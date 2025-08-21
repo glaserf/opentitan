@@ -12,9 +12,6 @@
 module csrng_state_db import csrng_pkg::*; #(
   parameter int NApps = 4,
   parameter int StateId = 4,
-  parameter int BlkLen = 128,
-  parameter int KeyLen = 256,
-  parameter int CtrLen  = 32,
   parameter int Cmd     = 3
 ) (
   input logic                clk_i,
@@ -25,7 +22,7 @@ module csrng_state_db import csrng_pkg::*; #(
   input logic [StateId-1:0]  state_db_rd_inst_id_i,
   output logic [KeyLen-1:0]  state_db_rd_key_o,
   output logic [BlkLen-1:0]  state_db_rd_v_o,
-  output logic [CtrLen-1:0]  state_db_rd_res_ctr_o,
+  output logic [CntrLen-1:0] state_db_rd_res_ctr_o,
   output logic               state_db_rd_inst_st_o,
   output logic               state_db_rd_fips_o,
   // write interface
@@ -36,7 +33,7 @@ module csrng_state_db import csrng_pkg::*; #(
   input logic [Cmd-1:0]      state_db_wr_ccmd_i,
   input logic [KeyLen-1:0]   state_db_wr_key_i,
   input logic [BlkLen-1:0]   state_db_wr_v_i,
-  input logic [CtrLen-1:0]   state_db_wr_res_ctr_i,
+  input logic [CntrLen-1:0]  state_db_wr_res_ctr_i,
   input csrng_cmd_sts_e      state_db_wr_sts_i,
   // status interface
   input logic                state_db_is_dump_en_i,
@@ -53,15 +50,15 @@ module csrng_state_db import csrng_pkg::*; #(
   output logic [NApps-1:0][31:0] reseed_counter_o
 );
 
-  localparam int InternalStateWidth = 2+KeyLen+BlkLen+CtrLen;
+  localparam int InternalStateWidth = 2+KeyLen+BlkLen+CntrLen;
   localparam int RegInternalStateWidth = 30+InternalStateWidth;
   localparam int RegW = 32;
-  localparam int StateWidth = 1+1+KeyLen+BlkLen+CtrLen+StateId+CSRNG_CMD_STS_WIDTH;
+  localparam int StateWidth = 1+1+KeyLen+BlkLen+CntrLen+StateId+CSRNG_CMD_STS_WIDTH;
 
   logic [StateId-1:0]              state_db_id;
   logic [KeyLen-1:0]               state_db_key;
   logic [BlkLen-1:0]               state_db_v;
-  logic [CtrLen-1:0]               state_db_rc;
+  logic [CntrLen-1:0]              state_db_rc;
   logic                            state_db_fips;
   logic                            state_db_inst_st;
   csrng_cmd_sts_e                  state_db_sts;

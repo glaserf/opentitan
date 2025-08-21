@@ -6,19 +6,17 @@
 //
 // implementation using security_strength = 256
 
-module csrng_ctr_drbg_upd #(
+module csrng_ctr_drbg_upd import csrng_pkg::*; #(
   parameter int Cmd = 3,
-  parameter int StateId = 4,
-  parameter int BlkLen = 128,
-  parameter int KeyLen = 256,
-  parameter int SeedLen = 384,
-  parameter int CtrLen  = 32
+  parameter int StateId = 4
 ) (
   input logic                clk_i,
   input logic                rst_ni,
 
-   // update interface
+  // update interface
   input logic                ctr_drbg_upd_enable_i,
+
+  // request in
   input logic                ctr_drbg_upd_req_i,
   output logic               ctr_drbg_upd_rdy_o, // ready to process the req above
   input logic [Cmd-1:0]      ctr_drbg_upd_ccmd_i,
@@ -26,29 +24,36 @@ module csrng_ctr_drbg_upd #(
   input logic [SeedLen-1:0]  ctr_drbg_upd_pdata_i, // provided_data
   input logic [KeyLen-1:0]   ctr_drbg_upd_key_i,
   input logic [BlkLen-1:0]   ctr_drbg_upd_v_i,
+
+  // response out
+  output logic               ctr_drbg_upd_ack_o, // final ack when update process has been completed
+  input logic                ctr_drbg_upd_rdy_i, // ready to process the ack above
   output logic [Cmd-1:0]     ctr_drbg_upd_ccmd_o,
   output logic [StateId-1:0] ctr_drbg_upd_inst_id_o,
   output logic [KeyLen-1:0]  ctr_drbg_upd_key_o,
   output logic [BlkLen-1:0]  ctr_drbg_upd_v_o,
-  output logic               ctr_drbg_upd_ack_o, // final ack when update process has been completed
-  input logic                ctr_drbg_upd_rdy_i, // ready to process the ack above
 
-   // es_req/ack
+  // es_req/ack
   input logic                ctr_drbg_upd_es_req_i,
   output logic               ctr_drbg_upd_es_ack_o,
 
-   // block encrypt interface
+  // block encrypt interfaces
+  // Request interface (out to block_encrypt)
   output logic               block_encrypt_req_o,
   input logic                block_encrypt_rdy_i,
   output logic [Cmd-1:0]     block_encrypt_ccmd_o,
   output logic [StateId-1:0] block_encrypt_inst_id_o,
   output logic [KeyLen-1:0]  block_encrypt_key_o,
   output logic [BlkLen-1:0]  block_encrypt_v_o,
+
+  // Response interface
   input logic                block_encrypt_ack_i,
   output logic               block_encrypt_rdy_o,
   input logic [Cmd-1:0]      block_encrypt_ccmd_i,
   input logic [StateId-1:0]  block_encrypt_inst_id_i,
   input logic [BlkLen-1:0]   block_encrypt_v_i,
+
+  // error status outputs
   output logic               ctr_drbg_upd_v_ctr_err_o,
   output logic [2:0]         ctr_drbg_upd_sfifo_updreq_err_o,
   output logic [2:0]         ctr_drbg_upd_sfifo_bencreq_err_o,
@@ -72,7 +77,7 @@ module csrng_ctr_drbg_upd #(
 
   // signals
   logic [SeedLen-1:0] updated_key_and_v;
-  logic [CtrLen-1:0]  v_inc;
+  logic [CntrLen-1:0] v_inc;
   logic [BlkLen-1:0]  v_first;
   logic [BlkLen-1:0]  v_sized;
 
@@ -145,7 +150,7 @@ module csrng_ctr_drbg_upd #(
   logic               concat_ctr_done;
   logic               concat_ctr_inc;
   logic [SeedLen+BlkLen-1:0] concat_outblk_shifted_value;
-  logic [CtrLen-1:0]         v_ctr;
+  logic [CntrLen-1:0]         v_ctr;
 
   // flops
   logic [1:0]         interate_ctr_q, interate_ctr_d;
@@ -278,33 +283,33 @@ module csrng_ctr_drbg_upd #(
   // prepare value for block_encrypt step
   //--------------------------------------------
 
-  if (CtrLen < BlkLen) begin : g_ctrlen_sm
+  if (CntrLen < BlkLen) begin : g_ctrlen_sm
     // for ctr_len < blocklen
-    assign v_inc = sfifo_updreq_v[CtrLen-1:0] + 1;
-    assign v_first = {sfifo_updreq_v[BlkLen-1:CtrLen],v_inc};
+    assign v_inc = sfifo_updreq_v[CntrLen-1:0] + 1;
+    assign v_first = {sfifo_updreq_v[BlkLen-1:CntrLen],v_inc};
   end else begin : g_ctrlen_lg
     assign v_first = sfifo_updreq_v + 1;
   end
 
   // SEC_CM: DRBG_UPD.CTR.REDUN
   prim_count #(
-    .Width(CtrLen)
+    .Width(CntrLen)
   ) u_prim_count_ctr_drbg (
     .clk_i,
     .rst_ni,
     .clr_i(!ctr_drbg_upd_enable_i),
     .set_i(v_ctr_load),
-    .set_cnt_i(v_first[CtrLen-1:0]),
+    .set_cnt_i(v_first[CntrLen-1:0]),
     .incr_en_i(v_ctr_inc), // count up
     .decr_en_i(1'b0),
-    .step_i(CtrLen'(1)),
+    .step_i(CntrLen'(1)),
     .commit_i(1'b1),
     .cnt_o(v_ctr),
     .cnt_after_commit_o(),
     .err_o(ctr_drbg_upd_v_ctr_err_o)
   );
 
-  assign     v_sized = {v_first[BlkLen-1:CtrLen],v_ctr};
+  assign     v_sized = {v_first[BlkLen-1:CntrLen],v_ctr};
 
   // interation counter
   assign     interate_ctr_d =

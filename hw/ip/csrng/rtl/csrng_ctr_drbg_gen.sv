@@ -11,17 +11,14 @@
 module csrng_ctr_drbg_gen import csrng_pkg::*; #(
   parameter int NApps = 4,
   parameter int Cmd = 3,
-  parameter int StateId = 4,
-  parameter int BlkLen = 128,
-  parameter int KeyLen = 256,
-  parameter int SeedLen = 384,
-  parameter int CtrLen  = 32
+  parameter int StateId = 4
 ) (
   input logic                clk_i,
   input logic                rst_ni,
 
-   // command interface
+  // command interface
   input logic                ctr_drbg_gen_enable_i,
+
   input logic                ctr_drbg_gen_req_i,
   output logic               ctr_drbg_gen_rdy_o, // ready to process the req above
   input logic [Cmd-1:0]      ctr_drbg_gen_ccmd_i,    // current command
@@ -31,16 +28,16 @@ module csrng_ctr_drbg_gen import csrng_pkg::*; #(
   input logic [SeedLen-1:0]  ctr_drbg_gen_adata_i,   // additional data
   input logic [KeyLen-1:0]   ctr_drbg_gen_key_i,
   input logic [BlkLen-1:0]   ctr_drbg_gen_v_i,
-  input logic [CtrLen-1:0]   ctr_drbg_gen_rc_i,
+  input logic [CntrLen-1:0]  ctr_drbg_gen_rc_i,
 
   output logic               ctr_drbg_gen_ack_o, // final ack when update process has been completed
-  output csrng_cmd_sts_e     ctr_drbg_gen_sts_o, // final ack status
   input logic                ctr_drbg_gen_rdy_i, // ready to process the ack above
+  output csrng_cmd_sts_e     ctr_drbg_gen_sts_o, // final ack status
   output logic [Cmd-1:0]     ctr_drbg_gen_ccmd_o,
   output logic [StateId-1:0] ctr_drbg_gen_inst_id_o,
   output logic [KeyLen-1:0]  ctr_drbg_gen_key_o,
   output logic [BlkLen-1:0]  ctr_drbg_gen_v_o,
-  output logic [CtrLen-1:0]  ctr_drbg_gen_rc_o,
+  output logic [CntrLen-1:0] ctr_drbg_gen_rc_o,
   output logic [BlkLen-1:0]  ctr_drbg_gen_bits_o,
   output logic               ctr_drbg_gen_fips_o,
 
@@ -63,6 +60,7 @@ module csrng_ctr_drbg_gen import csrng_pkg::*; #(
   input logic [StateId-1:0]  upd_gen_inst_id_i,
   input logic [KeyLen-1:0]   upd_gen_key_i,
   input logic [BlkLen-1:0]   upd_gen_v_i,
+
   // block encrypt interface
   output logic               block_encrypt_req_o,
   input logic                block_encrypt_rdy_i,
@@ -70,12 +68,14 @@ module csrng_ctr_drbg_gen import csrng_pkg::*; #(
   output logic [StateId-1:0] block_encrypt_inst_id_o,
   output logic [KeyLen-1:0]  block_encrypt_key_o,
   output logic [BlkLen-1:0]  block_encrypt_v_o,
+
   input logic                block_encrypt_ack_i,
   output logic               block_encrypt_rdy_o,
   input logic [Cmd-1:0]      block_encrypt_ccmd_i,
   input logic [StateId-1:0]  block_encrypt_inst_id_i,
   input logic [BlkLen-1:0]   block_encrypt_v_i,
-  // misc
+
+  // error status signals
   output logic               ctr_drbg_gen_v_ctr_err_o,
   output logic [2:0]         ctr_drbg_gen_sfifo_gbencack_err_o,
   output logic [2:0]         ctr_drbg_gen_sfifo_grcstage_err_o,
@@ -86,15 +86,15 @@ module csrng_ctr_drbg_gen import csrng_pkg::*; #(
 );
 
   localparam int GenreqFifoDepth = 1;
-  localparam int GenreqFifoWidth = KeyLen+BlkLen+CtrLen+1+SeedLen+1+StateId+Cmd;
+  localparam int GenreqFifoWidth = KeyLen+BlkLen+CntrLen+1+SeedLen+1+StateId+Cmd;
   localparam int BlkEncAckFifoDepth = 1;
   localparam int BlkEncAckFifoWidth = BlkLen+StateId+Cmd;
   localparam int AdstageFifoDepth = 1;
-  localparam int AdstageFifoWidth = KeyLen+BlkLen+CtrLen+1+1;
+  localparam int AdstageFifoWidth = KeyLen+BlkLen+CntrLen+1+1;
   localparam int RCStageFifoDepth = 1;
-  localparam int RCStageFifoWidth = KeyLen+BlkLen+BlkLen+CtrLen+1+1+StateId+Cmd;
+  localparam int RCStageFifoWidth = KeyLen+BlkLen+BlkLen+CntrLen+1+1+StateId+Cmd;
   localparam int GenbitsFifoDepth = 1;
-  localparam int GenbitsFifoWidth = 1+BlkLen+KeyLen+BlkLen+CtrLen+StateId+Cmd;
+  localparam int GenbitsFifoWidth = 1+BlkLen+KeyLen+BlkLen+CntrLen+StateId+Cmd;
 
   // signals
   logic [Cmd-1:0]     genreq_ccmd;
@@ -104,11 +104,11 @@ module csrng_ctr_drbg_gen import csrng_pkg::*; #(
   logic               genreq_fips;
   logic [KeyLen-1:0]  genreq_key;
   logic [BlkLen-1:0]  genreq_v;
-  logic [CtrLen-1:0]  genreq_rc;
+  logic [CntrLen-1:0] genreq_rc;
 
   logic [KeyLen-1:0]  adstage_key;
   logic [BlkLen-1:0]  adstage_v;
-  logic [CtrLen-1:0]  adstage_rc;
+  logic [CntrLen-1:0] adstage_rc;
   logic               adstage_fips;
   logic               adstage_glast;
   logic [SeedLen-1:0] adstage_adata;
@@ -116,10 +116,10 @@ module csrng_ctr_drbg_gen import csrng_pkg::*; #(
   logic [KeyLen-1:0]  rcstage_key;
   logic [BlkLen-1:0]  rcstage_v;
   logic [BlkLen-1:0]  rcstage_bits;
-  logic [CtrLen-1:0]  rcstage_rc;
+  logic [CntrLen-1:0] rcstage_rc;
   logic               rcstage_glast;
   logic               rcstage_fips;
-  logic [CtrLen-1:0]  rcstage_rc_plus1;
+  logic [CntrLen-1:0] rcstage_rc_plus1;
   logic [Cmd-1:0]     rcstage_ccmd;
   logic [StateId-1:0] rcstage_inst_id;
 
@@ -170,7 +170,7 @@ module csrng_ctr_drbg_gen import csrng_pkg::*; #(
   logic                        sfifo_genbits_full;
   logic                        sfifo_genbits_not_empty;
 
-  logic [CtrLen-1:0]           v_inc;
+  logic [CntrLen-1:0]          v_inc;
   logic [BlkLen-1:0]           v_first;
   logic [BlkLen-1:0]           v_sized;
   logic                        v_ctr_load;
@@ -179,7 +179,7 @@ module csrng_ctr_drbg_gen import csrng_pkg::*; #(
   logic                        interate_ctr_inc;
   logic [NApps-1:0]            capt_adata;
   logic [SeedLen-1:0]          update_adata[NApps];
-  logic [CtrLen-1:0]           v_ctr;
+  logic [CntrLen-1:0]          v_ctr;
 
   // status error signals
   logic                        ctr_drbg_gen_sts_err;
@@ -283,33 +283,33 @@ module csrng_ctr_drbg_gen import csrng_pkg::*; #(
   // prepare value for block_encrypt step
   //--------------------------------------------
 
-  if (CtrLen < BlkLen) begin : gen_ctrlen_sm
+  if (CntrLen < BlkLen) begin : gen_ctrlen_sm
     // for ctr_len < blocklen
-    assign v_inc = genreq_v[CtrLen-1:0] + 1;
-    assign v_first = {genreq_v[BlkLen-1:CtrLen],v_inc};
+    assign v_inc = genreq_v[CntrLen-1:0] + 1;
+    assign v_first = {genreq_v[BlkLen-1:CntrLen],v_inc};
   end else begin : g_ctrlen_lg
     assign v_first = genreq_v + 1;
   end
 
   // SEC_CM: DRBG_GEN.CTR.REDUN
   prim_count #(
-    .Width(CtrLen)
+    .Width(CntrLen)
   ) u_prim_count_ctr_drbg (
     .clk_i,
     .rst_ni,
     .clr_i(!ctr_drbg_gen_enable_i),
     .set_i(v_ctr_load),
-    .set_cnt_i(v_first[CtrLen-1:0]),
+    .set_cnt_i(v_first[CntrLen-1:0]),
     .incr_en_i(v_ctr_inc), // count up
     .decr_en_i(1'b0),
-    .step_i(CtrLen'(1)),
+    .step_i(CntrLen'(1)),
     .commit_i(1'b1),
     .cnt_o(v_ctr),
     .cnt_after_commit_o(),
     .err_o(ctr_drbg_gen_v_ctr_err_o)
   );
 
-  assign v_sized = {v_first[BlkLen-1:CtrLen],v_ctr};
+  assign v_sized = {v_first[BlkLen-1:CntrLen],v_ctr};
 
   // interation counter
   assign interate_ctr_d =
@@ -361,6 +361,7 @@ module csrng_ctr_drbg_gen import csrng_pkg::*; #(
           block_encrypt_req_o = 1'b1;
           sfifo_adstage_push = 1'b1;
           if (block_encrypt_rdy_i) begin
+            // TODO combine into one signal
             v_ctr_inc  = 1'b1;
             interate_ctr_inc  = 1'b1;
           end

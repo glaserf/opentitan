@@ -10,17 +10,14 @@
 
 module csrng_ctr_drbg_cmd import csrng_pkg::*; #(
   parameter int Cmd = 3,
-  parameter int StateId = 4,
-  parameter int BlkLen = 128,
-  parameter int KeyLen = 256,
-  parameter int SeedLen = 384,
-  parameter int CtrLen  = 32
+  parameter int StateId = 4
 ) (
   input logic                clk_i,
   input logic                rst_ni,
 
    // command interface
   input logic                ctr_drbg_cmd_enable_i,
+  // command request
   input logic                ctr_drbg_cmd_req_i,
   output logic               ctr_drbg_cmd_rdy_o, // ready to process the req above
   input logic [Cmd-1:0]      ctr_drbg_cmd_ccmd_i,    // current command
@@ -31,12 +28,13 @@ module csrng_ctr_drbg_cmd import csrng_pkg::*; #(
   input logic [SeedLen-1:0]  ctr_drbg_cmd_adata_i,   // additional data
   input logic [KeyLen-1:0]   ctr_drbg_cmd_key_i,
   input logic [BlkLen-1:0]   ctr_drbg_cmd_v_i,
-  input logic [CtrLen-1:0]   ctr_drbg_cmd_rc_i,
+  input logic [CntrLen-1:0]  ctr_drbg_cmd_rc_i,
   input logic                ctr_drbg_cmd_fips_i,
 
+  // command response
   output logic               ctr_drbg_cmd_ack_o, // final ack when update process has been completed
-  output csrng_cmd_sts_e     ctr_drbg_cmd_sts_o, // final ack status
   input logic                ctr_drbg_cmd_rdy_i, // ready to process the ack above
+  output csrng_cmd_sts_e     ctr_drbg_cmd_sts_o, // final ack status
   output logic [Cmd-1:0]     ctr_drbg_cmd_ccmd_o,
   output logic [StateId-1:0] ctr_drbg_cmd_inst_id_o,
   output logic               ctr_drbg_cmd_glast_o,
@@ -44,9 +42,9 @@ module csrng_ctr_drbg_cmd import csrng_pkg::*; #(
   output logic [SeedLen-1:0] ctr_drbg_cmd_adata_o,
   output logic [KeyLen-1:0]  ctr_drbg_cmd_key_o,
   output logic [BlkLen-1:0]  ctr_drbg_cmd_v_o,
-  output logic [CtrLen-1:0]  ctr_drbg_cmd_rc_o,
+  output logic [CntrLen-1:0] ctr_drbg_cmd_rc_o,
 
-   // update interface
+  // update request interface
   output logic               cmd_upd_req_o,
   input logic                upd_cmd_rdy_i,
   output logic [Cmd-1:0]     cmd_upd_ccmd_o,
@@ -55,24 +53,26 @@ module csrng_ctr_drbg_cmd import csrng_pkg::*; #(
   output logic [KeyLen-1:0]  cmd_upd_key_o,
   output logic [BlkLen-1:0]  cmd_upd_v_o,
 
+  // update response interface
   input logic                upd_cmd_ack_i,
   output logic               cmd_upd_rdy_o,
   input logic [Cmd-1:0]      upd_cmd_ccmd_i,
   input logic [StateId-1:0]  upd_cmd_inst_id_i,
   input logic [KeyLen-1:0]   upd_cmd_key_i,
   input logic [BlkLen-1:0]   upd_cmd_v_i,
-  // misc
+
+  // error status outputs
   output logic [2:0]         ctr_drbg_cmd_sfifo_cmdreq_err_o,
   output logic [2:0]         ctr_drbg_cmd_sfifo_rcstage_err_o,
   output logic [2:0]         ctr_drbg_cmd_sfifo_keyvrc_err_o
 );
 
   localparam int CmdreqFifoDepth = 1;
-  localparam int CmdreqFifoWidth = KeyLen+BlkLen+CtrLen+1+2*SeedLen+1+StateId+Cmd;
+  localparam int CmdreqFifoWidth = KeyLen+BlkLen+CntrLen+1+2*SeedLen+1+StateId+Cmd;
   localparam int RCStageFifoDepth = 1;
-  localparam int RCStageFifoWidth = KeyLen+BlkLen+StateId+CtrLen+1+SeedLen+1+Cmd;
+  localparam int RCStageFifoWidth = KeyLen+BlkLen+StateId+CntrLen+1+SeedLen+1+Cmd;
   localparam int KeyVRCFifoDepth = 1;
-  localparam int KeyVRCFifoWidth = KeyLen+BlkLen+CtrLen+1+SeedLen+1+StateId+Cmd;
+  localparam int KeyVRCFifoWidth = KeyLen+BlkLen+CntrLen+1+SeedLen+1+StateId+Cmd;
 
 
   // signals
@@ -84,17 +84,17 @@ module csrng_ctr_drbg_cmd import csrng_pkg::*; #(
   logic [SeedLen-1:0] cmdreq_adata;
   logic [KeyLen-1:0]  cmdreq_key;
   logic [BlkLen-1:0]  cmdreq_v;
-  logic [CtrLen-1:0]  cmdreq_rc;
+  logic [CntrLen-1:0] cmdreq_rc;
 
   logic [SeedLen-1:0] prep_seed_material;
   logic [KeyLen-1:0]  prep_key;
   logic [BlkLen-1:0]  prep_v;
-  logic [CtrLen-1:0]  prep_rc;
+  logic [CntrLen-1:0] prep_rc;
   logic               prep_gen_adata_null;
   logic [KeyLen-1:0]  rcstage_key;
   logic [BlkLen-1:0]  rcstage_v;
   logic [StateId-1:0] rcstage_id;
-  logic [CtrLen-1:0]  rcstage_rc;
+  logic [CntrLen-1:0] rcstage_rc;
   logic [Cmd-1:0]     rcstage_ccmd;
   logic               rcstage_glast;
   logic [SeedLen-1:0] rcstage_adata;
@@ -160,9 +160,8 @@ module csrng_ctr_drbg_cmd import csrng_pkg::*; #(
     .err_o          ()
   );
 
-  assign fips_modified = ((ctr_drbg_cmd_ccmd_i == INS) ||
-                          (ctr_drbg_cmd_ccmd_i == RES)) ? ctr_drbg_cmd_entropy_fips_i :
-                         ctr_drbg_cmd_fips_i;
+  assign fips_modified = ((ctr_drbg_cmd_ccmd_i == INS) || (ctr_drbg_cmd_ccmd_i == RES)) ? 
+                         ctr_drbg_cmd_entropy_fips_i : ctr_drbg_cmd_fips_i;
 
   assign sfifo_cmdreq_wdata = {ctr_drbg_cmd_key_i,ctr_drbg_cmd_v_i,
                                ctr_drbg_cmd_rc_i,fips_modified,
@@ -213,8 +212,8 @@ module csrng_ctr_drbg_cmd import csrng_pkg::*; #(
          '0;
 
   assign prep_rc =
-         (cmdreq_ccmd == INS) ? {{(CtrLen-1){1'b0}},1'b0} :
-         (cmdreq_ccmd == RES) ? {{(CtrLen-1){1'b0}},1'b0} :
+         (cmdreq_ccmd == INS) ? {{(CntrLen-1){1'b0}},1'b0} :
+         (cmdreq_ccmd == RES) ? {{(CntrLen-1){1'b0}},1'b0} :
          (cmdreq_ccmd == GEN) ? cmdreq_rc :
          (cmdreq_ccmd == UPD) ? cmdreq_rc :
          '0;
@@ -300,7 +299,7 @@ module csrng_ctr_drbg_cmd import csrng_pkg::*; #(
 
   // if a UNI command, reset the state values
   assign sfifo_keyvrc_wdata = (rcstage_ccmd == UNI) ?
-         {{(KeyLen+BlkLen+CtrLen+1+SeedLen){1'b0}},rcstage_glast,upd_cmd_inst_id_i,upd_cmd_ccmd_i} :
+         {{(KeyLen+BlkLen+CntrLen+1+SeedLen){1'b0}},rcstage_glast,upd_cmd_inst_id_i,upd_cmd_ccmd_i} :
          gen_adata_null_q ?
          {rcstage_key,rcstage_v,rcstage_rc,rcstage_fips,
           rcstage_adata,rcstage_glast,rcstage_id,rcstage_ccmd} :
