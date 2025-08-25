@@ -7,6 +7,7 @@
 
 // These hierarchical paths are all up-references and go up one step (to leave the bound-in
 // interface), then select a block that is a child of the csrng module.
+`define DUT_PATH tb.dut
 `define PATH1 \
     u_csrng_core.gen_cmd_stage[2].u_csrng_cmd_stage
 `define PATH2 \
@@ -36,17 +37,17 @@ interface csrng_assert_if
 );
 
   task automatic assert_off ();
-    $assertoff(0, `PATH1.u_state_regs_A);
-    $assertoff(0, `PATH2.`PATH2_1.AesCipherControlStateValid);
-    $assertoff(0, `PATH2.`PATH2_2.AesCipherControlStateValid);
-    $assertoff(0, `PATH2.`PATH2_3.AesCipherControlStateValid);
-    $assertoff(0, `PATH2.`PATH2_1.u_state_regs_A);
-    $assertoff(0, `PATH2.`PATH2_2.u_state_regs_A);
-    $assertoff(0, `PATH2.`PATH2_3.u_state_regs_A);
-    $assertoff(0, `PATH6.u_outblk_state_regs_A);
-    $assertoff(0, `PATH6.u_blk_enc_state_regs_A);
-    $assertoff(0, `PATH7.u_state_regs_A);
-    $assertoff(0, `PATH8.u_state_regs_A);
+    $assertoff(0, `DUT_PATH.`PATH1.u_state_regs_A);
+    $assertoff(0, `DUT_PATH.`PATH2.`PATH2_1.AesCipherControlStateValid);
+    $assertoff(0, `DUT_PATH.`PATH2.`PATH2_2.AesCipherControlStateValid);
+    $assertoff(0, `DUT_PATH.`PATH2.`PATH2_3.AesCipherControlStateValid);
+    $assertoff(0, `DUT_PATH.`PATH2.`PATH2_1.u_state_regs_A);
+    $assertoff(0, `DUT_PATH.`PATH2.`PATH2_2.u_state_regs_A);
+    $assertoff(0, `DUT_PATH.`PATH2.`PATH2_3.u_state_regs_A);
+    $assertoff(0, `DUT_PATH.`PATH6.u_outblk_state_regs_A);
+    $assertoff(0, `DUT_PATH.`PATH6.u_blk_enc_state_regs_A);
+    $assertoff(0, `DUT_PATH.`PATH7.u_state_regs_A);
+    $assertoff(0, `DUT_PATH.`PATH8.u_state_regs_A);
   endtask // assert_off
 
   task automatic assert_on ();
