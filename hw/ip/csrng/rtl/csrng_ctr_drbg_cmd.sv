@@ -163,8 +163,14 @@ module csrng_ctr_drbg_cmd import csrng_pkg::*; (
           rsp_vld_o = req_vld_i;
         end else begin
           update_req_vld_o = req_vld_i;
+          update_rsp_rdy_o = rsp_rdy_i;
+          rsp_vld_o = update_rsp_vld_i;
           if (update_req_vld_o && update_req_rdy_i) begin
-            state_d = RspPend;
+            if (update_rsp_vld_i && update_rsp_rdy_o) begin
+              req_rdy_o = 1'b1;
+            end else begin
+              state_d = RspPend;
+            end
           end
         end
       end

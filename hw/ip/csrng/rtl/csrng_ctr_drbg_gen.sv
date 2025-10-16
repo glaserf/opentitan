@@ -451,7 +451,8 @@ module csrng_ctr_drbg_gen import csrng_pkg::*; (
           ( sfifo_rcstage_rrdy && !sfifo_rcstage_rvld),
           (!sfifo_rcstage_wrdy && !sfifo_rcstage_rvld)};
 
-  assign update_rsp_rdy_o = sfifo_rcstage_rvld && sfifo_genbits_wrdy;
+  //assign update_rsp_rdy_o = sfifo_rcstage_rvld && sfifo_genbits_wrdy;
+  assign update_rsp_rdy_o = sfifo_genbits_wrdy;
 
 
   //--------------------------------------------

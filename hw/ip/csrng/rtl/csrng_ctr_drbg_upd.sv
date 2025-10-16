@@ -133,7 +133,8 @@ module csrng_ctr_drbg_upd import csrng_pkg::*; (
     AckIdle = 6'b110110,
     Load    = 6'b110001,
     Shift   = 6'b001001,
-    OBError = 6'b011100
+    OBError = 6'b011100,
+    RspWait = 6'b111111
   } outblk_state_e;
 
   outblk_state_e outblk_state_d, outblk_state_q;
@@ -341,6 +342,7 @@ module csrng_ctr_drbg_upd import csrng_pkg::*; (
     concat_outblk_shift = 1'b0;
     block_encrypt_rsp_rdy_o = 1'b0;
     sfifo_final_wvld = 1'b0;
+    rsp_vld_o = 1'b0;
     req_rdy_o = 1'b0;
     sm_block_enc_rsp_err_o = 1'b0;
     unique case (outblk_state_q)
@@ -351,7 +353,7 @@ module csrng_ctr_drbg_upd import csrng_pkg::*; (
           // Otherwise, there will be erroneous handshakes when re-enabling the CSRNG
           block_encrypt_rsp_rdy_o = 1'b1;
           outblk_state_d = AckIdle;
-        end else if (sfifo_final_wrdy) begin
+        end else begin
           outblk_state_d = Load;
         end
       end
@@ -370,12 +372,27 @@ module csrng_ctr_drbg_upd import csrng_pkg::*; (
         if (!enable_i) begin
           outblk_state_d = AckIdle;
         end else if (concat_ctr_done) begin
-          req_rdy_o = 1'b1;
-          sfifo_final_wvld  = 1'b1;
-          outblk_state_d = AckIdle;
+          rsp_vld_o = 1'b1;
+          if (rsp_rdy_i) begin
+            req_rdy_o = 1'b1;
+            outblk_state_d = AckIdle;
+          end else begin
+            outblk_state_d = RspWait;
+          end
         end else begin
           concat_outblk_shift = 1'b1;
           outblk_state_d = Load;
+        end
+      end
+      RspWait: begin
+        if (!enable_i) begin
+          outblk_state_d = AckIdle;
+        end else begin
+          rsp_vld_o = 1'b1;
+          if (rsp_rdy_i) begin
+            req_rdy_o = 1'b1;
+            outblk_state_d = AckIdle;
+          end
         end
       end
       OBError: begin
@@ -420,10 +437,18 @@ module csrng_ctr_drbg_upd import csrng_pkg::*; (
                               concat_ccmd_q,
                               updated_key_and_v};
 
-  assign sfifo_final_rrdy = rsp_rdy_i && sfifo_final_rvld;
-  assign rsp_vld_o  = sfifo_final_rvld;
+  assign sfifo_final_rrdy = 1'b0; //rsp_rdy_i && sfifo_final_rvld;
+  //assign rsp_vld_o  = sfifo_final_rvld;
   // pdata (in the MSBs) is unused in rsp path
-  assign rsp_data_o = csrng_upd_data_t'({{SeedLen{1'b0}}, sfifo_final_rdata});
+  assign rsp_data_o = '{
+    pdata:   {SeedLen{1'b0}},
+    inst_id: concat_inst_id_q,
+    cmd:     concat_ccmd_q,
+    key:     updated_key_and_v[BlkLen +: KeyLen],
+    v:       updated_key_and_v[BlkLen-1:0]
+  };
+  
+  //csrng_upd_data_t'({{SeedLen{1'b0}}, sfifo_final_rdata});
 
   assign fifo_final_err_o =
          {( sfifo_final_wvld && !sfifo_final_wrdy),
