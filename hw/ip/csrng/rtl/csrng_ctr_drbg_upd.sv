@@ -53,6 +53,7 @@ module csrng_ctr_drbg_upd import csrng_pkg::*; (
   logic                     sfifo_final_rvld;
   logic                     sfifo_final_rrdy;
   logic [BencDataWidth-1:0] sfifo_final_rdata;
+  logic sfifo_final_clear;
 
   logic                     v_ctr_load;
   logic                     v_ctr_inc;
@@ -133,7 +134,8 @@ module csrng_ctr_drbg_upd import csrng_pkg::*; (
     AckIdle = 6'b110110,
     Load    = 6'b110001,
     Shift   = 6'b001001,
-    OBError = 6'b011100
+    OBError = 6'b011100,
+    Bugu    = 6'b111111
   } outblk_state_e;
 
   outblk_state_e outblk_state_d, outblk_state_q;
@@ -341,6 +343,7 @@ module csrng_ctr_drbg_upd import csrng_pkg::*; (
     concat_outblk_shift = 1'b0;
     block_encrypt_rsp_rdy_o = 1'b0;
     sfifo_final_wvld = 1'b0;
+    sfifo_final_clear = 1'b0;
     req_rdy_o = 1'b0;
     sm_block_enc_rsp_err_o = 1'b0;
     unique case (outblk_state_q)
@@ -351,7 +354,7 @@ module csrng_ctr_drbg_upd import csrng_pkg::*; (
           // Otherwise, there will be erroneous handshakes when re-enabling the CSRNG
           block_encrypt_rsp_rdy_o = 1'b1;
           outblk_state_d = AckIdle;
-        end else if (sfifo_final_wrdy) begin
+        end else begin //if (sfifo_final_wrdy) begin
           outblk_state_d = Load;
         end
       end
@@ -370,12 +373,26 @@ module csrng_ctr_drbg_upd import csrng_pkg::*; (
         if (!enable_i) begin
           outblk_state_d = AckIdle;
         end else if (concat_ctr_done) begin
-          req_rdy_o = 1'b1;
-          sfifo_final_wvld  = 1'b1;
-          outblk_state_d = AckIdle;
+          if (req_data_i.cmd == GENU) begin
+            sfifo_final_clear = 1'b1;
+            outblk_state_d = Bugu;
+          end else begin
+            req_rdy_o = 1'b1;
+            sfifo_final_wvld = 1'b1;
+            outblk_state_d = AckIdle;
+          end
         end else begin
           concat_outblk_shift = 1'b1;
           outblk_state_d = Load;
+        end
+      end
+      Bugu: begin
+        if (!enable_i) begin
+          outblk_state_d = AckIdle;
+        end else begin
+          req_rdy_o = 1'b1;
+          sfifo_final_wvld = 1'b1;
+          outblk_state_d = AckIdle;
         end
       end
       OBError: begin
@@ -420,8 +437,8 @@ module csrng_ctr_drbg_upd import csrng_pkg::*; (
                               concat_ccmd_q,
                               updated_key_and_v};
 
-  assign sfifo_final_rrdy = rsp_rdy_i && sfifo_final_rvld;
-  assign rsp_vld_o  = sfifo_final_rvld;
+  assign sfifo_final_rrdy = (rsp_rdy_i || sfifo_final_clear) && sfifo_final_rvld;
+  assign rsp_vld_o = sfifo_final_rvld;
   // pdata (in the MSBs) is unused in rsp path
   assign rsp_data_o = csrng_upd_data_t'({{SeedLen{1'b0}}, sfifo_final_rdata});
 
