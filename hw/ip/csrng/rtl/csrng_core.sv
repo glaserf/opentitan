@@ -520,7 +520,7 @@ module csrng_core import csrng_pkg::*; #(
     csrng_cmd_stage u_csrng_cmd_stage (
       .clk_i                        (clk_i),
       .rst_ni                       (rst_ni),
-      .cs_enable_i                  (cs_enable_fo[27]),
+      .enable_i                     (cs_enable_fo[27]),
       .cmd_stage_vld_i              (cmd_stage_vld[ai]),
       .cmd_stage_shid_i             (cmd_stage_shid[ai]),
       .cmd_stage_bus_i              (cmd_stage_bus[ai]),
