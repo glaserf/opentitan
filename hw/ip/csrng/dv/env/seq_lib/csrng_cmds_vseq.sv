@@ -6,9 +6,9 @@ class csrng_cmds_vseq extends csrng_base_vseq;
   `uvm_object_utils(csrng_cmds_vseq)
   `uvm_object_new
 
-  csrng_item   cs_item, cs_item_q[NUM_HW_APPS + 1][$];
+  csrng_item   cs_item, cs_item_q[NUM_APPS][$];
   uint         num_cmds, cmds_gen, cmds_sent, aes_halt_clks;
-  bit          uninstantiate[NUM_HW_APPS + 1];
+  bit          uninstantiate[NUM_APPS];
 
   function void gen_seed(uint app);
     bit [entropy_src_pkg::FIPS_BUS_WIDTH - 1:0]    fips;
@@ -68,7 +68,7 @@ class csrng_cmds_vseq extends csrng_base_vseq;
     cmds_gen = 0;
     cmds_sent = 0;
     // Generate queues of csrng commands
-    for (int i = 0; i < NUM_HW_APPS + 1; i++) begin
+    for (int i = 0; i < NUM_APPS; i++) begin
       create_cmds(i);
     end
   endfunction
@@ -120,7 +120,7 @@ class csrng_cmds_vseq extends csrng_base_vseq;
     // Send commands
     fork
       fork
-        for (int i = 0; i < NUM_HW_APPS + 1; i++) begin
+        for (int i = 0; i < NUM_APPS; i++) begin
           automatic int j = i;
           fork
             forever begin
@@ -160,7 +160,7 @@ class csrng_cmds_vseq extends csrng_base_vseq;
           cfg.csrng_agents_vif.drive_edn_disable(1);
 
           // Clear any items that may remain in the command queues.
-          for (int i = 0; i < NUM_HW_APPS + 1; i++) begin
+          for (int i = 0; i < NUM_APPS; i++) begin
             cs_item_q[i].delete();
           end
 
@@ -204,7 +204,7 @@ class csrng_cmds_vseq extends csrng_base_vseq;
 
     // Check internal state, then uninstantiate if not already
     if (cfg.check_int_state) begin
-      for (int i = 0; i < NUM_HW_APPS + 1; i++) begin
+      for (int i = 0; i < NUM_APPS; i++) begin
         cfg.check_internal_state(.app(i), .compare(1));
         if (!uninstantiate[i]) begin
           cs_item = new();

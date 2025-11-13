@@ -48,8 +48,7 @@ module tb;
   `DV_ALERT_IF_CONNECT()
 
   // dut
-  csrng#(.NHwApps(NUM_HW_APPS),
-         .RndCnstCsKeymgrDivNonProduction(LC_HW_DEBUG_EN_ON_DATA),
+  csrng#(.RndCnstCsKeymgrDivNonProduction(LC_HW_DEBUG_EN_ON_DATA),
          .RndCnstCsKeymgrDivProduction(LC_HW_DEBUG_EN_OFF_DATA))
   dut (
     .clk_i                      (clk      ),
@@ -123,7 +122,7 @@ module tb;
   end
 
   // Assertions
-  for (genvar i = 0; i < NUM_HW_APPS + 1; i++) begin : gen_cmd_stage_asserts
+  for (genvar i = 0; i < NUM_APPS; i++) begin : gen_cmd_stage_asserts
     `ASSERT(CmdStageFifoNotFullReady,
       $past(rst_n) &&
       (tb.dut.u_csrng_core.gen_cmd_stage[i].u_csrng_cmd_stage.sfifo_cmd_depth != 2'h2) |->

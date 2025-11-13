@@ -25,10 +25,9 @@ package csrng_env_pkg;
   `include "dv_macros.svh"
 
   // parameters
-  parameter uint     NUM_HW_APPS                = 2;
-  parameter uint     HW_APP0                    = 0;
-  parameter uint     HW_APP1                    = 1;
-  parameter uint     SW_APP                     = 2;
+  parameter uint     NUM_APPS                   = csrng_reg_pkg::NumApps;
+  parameter uint     NUM_HW_APPS                = NUM_APPS - 1;
+  parameter uint     SW_APP                     = NUM_APPS - 1;
   parameter uint     NUM_ALERTS                 = 2;
   parameter string   LIST_OF_ALERTS[NUM_ALERTS] = {"recov_alert","fatal_alert"};
   parameter uint     KEY_LEN                    = 256;

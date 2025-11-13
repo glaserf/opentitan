@@ -37,11 +37,7 @@ The following utilities provide generic helper tasks and functions to perform ac
 * [csr_utils_pkg](../../../dv/sv/csr_utils/README.md)
 
 ### Global types & methods
-All common types and methods defined at the package level can be found in
-`csrng_env_pkg`. Some of them in use are:
-```systemverilog
-parameter uint NUM_HW_APPS = 2;
-```
+All common types and methods defined at the package level can be found in `csrng_env_pkg`.
 
 ### TL_agent
 CSRNG testbench instantiates (already handled in CIP base env) [tl_agent](../../../dv/sv/tl_agent/README.md)
