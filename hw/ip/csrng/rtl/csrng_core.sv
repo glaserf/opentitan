@@ -56,37 +56,39 @@ module csrng_core import csrng_pkg::*; #(
   import prim_mubi_pkg::mubi4_test_invalid;
 
   localparam int unsigned ADataDepthClog = $clog2(CmdMaxClen) + 1;
-  localparam int unsigned CsEnableCopies = 51;
+  localparam int unsigned NumEnableFanout = 51;
   localparam int unsigned LcHwDebugCopies = 1;
-  localparam int unsigned Flag0Copies = 3;
+  localparam int unsigned Flag0Fanout = 3;
 
-  // signals
-  // interrupt signals
-  logic                        event_cs_fatal_err;
-  logic [CsEnableCopies-1:1]   cs_enable_fo;
-  logic [Flag0Copies-1:0]      flag0_fo;
-  logic                        acmd_flag0_pfa;
-  logic                        cs_enable_pfa;
+  // Signals
+  // Fanout and invalid-testing of important MuBi encoded signals
+  logic                        main_enable_inv;
+  logic  [NumEnableFanout-1:1] cs_enable_fo;
+  logic                        flag0_inv;
+  logic      [Flag0Fanout-1:0] flag0_fo;
+  logic                  [1:0] otp_sw_app_read_en;
+  prim_mubi_pkg::mubi8_t [1:0] otp_sw_app_read_en_mubi;
   logic                        sw_app_enable;
-  logic                        sw_app_enable_pfe;
-  logic                        sw_app_enable_pfa;
+  logic                        sw_app_enable_inv;
   logic                        read_int_state;
-  logic                        read_int_state_pfe;
-  logic                        read_int_state_pfa;
+  logic                        read_int_state_inv;
   logic                        fips_force_enable;
-  logic                        fips_force_enable_pfe;
-  logic                        fips_force_enable_pfa;
+  logic                        fips_force_enable_inv;
+
+  logic                        event_cs_fatal_err;
   logic                        recov_alert_event;
+
+  // Application command data and control
+  logic                        acmd_accept;
   logic                        acmd_avail;
   logic                        acmd_sop;
   logic                        acmd_mop;
   logic                        acmd_eop;
+  logic      [CmdBusWidth-1:0] acmd_bus;
+  acmd_e                       acmd_hold;
 
   logic                        state_db_wr_vld;
   csrng_state_t                state_db_rd_data;
-
-  logic [CmdBusWidth-1:0]      acmd_bus;
-  acmd_e                       acmd_hold;
 
   logic [SeedLen-1:0]          packer_adata;
   logic [ADataDepthClog-1:0]   packer_adata_depth;
@@ -109,7 +111,6 @@ module csrng_core import csrng_pkg::*; #(
   logic [BlkLen-1:0]           ctr_drbg_bits_data;
   logic                        ctr_drbg_bits_fips;
 
-  logic                        acmd_accept;
   logic                        main_sm_cmd_vld;
   logic                        clr_adata_packer;
 
@@ -190,13 +191,8 @@ module csrng_core import csrng_pkg::*; #(
   logic [NumApps-1:0]          invalid_cmd_seq_alert;
   logic [NumApps-1:0]          invalid_acmd_alert;
   logic [NumApps-1:0]          reseed_cnt_alert;
-  logic [1:0]                  otp_sw_app_read_en;
 
   logic [NumApps-1:0][31:0]    reseed_counter;
-
-  prim_mubi_pkg::mubi8_t                [1:0] otp_sw_app_read_en_mubi;
-  prim_mubi_pkg::mubi4_t [CsEnableCopies-1:0] mubi_cs_enable_fanout;
-  prim_mubi_pkg::mubi4_t    [Flag0Copies-1:0] mubi_flag0_fanout;
 
   // flops
   acmd_e                  acmd_q, acmd_d;
@@ -397,15 +393,9 @@ module csrng_core import csrng_pkg::*; #(
   };
 
 
-  assign recov_alert_event = cs_enable_pfa ||
-         sw_app_enable_pfa ||
-         read_int_state_pfa ||
-         acmd_flag0_pfa ||
-         |reseed_cnt_alert ||
-         |invalid_cmd_seq_alert ||
-         |invalid_acmd_alert ||
-         cs_bus_cmp_alert;
-
+  assign recov_alert_event = main_enable_inv || sw_app_enable_inv || read_int_state_inv ||
+                             flag0_inv || |reseed_cnt_alert || |invalid_cmd_seq_alert ||
+                             |invalid_acmd_alert || cs_bus_cmp_alert;
 
   prim_edge_detector #(
     .Width(1),
@@ -420,38 +410,31 @@ module csrng_core import csrng_pkg::*; #(
     .q_negedge_pulse_o()
   );
 
-
   // check for illegal enable field states, and set alert if detected
 
   // SEC_CM: CONFIG.MUBI
-  mubi4_t mubi_cs_enable;
-  assign mubi_cs_enable = mubi4_t'(reg2hw.ctrl.enable.q);
-  assign cs_enable_pfa = mubi4_test_invalid(mubi_cs_enable_fanout[0]);
-  assign hw2reg.recov_alert_sts.enable_field_alert.de = cs_enable_pfa;
-  assign hw2reg.recov_alert_sts.enable_field_alert.d  = cs_enable_pfa;
-
-  for (genvar i = 1; i < CsEnableCopies; i = i+1) begin : gen_mubi_en_copies
-    assign cs_enable_fo[i] = mubi4_test_true_strict(mubi_cs_enable_fanout[i]);
-  end : gen_mubi_en_copies
+  prim_mubi_pkg::mubi4_t [NumEnableFanout-1:0] mubi_main_enable_fo;
 
   prim_mubi4_sync #(
-    .NumCopies(CsEnableCopies),
+    .NumCopies(NumEnableFanout),
     .AsyncOn(0)
-  ) u_prim_mubi4_sync_cs_enable (
+  ) u_prim_mubi4_sync_main_enable (
     .clk_i,
     .rst_ni,
-    .mubi_i(mubi_cs_enable),
-    .mubi_o(mubi_cs_enable_fanout)
+    .mubi_i(mubi4_t'(reg2hw.ctrl.enable.q)),
+    .mubi_o(mubi_main_enable_fo)
   );
 
+  assign main_enable_inv = mubi4_test_invalid(mubi_main_enable_fo[0]);
+  assign hw2reg.recov_alert_sts.enable_field_alert.d  = 1'b1;
+  assign hw2reg.recov_alert_sts.enable_field_alert.de = main_enable_inv;
+
+  for (genvar i = 1; i < NumEnableFanout; i++) begin : gen_mubi_en_fanout
+    assign cs_enable_fo[i] = mubi4_test_true_strict(mubi_main_enable_fo[i]);
+  end : gen_mubi_en_fanout
+
   // SEC_CM: CONFIG.MUBI
-  mubi4_t mubi_sw_app_enable;
-  mubi4_t [1:0] mubi_sw_app_enable_fanout;
-  assign mubi_sw_app_enable = mubi4_t'(reg2hw.ctrl.sw_app_enable.q);
-  assign sw_app_enable_pfe = mubi4_test_true_strict(mubi_sw_app_enable_fanout[0]);
-  assign sw_app_enable_pfa = mubi4_test_invalid(mubi_sw_app_enable_fanout[1]);
-  assign hw2reg.recov_alert_sts.sw_app_enable_field_alert.de = sw_app_enable_pfa;
-  assign hw2reg.recov_alert_sts.sw_app_enable_field_alert.d  = sw_app_enable_pfa;
+  mubi4_t [1:0] mubi_sw_app_enable_fo;
 
   prim_mubi4_sync #(
     .NumCopies(2),
@@ -459,18 +442,18 @@ module csrng_core import csrng_pkg::*; #(
   ) u_prim_mubi4_sync_sw_app_enable (
     .clk_i,
     .rst_ni,
-    .mubi_i(mubi_sw_app_enable),
-    .mubi_o(mubi_sw_app_enable_fanout)
+    .mubi_i(mubi4_t'(reg2hw.ctrl.sw_app_enable.q)),
+    .mubi_o(mubi_sw_app_enable_fo)
   );
 
+  assign sw_app_enable_inv = mubi4_test_invalid(mubi_sw_app_enable_fo[1]);
+  assign hw2reg.recov_alert_sts.sw_app_enable_field_alert.d  = 1'b1;
+  assign hw2reg.recov_alert_sts.sw_app_enable_field_alert.de = sw_app_enable_inv;
+
+  assign sw_app_enable = mubi4_test_true_strict(mubi_sw_app_enable_fo[0]);
+
   // SEC_CM: CONFIG.MUBI
-  mubi4_t mubi_read_int_state;
-  mubi4_t [1:0] mubi_read_int_state_fanout;
-  assign mubi_read_int_state = mubi4_t'(reg2hw.ctrl.read_int_state.q);
-  assign read_int_state_pfe = mubi4_test_true_strict(mubi_read_int_state_fanout[0]);
-  assign read_int_state_pfa = mubi4_test_invalid(mubi_read_int_state_fanout[1]);
-  assign hw2reg.recov_alert_sts.read_int_state_field_alert.de = read_int_state_pfa;
-  assign hw2reg.recov_alert_sts.read_int_state_field_alert.d  = read_int_state_pfa;
+  mubi4_t [1:0] mubi_read_int_state_fo;
 
   prim_mubi4_sync #(
     .NumCopies(2),
@@ -478,18 +461,18 @@ module csrng_core import csrng_pkg::*; #(
   ) u_prim_mubi4_sync_read_int_state (
     .clk_i,
     .rst_ni,
-    .mubi_i(mubi_read_int_state),
-    .mubi_o(mubi_read_int_state_fanout)
+    .mubi_i(mubi4_t'(reg2hw.ctrl.read_int_state.q)),
+    .mubi_o(mubi_read_int_state_fo)
   );
 
+  assign read_int_state_inv = mubi4_test_invalid(mubi_read_int_state_fo[1]);
+  assign hw2reg.recov_alert_sts.read_int_state_field_alert.d  = 1'b1;
+  assign hw2reg.recov_alert_sts.read_int_state_field_alert.de = read_int_state_inv;
+
+  assign read_int_state = mubi4_test_true_strict(mubi_read_int_state_fo[0]);
+
   // SEC_CM: CONFIG.MUBI
-  mubi4_t mubi_fips_force_enable;
-  mubi4_t [1:0] mubi_fips_force_enable_fanout;
-  assign mubi_fips_force_enable = mubi4_t'(reg2hw.ctrl.fips_force_enable.q);
-  assign fips_force_enable_pfe = mubi4_test_true_strict(mubi_fips_force_enable_fanout[0]);
-  assign fips_force_enable_pfa = mubi4_test_invalid(mubi_fips_force_enable_fanout[1]);
-  assign hw2reg.recov_alert_sts.fips_force_enable_field_alert.de = fips_force_enable_pfa;
-  assign hw2reg.recov_alert_sts.fips_force_enable_field_alert.d  = fips_force_enable_pfa;
+  mubi4_t [1:0] fips_force_enable_mubi_fo;
 
   prim_mubi4_sync #(
     .NumCopies(2),
@@ -497,14 +480,15 @@ module csrng_core import csrng_pkg::*; #(
   ) u_prim_mubi4_sync_fips_force_enable (
     .clk_i,
     .rst_ni,
-    .mubi_i(mubi_fips_force_enable),
-    .mubi_o(mubi_fips_force_enable_fanout)
+    .mubi_i(mubi4_t'(reg2hw.ctrl.fips_force_enable.q)),
+    .mubi_o(fips_force_enable_mubi_fo)
   );
 
-  // master module enable
-  assign sw_app_enable = sw_app_enable_pfe;
-  assign read_int_state = read_int_state_pfe;
-  assign fips_force_enable = fips_force_enable_pfe;
+  assign fips_force_enable_inv = mubi4_test_invalid(fips_force_enable_mubi_fo[1]);
+  assign hw2reg.recov_alert_sts.fips_force_enable_field_alert.d  = 1'b1;
+  assign hw2reg.recov_alert_sts.fips_force_enable_field_alert.de = fips_force_enable_inv;
+
+  assign fips_force_enable = mubi4_test_true_strict(fips_force_enable_mubi_fo[0]);
 
   //------------------------------------------
   // application interface
@@ -736,10 +720,6 @@ module csrng_core import csrng_pkg::*; #(
     .ready_i  (acmd_accept) // 1 fsm rdy
   );
 
-  assign acmd_flag0_pfa = mubi4_test_invalid(flag0_q);
-  assign hw2reg.recov_alert_sts.acmd_flag0_field_alert.de = acmd_flag0_pfa;
-  assign hw2reg.recov_alert_sts.acmd_flag0_field_alert.d  = acmd_flag0_pfa;
-
   // parse the command bus
   assign acmd_hold = acmd_sop ? acmd_e'(acmd_bus[CmdWidth-1:0]) : acmd_q;
 
@@ -765,22 +745,25 @@ module csrng_core import csrng_pkg::*; #(
           mubi4_t'(acmd_bus[11:8]) : flag0_q;
 
   // SEC_CM: CTRL.MUBI
-  mubi4_t mubi_flag0;
-  assign mubi_flag0 = flag0_q;
-
-  for (genvar i = 0; i < Flag0Copies; i = i+1) begin : gen_mubi_flag0_copies
-    assign flag0_fo[i] = mubi4_test_true_strict(mubi_flag0_fanout[i]);
-  end : gen_mubi_flag0_copies
+  prim_mubi_pkg::mubi4_t [Flag0Fanout-1:0] mubi_flag0_fo;
 
   prim_mubi4_sync #(
-    .NumCopies(Flag0Copies),
+    .NumCopies(Flag0Fanout),
     .AsyncOn(0)
   ) u_prim_mubi4_sync_flag0 (
     .clk_i,
     .rst_ni,
-    .mubi_i(mubi_flag0),
-    .mubi_o(mubi_flag0_fanout)
+    .mubi_i(mubi4_t'(flag0_q)),
+    .mubi_o(mubi_flag0_fo)
   );
+
+  assign flag0_inv = mubi4_test_invalid(flag0_q);
+  assign hw2reg.recov_alert_sts.acmd_flag0_field_alert.d  = 1'b1;
+  assign hw2reg.recov_alert_sts.acmd_flag0_field_alert.de = flag0_inv;
+
+  for (genvar i = 0; i < Flag0Fanout; i = i+1) begin : gen_mubi_flag0_fanout
+    assign flag0_fo[i] = mubi4_test_true_strict(mubi_flag0_fo[i]);
+  end : gen_mubi_flag0_fanout
 
   // sm to process all instantiation requests
   // SEC_CM: MAIN_SM.CTR.LOCAL_ESC
