@@ -804,9 +804,6 @@ module csrng_core import csrng_pkg::*; #(
     .main_sm_err_o         (cs_main_sm_err)
   );
 
-  // entropy available
-  assign cmd_entropy_avail = entropy_src_hw_if_i.es_ack;
-
   for (genvar csi = 0; csi < NumApps; csi = csi+1) begin : gen_cmd_ack
     assign cmd_core_ack[csi] = ctr_drbg_rsp_vld && (ctr_drbg_rsp_data.inst_id == csi);
     assign cmd_core_ack_sts[csi] = ctr_drbg_rsp_sts;
@@ -876,30 +873,37 @@ module csrng_core import csrng_pkg::*; #(
   end
 
   //--------------------------------------------
-  // entropy interface
+  // Interface to entropy source
   //--------------------------------------------
-  // Basic interface logic with the entropy_src block
 
   assign entropy_src_hw_if_o.es_req = cs_enable_fo[43] && cmd_entropy_req;
-
+  assign cmd_entropy_avail = entropy_src_hw_if_i.es_ack;
 
   // SEC_CM: CONSTANTS.LC_GATED
   assign seed_diversification = lc_hw_debug_on_fo[0] ? RndCnstCsKeymgrDivNonProduction :
                                                        RndCnstCsKeymgrDivProduction;
 
-  // Capture entropy from entropy_src
-  assign entropy_src_seed_d =
-         flag0_fo[1] ? '0 : // special case where zero is used
-         cmd_entropy_req && cmd_entropy_avail ?
-            (entropy_src_hw_if_i.es_bits ^ seed_diversification) :
-         entropy_src_seed_q;
-  assign entropy_src_fips_d =
-         // Use inst_id_d here such that u_csrng_ctr_drbg_cmd gets the inst_id_q and the proper
-         // entropy_src_fips_q in the next clock cycle.
-         fips_force_enable && reg2hw.fips_force.q[inst_id_d] ? 1'b1 :
-         flag0_fo[2] ? '0 : // special case where zero is used
-         cmd_entropy_req && cmd_entropy_avail ? entropy_src_hw_if_i.es_fips :
-         entropy_src_fips_q;
+  // Capture entropy and FIPS status from entropy source
+  always_comb begin
+    entropy_src_seed_d = entropy_src_seed_q;
+    entropy_src_fips_d = entropy_src_fips_q;
+
+    if (flag0_fo[1]) begin
+      entropy_src_seed_d = '0;
+    end else if (cmd_entropy_req && cmd_entropy_avail) begin
+      entropy_src_seed_d = entropy_src_hw_if_i.es_bits ^ seed_diversification;
+    end
+
+    // First priority is FIPS force-enable, then flag0, then entropy source
+    // Use inst_id_d as ctr_drbg reads entropy_src_fips_q in next cycle already
+    if (fips_force_enable && reg2hw.fips_force.q[inst_id_d]) begin
+      entropy_src_fips_d = 1'b1;
+    end else if (flag0_fo[2]) begin
+      entropy_src_fips_d = 1'b0;
+    end else if (cmd_entropy_req && cmd_entropy_avail) begin
+      entropy_src_fips_d = entropy_src_hw_if_i.es_fips;
+    end
+  end
 
   //-------------------------------------
   // CTR DRBG instantiation
