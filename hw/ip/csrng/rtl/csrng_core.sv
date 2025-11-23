@@ -52,6 +52,7 @@ module csrng_core import csrng_pkg::*; #(
   import csrng_reg_pkg::*;
 
   import prim_mubi_pkg::mubi4_t;
+  import prim_mubi_pkg::MuBi4True;
   import prim_mubi_pkg::mubi4_test_true_strict;
   import prim_mubi_pkg::mubi4_test_invalid;
 
@@ -199,6 +200,7 @@ module csrng_core import csrng_pkg::*; #(
   logic   [NumAppsLg-1:0] inst_id_q, inst_id_d;
   logic                   gen_last_q, gen_last_d;
   mubi4_t                 flag0_q, flag0_d;
+  logic                   es_lock_q, es_lock_d;
   logic   [NumAppsLg-1:0] cmd_arb_idx_q, cmd_arb_idx_d;
   logic                   genbits_stage_fips_sw_q, genbits_stage_fips_sw_d;
   acmd_e                  ctr_drbg_cmd_q, ctr_drbg_cmd_d;
@@ -217,6 +219,7 @@ module csrng_core import csrng_pkg::*; #(
       inst_id_q               <= '0;
       gen_last_q              <= '0;
       flag0_q                 <= prim_mubi_pkg::MuBi4False;
+      es_lock_q               <= 1'b0;
       cmd_arb_idx_q           <= '0;
       genbits_stage_fips_sw_q <= '0;
       ctr_drbg_cmd_q          <= INV;
@@ -233,6 +236,7 @@ module csrng_core import csrng_pkg::*; #(
       inst_id_q               <= inst_id_d;
       gen_last_q              <= gen_last_d;
       flag0_q                 <= flag0_d;
+      es_lock_q               <= es_lock_d;
       cmd_arb_idx_q           <= cmd_arb_idx_d;
       genbits_stage_fips_sw_q <= genbits_stage_fips_sw_d;
       ctr_drbg_cmd_q          <= ctr_drbg_cmd_d;
@@ -499,6 +503,15 @@ module csrng_core import csrng_pkg::*; #(
   // and return any genbits if the command
   // is a generate command.
 
+  mubi4_t [NumApps-1:0] cmd_flag0;
+
+  logic   [NumApps-1:0] cmd_es_unlock;
+  logic   [NumApps-1:0] cmd_es_req;
+  logic   [NumApps-1:0] cmd_es_gnt;
+  logic [NumAppsLg-1:0] cmd_es_idx, cmd_es_idx_q;
+
+  logic es_req_gated;
+
   for (genvar ai = 0; ai < NumApps; ai = ai+1) begin : gen_cmd_stage
 
     csrng_cmd_stage u_csrng_cmd_stage (
@@ -513,6 +526,10 @@ module csrng_core import csrng_pkg::*; #(
       .reseed_cnt_alert_o           (reseed_cnt_alert[ai]),
       .invalid_cmd_seq_alert_o      (invalid_cmd_seq_alert[ai]),
       .invalid_acmd_alert_o         (invalid_acmd_alert[ai]),
+      .cmd_es_req_o                 (cmd_es_req[ai]),
+      .cmd_es_gnt_i                 (cmd_es_gnt[ai]),
+      .cmd_es_unlock_o              (cmd_es_unlock[ai]),
+      .cmd_flag0_o                  (cmd_flag0[ai]),
       .cmd_arb_req_o                (cmd_arb_req[ai]),
       .cmd_arb_sop_o                (cmd_arb_sop[ai]),
       .cmd_arb_mop_o                (cmd_arb_mop[ai]),
@@ -776,7 +793,7 @@ module csrng_core import csrng_pkg::*; #(
     .acmd_i                (acmd_hold),
     .acmd_eop_i            (acmd_eop),
     .flag0_i               (flag0_fo[0]),
-    .cmd_entropy_req_o     (cmd_entropy_req),
+    .cmd_entropy_req_o     (),
     .cmd_entropy_avail_i   (cmd_entropy_avail),
     .cmd_vld_o             (main_sm_cmd_vld),
     .cmd_rdy_i             (ctr_drbg_req_rdy),
@@ -859,32 +876,75 @@ module csrng_core import csrng_pkg::*; #(
   // Interface to entropy source
   //--------------------------------------------
 
-  assign entropy_src_hw_if_o.es_req = cs_enable_fo[43] && cmd_entropy_req;
-  assign cmd_entropy_avail = entropy_src_hw_if_i.es_ack;
+  assign es_req_gated = cmd_entropy_req && !es_lock_q;
+
+  assign entropy_src_hw_if_o.es_req = cs_enable_fo[43] && es_req_gated && (cmd_flag0[cmd_es_idx] != MuBi4True);
+  assign cmd_entropy_avail = (cmd_flag0[cmd_es_idx] == MuBi4True) ? es_req_gated : entropy_src_hw_if_i.es_ack;
+
+  //assign es_lock_d = cs_enable_fo[1] && cmd_entropy_req && cmd_entropy_avail && !(|cmd_es_unlock);
+
+  always_comb begin
+    es_lock_d = es_lock_q;
+
+    if (!cs_enable_fo[1] || |cmd_es_unlock) begin
+      es_lock_d = 1'b0;
+    end else if (cmd_entropy_req && cmd_entropy_avail) begin
+      es_lock_d = 1'b1;
+    end
+  end
+
+  prim_arbiter_ppc #(
+    .EnDataPort(0), // Ignore data port
+    .N(NumApps), // Number of request ports
+    .DW(1) // Data width
+  ) u_prim_arbiter_ppc_es (
+    .clk_i    (clk_i),
+    .rst_ni   (rst_ni),
+    .req_chk_i(cs_enable_fo[1]),
+    .req_i    (cmd_es_req),
+    .data_i   ('{default: 1'b0}),
+    .gnt_o    (cmd_es_gnt),
+    .idx_o    (cmd_es_idx),
+    .valid_o  (cmd_entropy_req),
+    .data_o   (),
+    .ready_i  (cmd_entropy_avail)
+  );
 
   // SEC_CM: CONSTANTS.LC_GATED
   assign seed_diversification = lc_hw_debug_on_fo[0] ? RndCnstCsKeymgrDivNonProduction :
                                                        RndCnstCsKeymgrDivProduction;
+
+  always_ff @(posedge clk_i or negedge rst_ni) begin
+    if (!rst_ni) begin
+      cmd_es_idx_q <= '0;
+    end else begin
+      cmd_es_idx_q <= cmd_es_idx;
+    end
+  end
 
   // Capture entropy and FIPS status from entropy source
   always_comb begin
     entropy_src_seed_d = entropy_src_seed_q;
     entropy_src_fips_d = entropy_src_fips_q;
 
-    if (flag0_fo[1]) begin
-      entropy_src_seed_d = '0;
-    end else if (cmd_entropy_req && cmd_entropy_avail) begin
-      entropy_src_seed_d = entropy_src_hw_if_i.es_bits ^ seed_diversification;
+    if (cmd_entropy_req && cmd_entropy_avail) begin
+      if (cmd_flag0[cmd_es_idx] == MuBi4True) begin
+        entropy_src_seed_d = '0;
+      end else begin
+        entropy_src_seed_d = entropy_src_hw_if_i.es_bits ^ seed_diversification;
+      end
     end
 
     // First priority is FIPS force-enable, then flag0, then entropy source
     // Use inst_id_d as ctr_drbg reads entropy_src_fips_q in next cycle already
-    if (fips_force_enable && reg2hw.fips_force.q[inst_id_d]) begin
-      entropy_src_fips_d = 1'b1;
-    end else if (flag0_fo[2]) begin
-      entropy_src_fips_d = 1'b0;
-    end else if (cmd_entropy_req && cmd_entropy_avail) begin
-      entropy_src_fips_d = entropy_src_hw_if_i.es_fips;
+    if (cmd_entropy_req && cmd_entropy_avail) begin
+      if (fips_force_enable && reg2hw.fips_force.q[cmd_es_idx]) begin
+        entropy_src_fips_d = 1'b1;
+      end else if (cmd_flag0[cmd_es_idx] == MuBi4True) begin
+        entropy_src_fips_d = 1'b0;
+      end else begin
+        entropy_src_fips_d = entropy_src_hw_if_i.es_fips;
+      end
     end
   end
 

@@ -72,7 +72,7 @@ module csrng_main_sm import csrng_pkg::*; (
         MainSmParseCmd: begin
           if (acmd_eop_i) begin
             unique case (acmd_i)
-              INS, RES:      state_d = MainSmEntropyReq; // Command may require entropy
+              INS, RES:      state_d = MainSmCmdPrep; // Command may require entropy
               GEN, UPD, UNI: state_d = MainSmCmdPrep;    // Command does not require entropy
               default:       state_d = MainSmIdle;       // Command was not supported
             endcase

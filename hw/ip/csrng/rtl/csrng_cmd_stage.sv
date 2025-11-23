@@ -23,6 +23,12 @@ module csrng_cmd_stage import csrng_pkg::*; (
   output logic                   invalid_cmd_seq_alert_o,
   output logic                   invalid_acmd_alert_o,
 
+  // Command to es arbiter.
+  output logic                   cmd_es_req_o,
+  input  logic                   cmd_es_gnt_i,
+  output logic                   cmd_es_unlock_o,
+  output prim_mubi_pkg::mubi4_t  cmd_flag0_o,
+
   // Command to arbiter.
   output logic                   cmd_arb_req_o,
   input  logic                   cmd_arb_gnt_i,
@@ -104,6 +110,7 @@ module csrng_cmd_stage import csrng_pkg::*; (
   csrng_cmd_sts_e cmd_ack_sts_q, cmd_ack_sts_d;
   logic     [3:0] cmd_len_q, cmd_len_d;
   logic           cmd_gen_flag_q, cmd_gen_flag_d;
+  logic           cmd_es_flag_q, cmd_es_flag_d;
   logic    [11:0] cmd_gen_cmd_q, cmd_gen_cmd_d;
   logic           instantiated_d, instantiated_q;
 
@@ -113,6 +120,7 @@ module csrng_cmd_stage import csrng_pkg::*; (
       cmd_ack_sts_q   <= CMD_STS_SUCCESS;
       cmd_len_q       <= '0;
       cmd_gen_flag_q  <= '0;
+      cmd_es_flag_q   <= 1'b0;
       cmd_gen_cmd_q   <= '0;
       instantiated_q  <= '0;
     end else begin
@@ -120,6 +128,7 @@ module csrng_cmd_stage import csrng_pkg::*; (
       cmd_ack_sts_q   <= cmd_ack_sts_d;
       cmd_len_q       <= cmd_len_d;
       cmd_gen_flag_q  <= cmd_gen_flag_d;
+      cmd_es_flag_q   <= cmd_es_flag_d;
       cmd_gen_cmd_q   <= cmd_gen_cmd_d;
       instantiated_q  <= instantiated_d;
     end
@@ -156,6 +165,8 @@ module csrng_cmd_stage import csrng_pkg::*; (
 
   assign sfifo_cmd_wvld = cmd_stage_rdy_o && cmd_stage_vld_i;
   assign sfifo_cmd_rrdy = cmd_fifo_pop;
+
+  assign cmd_flag0_o = cmd_es_req_o ? prim_mubi_pkg::mubi4_t'(sfifo_cmd_rdata[11:8]) : prim_mubi_pkg::mubi4_t'(cmd_gen_cmd_q[11:8]);
 
   assign cmd_arb_bus_o =
          cmd_gen_inc_req ? {15'b0,cmd_gen_cnt_last,cmd_stage_shid_i,cmd_gen_cmd_q} :
@@ -247,6 +258,7 @@ module csrng_cmd_stage import csrng_pkg::*; (
   typedef enum logic [StateWidth-1:0] {
     Idle      = 8'b11110101, // idle
     Flush     = 8'b01011011, // flush command FIFO and start over
+    EsGnt     = 8'b00011101, // general arbiter request
     ArbGnt    = 8'b00011100, // general arbiter request
     SendSOP   = 8'b00000001, // send sop (start of packet)
     SendMOP   = 8'b01010110, // send mop (middle of packet)
@@ -264,6 +276,11 @@ module csrng_cmd_stage import csrng_pkg::*; (
 
   always_comb begin
     state_d = state_q;
+
+    cmd_es_flag_d = cmd_es_flag_q;
+    cmd_es_unlock_o = 1'b0;
+    cmd_es_req_o = 1'b0;
+
     cmd_fifo_pop = 1'b0;
     cmd_len_dec = 1'b0;
     cmd_gen_cnt_dec = 1'b0;
@@ -288,10 +305,11 @@ module csrng_cmd_stage import csrng_pkg::*; (
     end else if (local_escalate) begin
       // In case local escalate is high we must transition to the error state.
       state_d = Error;
-    end else if (!enable_i && state_q inside {Idle, Flush, ArbGnt, SendSOP, SendMOP, GenCmdChk,
+    end else if (!enable_i && state_q inside {Idle, Flush, EsGnt, ArbGnt, SendSOP, SendMOP, GenCmdChk,
                                                  CmdAck, GenReq, GenArbGnt, GenSOP}) begin
       // In case the module is disabled and we are in a legal state we must go into idle state.
       state_d = Idle;
+      cmd_es_flag_d = 1'b0;
       instantiated_d = 1'b0;
     end else begin
       // Otherwise do the state machine as normal.
@@ -301,7 +319,8 @@ module csrng_cmd_stage import csrng_pkg::*; (
           if (!cmd_fifo_zero) begin
             if (acmd == INS) begin
               if (!instantiated_q) begin
-                state_d = ArbGnt;
+                cmd_es_flag_d = 1'b1;
+                state_d = EsGnt;
                 instantiated_d = 1'b1;
               end
               if (instantiated_q) begin
@@ -311,7 +330,8 @@ module csrng_cmd_stage import csrng_pkg::*; (
               end
             end else if (acmd == RES) begin
               if (instantiated_q) begin
-                state_d = ArbGnt;
+                cmd_es_flag_d = 1'b1;
+                state_d = EsGnt;
               end
               if (!instantiated_q) begin
                 cmd_err_ack = 1'b1;
@@ -372,6 +392,12 @@ module csrng_cmd_stage import csrng_pkg::*; (
             state_d = Idle;
           end
         end
+        EsGnt: begin
+          cmd_es_req_o = 1'b1;
+          if (cmd_es_gnt_i) begin
+            state_d = ArbGnt;
+          end
+        end
         ArbGnt: begin
           cmd_arb_req_o = 1'b1;
           if (cmd_arb_gnt_i) begin
@@ -414,6 +440,10 @@ module csrng_cmd_stage import csrng_pkg::*; (
         CmdAck: begin
           if (cmd_ack_i) begin
             // The state database has successfully been updated.
+            if (cmd_es_flag_q) begin
+              cmd_es_unlock_o = 1'b1;
+              cmd_es_flag_d = 1'b0;
+            end
             // In case of Generate commands, we get the generated bits one clock cycle before
             // receiving the ACK from the state database (from csrng_ctr_drbg_gen).
             state_d = GenReq;
