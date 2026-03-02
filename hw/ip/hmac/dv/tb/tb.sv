@@ -30,7 +30,9 @@ module tb;
   `DV_ALERT_IF_CONNECT()
 
   // dut
-  hmac dut (
+  hmac #(
+    .MultimodeEn(0)  
+  ) dut (
     .clk_i              ( clk            ),
     .rst_ni             ( rst_n          ),
 

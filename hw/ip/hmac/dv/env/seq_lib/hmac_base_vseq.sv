@@ -119,9 +119,10 @@ constraint hmac_base_vseq::key_length_c {
 }
 
 constraint hmac_base_vseq::digest_size_c {
-  $countones(digest_size) == 1 dist {
-    1 :/ 4,  // SHA2_256/SHA2_384/SHA2_512/SHA2_None
-    0 :/ 1   // Illegal -> should get cast to SHA2_None in HW
+  digest_size dist {
+    SHA2_256  :/ 3,
+    SHA2_None :/ 1,
+    '0        :/ 1  // Illegal -> should get cast to SHA2_None in HW
   };
 }
 

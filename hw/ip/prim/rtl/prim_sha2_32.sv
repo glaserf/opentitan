@@ -259,7 +259,7 @@ module prim_sha2_32 import prim_sha2_pkg::*;
       .hash_start_i       (hash_start_i),
       .hash_stop_i        (hash_stop_i),
       .hash_continue_i    (hash_continue_i),
-      .digest_mode_i      (SHA2_None),      // unused input port tied to ground
+      .digest_mode_i      (SHA2_256),       // tie to SHA2_256 to avoid assertions firing
       .hash_process_i     (hash_process_i), // feed input port directly to SHA-2 engine
       .hash_done_o        (hash_done_o),
       .message_length_i   (message_length_i),

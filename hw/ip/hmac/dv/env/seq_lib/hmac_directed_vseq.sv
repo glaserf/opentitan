@@ -36,7 +36,7 @@ endfunction : new
 task hmac_directed_vseq::body();
   bit [2:0] sha2_pad_fsm_val   = 0;
   string    sha2_pad_fsm_path  =
-    "tb.dut.u_prim_sha2_512.gen_multimode_logic.u_prim_sha2_multimode.u_pad.st_q";
+    "tb.dut.u_prim_sha2_512.gen_sha256_logic.u_prim_sha2_256.u_pad.st_q";
   fork begin
     forever begin
       // Wait until the state is well established

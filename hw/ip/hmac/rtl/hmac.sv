@@ -10,6 +10,7 @@ module hmac
   import prim_sha2_pkg::*;
   import hmac_reg_pkg::*;
 #(
+  parameter logic MultimodeEn = 1,
   parameter logic [NumAlerts-1:0] AlertAsyncOn = {NumAlerts{1'b1}},
   // Number of cycles a differential skew is tolerated on the alert signal
   parameter int unsigned AlertSkewCycles = 1
@@ -723,7 +724,7 @@ module hmac
 
   // Instantiate SHA-2 256/384/512 engine
   prim_sha2_32 #(
-      .MultimodeEn(1)
+    .MultimodeEn(MultimodeEn)
   ) u_prim_sha2_512 (
     .clk_i,
     .rst_ni,
