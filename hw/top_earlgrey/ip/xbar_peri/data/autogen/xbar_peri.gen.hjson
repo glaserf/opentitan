@@ -691,6 +691,8 @@
       width: 1
       default: ""
       phys_pd: main
+      external: true
+      conn_type: false
       top_signame: uart1_tl
       index: -1
     }

@@ -510,7 +510,6 @@ def elab_intermodule(topcfg: OrderedDict):
                                                  rsp_module, rsp_signal)
 
             # determine the signal name
-
             rsp_struct["top_signame"] = sig_name
             if req_struct["type"] == "uni" and req_struct[
                     "top_type"] == "broadcast":
@@ -920,6 +919,10 @@ def check_intermodule(topcfg: Dict, prefix: str) -> int:
         elif req_struct["type"] == "uni":
             # one-to-one connection
             req_struct["top_type"] = "broadcast"
+
+        elif req_struct["type"] == "req_rsp":
+            # one-to-one connection
+            req_struct["top_type"] = "one-to-one"
 
         # If req is array, it is not allowed to have partial connections.
         # Doing for loop again here: Make code separate from other checker

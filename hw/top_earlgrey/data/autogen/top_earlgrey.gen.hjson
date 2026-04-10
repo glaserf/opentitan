@@ -707,6 +707,7 @@
           inst_name: uart0
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: uart0_tl
           index: -1
         }
@@ -801,6 +802,7 @@
           inst_name: uart1
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: uart1_tl
           index: -1
           conn_type: false
@@ -895,6 +897,7 @@
           inst_name: uart2
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: uart2_tl
           index: -1
         }
@@ -988,6 +991,7 @@
           inst_name: uart3
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: uart3_tl
           index: -1
         }
@@ -1120,6 +1124,7 @@
           inst_name: gpio
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: gpio_tl
           index: -1
         }
@@ -1232,6 +1237,7 @@
           inst_name: spi_device
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: spi_device_passthrough
           index: -1
         }
@@ -1294,6 +1300,7 @@
           inst_name: spi_device
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: spi_device_tl
           index: -1
         }
@@ -1425,6 +1432,7 @@
           inst_name: i2c0
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: i2c0_tl
           index: -1
         }
@@ -1556,6 +1564,7 @@
           inst_name: i2c1
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: i2c1_tl
           index: -1
         }
@@ -1687,6 +1696,7 @@
           inst_name: i2c2
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: i2c2_tl
           index: -1
         }
@@ -1740,6 +1750,7 @@
           inst_name: pattgen
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: pattgen_tl
           index: -1
         }
@@ -1819,6 +1830,7 @@
           inst_name: rv_timer
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: rv_timer_tl
           index: -1
         }
@@ -2100,6 +2112,7 @@
           default: "'0"
           inst_name: otp_ctrl
           end_idx: -1
+          top_type: one-to-one
           top_signame: otp_ctrl_otbn_otp_key
           index: -1
         }
@@ -2127,6 +2140,7 @@
           default: "'0"
           inst_name: otp_ctrl
           end_idx: -1
+          top_type: one-to-one
           top_signame: otp_ctrl_otp_macro
           index: -1
         }
@@ -2140,6 +2154,7 @@
           inst_name: otp_ctrl
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: otp_ctrl_core_tl
           index: -1
         }
@@ -2423,6 +2438,7 @@
           inst_name: otp_macro
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: otp_macro_prim_tl
           index: -1
         }
@@ -2663,6 +2679,7 @@
           default: "'0"
           inst_name: lc_ctrl
           end_idx: -1
+          top_type: one-to-one
           top_signame: lc_ctrl_lc_otp_vendor_test
           index: -1
         }
@@ -2689,6 +2706,7 @@
           default: "'0"
           inst_name: lc_ctrl
           end_idx: -1
+          top_type: one-to-one
           top_signame: lc_ctrl_lc_otp_program
           index: -1
         }
@@ -3095,6 +3113,7 @@
           inst_name: lc_ctrl
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: lc_ctrl_regs_tl
           index: -1
         }
@@ -3239,6 +3258,7 @@
           inst_name: alert_handler
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: alert_handler_tl
           index: -1
         }
@@ -3356,6 +3376,7 @@
           inst_name: spi_host0
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: spi_host0_tl
           index: -1
         }
@@ -3470,6 +3491,7 @@
           inst_name: spi_host1
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: spi_host1_tl
           index: -1
         }
@@ -3800,6 +3822,7 @@
           inst_name: usbdev
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: usbdev_tl
           index: -1
         }
@@ -3928,6 +3951,7 @@
           inst_name: pwrmgr_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: pwrmgr_aon_pwr_rst
           index: -1
         }
@@ -3941,6 +3965,7 @@
           inst_name: pwrmgr_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: pwrmgr_aon_pwr_clk
           index: -1
         }
@@ -3954,6 +3979,7 @@
           inst_name: pwrmgr_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: pwrmgr_aon_pwr_otp
           index: -1
         }
@@ -3967,6 +3993,7 @@
           inst_name: pwrmgr_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: pwrmgr_aon_pwr_lc
           index: -1
         }
@@ -4168,6 +4195,7 @@
           inst_name: pwrmgr_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: pwrmgr_aon_tl
           index: -1
         }
@@ -4377,6 +4405,7 @@
           inst_name: rstmgr_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: rstmgr_aon_tl
           index: -1
         }
@@ -4719,6 +4748,7 @@
           inst_name: clkmgr_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: clkmgr_aon_tl
           index: -1
         }
@@ -4805,6 +4835,7 @@
           inst_name: sysrst_ctrl_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: sysrst_ctrl_aon_tl
           index: -1
         }
@@ -4892,6 +4923,7 @@
           inst_name: adc_ctrl_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: adc_ctrl_aon_tl
           index: -1
         }
@@ -4980,6 +5012,7 @@
           inst_name: pwm_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: pwm_aon_tl
           index: -1
         }
@@ -5179,6 +5212,7 @@
           inst_name: pinmux_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: pinmux_aon_lc_jtag
           index: -1
         }
@@ -5193,6 +5227,7 @@
           inst_name: pinmux_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: pinmux_aon_rv_jtag
           index: -1
         }
@@ -5468,6 +5503,7 @@
           inst_name: pinmux_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: pinmux_aon_tl
           index: -1
         }
@@ -5620,6 +5656,7 @@
           inst_name: aon_timer_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: aon_timer_aon_tl
           index: -1
         }
@@ -5875,6 +5912,7 @@
           inst_name: sensor_ctrl_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: sensor_ctrl_aon_tl
           index: -1
         }
@@ -6154,6 +6192,7 @@
           inst_name: sram_ctrl_ret_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: sram_ctrl_ret_aon_regs_tl
           index: -1
         }
@@ -6167,6 +6206,7 @@
           inst_name: sram_ctrl_ret_aon
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: sram_ctrl_ret_aon_ram_tl
           index: -1
         }
@@ -6286,6 +6326,7 @@
           inst_name: flash_ctrl
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: flash_ctrl_otp
           index: -1
         }
@@ -6553,6 +6594,7 @@
           inst_name: flash_ctrl
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: flash_ctrl_core_tl
           index: -1
         }
@@ -6566,6 +6608,7 @@
           inst_name: flash_ctrl
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: flash_ctrl_prim_tl
           index: -1
         }
@@ -6579,6 +6622,7 @@
           inst_name: flash_ctrl
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: flash_ctrl_mem_tl
           index: -1
         }
@@ -6983,6 +7027,7 @@
           inst_name: rv_dm
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: rv_dm_regs_tl_d
           index: -1
         }
@@ -6996,6 +7041,7 @@
           inst_name: rv_dm
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: rv_dm_mem_tl_d
           index: -1
         }
@@ -7094,6 +7140,7 @@
           inst_name: rv_plic
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: rv_plic_tl
           index: -1
         }
@@ -7294,6 +7341,7 @@
           inst_name: aes
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: aes_tl
           index: -1
         }
@@ -7360,6 +7408,7 @@
           inst_name: hmac
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: hmac_tl
           index: -1
         }
@@ -7591,6 +7640,7 @@
           inst_name: kmac
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: kmac_tl
           index: -1
         }
@@ -7868,6 +7918,7 @@
           inst_name: otbn
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: otbn_tl
           index: -1
         }
@@ -8112,6 +8163,7 @@
           inst_name: keymgr
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: keymgr_tl
           index: -1
         }
@@ -8190,6 +8242,7 @@
           inst_name: csrng
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: csrng_entropy_src_hw_if
           index: -1
         }
@@ -8228,6 +8281,7 @@
           inst_name: csrng
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: csrng_tl
           index: -1
         }
@@ -8564,6 +8618,7 @@
           inst_name: entropy_src
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: entropy_src_tl
           index: -1
         }
@@ -8670,6 +8725,7 @@
           inst_name: edn0
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: edn0_tl
           index: -1
         }
@@ -8762,6 +8818,7 @@
           default: "'0"
           inst_name: edn1
           end_idx: -1
+          top_type: one-to-one
           top_signame: edn1_edn
           index: -1
         }
@@ -8775,6 +8832,7 @@
           inst_name: edn1
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: edn1_tl
           index: -1
         }
@@ -9058,6 +9116,7 @@
           inst_name: sram_ctrl_main
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: sram_ctrl_main_regs_tl
           index: -1
         }
@@ -9071,6 +9130,7 @@
           inst_name: sram_ctrl_main
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: sram_ctrl_main_ram_tl
           index: -1
         }
@@ -9243,6 +9303,7 @@
           inst_name: rom_ctrl
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: rom_ctrl_regs_tl
           index: -1
         }
@@ -9256,6 +9317,7 @@
           inst_name: rom_ctrl
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: rom_ctrl_rom_tl
           index: -1
         }
@@ -9997,6 +10059,7 @@
           inst_name: rv_core_ibex
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: rv_core_ibex_cfg_tl_d
           index: -1
         }
@@ -11523,6 +11586,7 @@
           width: 1
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: main_tl_rv_core_ibex__corei
           index: -1
         }
@@ -11536,6 +11600,7 @@
           width: 1
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: main_tl_rv_core_ibex__cored
           index: -1
         }
@@ -11549,6 +11614,7 @@
           width: 1
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: main_tl_rv_dm__sba
           index: -1
         }
@@ -11614,6 +11680,7 @@
           width: 1
           default: ""
           end_idx: -1
+          top_type: one-to-one
           top_signame: main_tl_peri
           index: -1
         }
@@ -19609,6 +19676,7 @@
         inst_name: uart0
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: uart0_tl
         index: -1
       }
@@ -19662,6 +19730,7 @@
         inst_name: uart1
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: uart1_tl
         index: -1
       }
@@ -19715,6 +19784,7 @@
         inst_name: uart2
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: uart2_tl
         index: -1
       }
@@ -19768,6 +19838,7 @@
         inst_name: uart3
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: uart3_tl
         index: -1
       }
@@ -19834,6 +19905,7 @@
         inst_name: gpio
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: gpio_tl
         index: -1
       }
@@ -19893,6 +19965,7 @@
         inst_name: spi_device
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: spi_device_passthrough
         index: -1
       }
@@ -19955,6 +20028,7 @@
         inst_name: spi_device
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: spi_device_tl
         index: -1
       }
@@ -20031,6 +20105,7 @@
         inst_name: i2c0
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: i2c0_tl
         index: -1
       }
@@ -20107,6 +20182,7 @@
         inst_name: i2c1
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: i2c1_tl
         index: -1
       }
@@ -20183,6 +20259,7 @@
         inst_name: i2c2
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: i2c2_tl
         index: -1
       }
@@ -20196,6 +20273,7 @@
         inst_name: pattgen
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: pattgen_tl
         index: -1
       }
@@ -20235,6 +20313,7 @@
         inst_name: rv_timer
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: rv_timer_tl
         index: -1
       }
@@ -20460,6 +20539,7 @@
         default: "'0"
         inst_name: otp_ctrl
         end_idx: -1
+        top_type: one-to-one
         top_signame: otp_ctrl_otbn_otp_key
         index: -1
       }
@@ -20487,6 +20567,7 @@
         default: "'0"
         inst_name: otp_ctrl
         end_idx: -1
+        top_type: one-to-one
         top_signame: otp_ctrl_otp_macro
         index: -1
       }
@@ -20500,6 +20581,7 @@
         inst_name: otp_ctrl
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: otp_ctrl_core_tl
         index: -1
       }
@@ -20680,6 +20762,7 @@
         inst_name: otp_macro
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: otp_macro_prim_tl
         index: -1
       }
@@ -20771,6 +20854,7 @@
         default: "'0"
         inst_name: lc_ctrl
         end_idx: -1
+        top_type: one-to-one
         top_signame: lc_ctrl_lc_otp_vendor_test
         index: -1
       }
@@ -20797,6 +20881,7 @@
         default: "'0"
         inst_name: lc_ctrl
         end_idx: -1
+        top_type: one-to-one
         top_signame: lc_ctrl_lc_otp_program
         index: -1
       }
@@ -21203,6 +21288,7 @@
         inst_name: lc_ctrl
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: lc_ctrl_regs_tl
         index: -1
       }
@@ -21281,6 +21367,7 @@
         inst_name: alert_handler
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: alert_handler_tl
         index: -1
       }
@@ -21347,6 +21434,7 @@
         inst_name: spi_host0
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: spi_host0_tl
         index: -1
       }
@@ -21410,6 +21498,7 @@
         inst_name: spi_host1
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: spi_host1_tl
         index: -1
       }
@@ -21670,6 +21759,7 @@
         inst_name: usbdev
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: usbdev_tl
         index: -1
       }
@@ -21697,6 +21787,7 @@
         inst_name: pwrmgr_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: pwrmgr_aon_pwr_rst
         index: -1
       }
@@ -21710,6 +21801,7 @@
         inst_name: pwrmgr_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: pwrmgr_aon_pwr_clk
         index: -1
       }
@@ -21723,6 +21815,7 @@
         inst_name: pwrmgr_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: pwrmgr_aon_pwr_otp
         index: -1
       }
@@ -21736,6 +21829,7 @@
         inst_name: pwrmgr_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: pwrmgr_aon_pwr_lc
         index: -1
       }
@@ -21937,6 +22031,7 @@
         inst_name: pwrmgr_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: pwrmgr_aon_tl
         index: -1
       }
@@ -22056,6 +22151,7 @@
         inst_name: rstmgr_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: rstmgr_aon_tl
         index: -1
       }
@@ -22272,6 +22368,7 @@
         inst_name: clkmgr_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: clkmgr_aon_tl
         index: -1
       }
@@ -22311,6 +22408,7 @@
         inst_name: sysrst_ctrl_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: sysrst_ctrl_aon_tl
         index: -1
       }
@@ -22351,6 +22449,7 @@
         inst_name: adc_ctrl_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: adc_ctrl_aon_tl
         index: -1
       }
@@ -22390,6 +22489,7 @@
         inst_name: pwm_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: pwm_aon_tl
         index: -1
       }
@@ -22504,6 +22604,7 @@
         inst_name: pinmux_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: pinmux_aon_lc_jtag
         index: -1
       }
@@ -22518,6 +22619,7 @@
         inst_name: pinmux_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: pinmux_aon_rv_jtag
         index: -1
       }
@@ -22793,6 +22895,7 @@
         inst_name: pinmux_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: pinmux_aon_tl
         index: -1
       }
@@ -22898,6 +23001,7 @@
         inst_name: aon_timer_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: aon_timer_aon_tl
         index: -1
       }
@@ -23004,6 +23108,7 @@
         inst_name: sensor_ctrl_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: sensor_ctrl_aon_tl
         index: -1
       }
@@ -23147,6 +23252,7 @@
         inst_name: sram_ctrl_ret_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: sram_ctrl_ret_aon_regs_tl
         index: -1
       }
@@ -23160,6 +23266,7 @@
         inst_name: sram_ctrl_ret_aon
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: sram_ctrl_ret_aon_ram_tl
         index: -1
       }
@@ -23173,6 +23280,7 @@
         inst_name: flash_ctrl
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: flash_ctrl_otp
         index: -1
       }
@@ -23440,6 +23548,7 @@
         inst_name: flash_ctrl
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: flash_ctrl_core_tl
         index: -1
       }
@@ -23453,6 +23562,7 @@
         inst_name: flash_ctrl
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: flash_ctrl_prim_tl
         index: -1
       }
@@ -23466,6 +23576,7 @@
         inst_name: flash_ctrl
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: flash_ctrl_mem_tl
         index: -1
       }
@@ -23770,6 +23881,7 @@
         inst_name: rv_dm
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: rv_dm_regs_tl_d
         index: -1
       }
@@ -23783,6 +23895,7 @@
         inst_name: rv_dm
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: rv_dm_mem_tl_d
         index: -1
       }
@@ -23843,6 +23956,7 @@
         inst_name: rv_plic
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: rv_plic_tl
         index: -1
       }
@@ -23908,6 +24022,7 @@
         inst_name: aes
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: aes_tl
         index: -1
       }
@@ -23934,6 +24049,7 @@
         inst_name: hmac
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: hmac_tl
         index: -1
       }
@@ -24037,6 +24153,7 @@
         inst_name: kmac
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: kmac_tl
         index: -1
       }
@@ -24200,6 +24317,7 @@
         inst_name: otbn
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: otbn_tl
         index: -1
       }
@@ -24371,6 +24489,7 @@
         inst_name: keymgr
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: keymgr_tl
         index: -1
       }
@@ -24398,6 +24517,7 @@
         inst_name: csrng
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: csrng_entropy_src_hw_if
         index: -1
       }
@@ -24436,6 +24556,7 @@
         inst_name: csrng
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: csrng_tl
         index: -1
       }
@@ -24671,6 +24792,7 @@
         inst_name: entropy_src
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: entropy_src_tl
         index: -1
       }
@@ -24723,6 +24845,7 @@
         inst_name: edn0
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: edn0_tl
         index: -1
       }
@@ -24761,6 +24884,7 @@
         default: "'0"
         inst_name: edn1
         end_idx: -1
+        top_type: one-to-one
         top_signame: edn1_edn
         index: -1
       }
@@ -24774,6 +24898,7 @@
         inst_name: edn1
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: edn1_tl
         index: -1
       }
@@ -24920,6 +25045,7 @@
         inst_name: sram_ctrl_main
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: sram_ctrl_main_regs_tl
         index: -1
       }
@@ -24933,6 +25059,7 @@
         inst_name: sram_ctrl_main
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: sram_ctrl_main_ram_tl
         index: -1
       }
@@ -25000,6 +25127,7 @@
         inst_name: rom_ctrl
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: rom_ctrl_regs_tl
         index: -1
       }
@@ -25013,6 +25141,7 @@
         inst_name: rom_ctrl
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: rom_ctrl_rom_tl
         index: -1
       }
@@ -25335,6 +25464,7 @@
         inst_name: rv_core_ibex
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: rv_core_ibex_cfg_tl_d
         index: -1
       }
@@ -25348,6 +25478,7 @@
         width: 1
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: main_tl_rv_core_ibex__corei
         index: -1
       }
@@ -25361,6 +25492,7 @@
         width: 1
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: main_tl_rv_core_ibex__cored
         index: -1
       }
@@ -25374,6 +25506,7 @@
         width: 1
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: main_tl_rv_dm__sba
         index: -1
       }
@@ -25439,6 +25572,7 @@
         width: 1
         default: ""
         end_idx: -1
+        top_type: one-to-one
         top_signame: main_tl_peri
         index: -1
       }
