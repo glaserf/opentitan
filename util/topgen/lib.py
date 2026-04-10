@@ -415,13 +415,22 @@ def get_hjsonobj_xbars(xbar_path: Path) -> Dict[str, ConfigT]:
     return xbar_objs
 
 
-def get_module_by_name(top: ConfigT, name: str) -> Optional[ConfigT]:
+def get_module_by_name(top: ConfigT, name: str,
+                       search_xbars: bool = False) -> Optional[ConfigT]:
     """Search in top["module"] by name
     """
     module = None
     for m in top["module"]:
         if m["name"] == name:
             module = m
+            break
+
+    if module or not search_xbars:
+        return module
+    
+    for x in top["xbar"]:
+        if x["name"] == name:
+            module = x
             break
 
     return module
@@ -523,12 +532,18 @@ def get_pad_list(padstr: str) -> List[Dict[str, Union[str, int]]]:
     return pads
 
 
-def idx_of_last_module_with_params(top: ConfigT) -> int:
+def idx_of_last_module_with_params(top: ConfigT, phys_pd: str = 'main') -> int:
     last = -1
-    for idx, module in enumerate(top["module"]):
+    for idx, module in enumerate([m for m in top["module"] if m.get('phys_pd', 'main') == phys_pd]):
         if len(module["param_list"]):
             last = idx
     return last
+
+def get_all_modules(top: ConfigT, phys_pd: str = None):
+    if phys_pd is not None:
+        return [m for m in top["module"] if m.get("phys_pd") == phys_pd]
+    else:
+        return top["module"]
 
 
 # Template functions
@@ -863,12 +878,12 @@ def make_bit_concatenation(sig_name: str, indices: List[int],
     return ''.join(acc)
 
 
-def num_rom_ctrl(modules: List[ConfigT]) -> int:
+def num_rom_ctrl(modules: List[ConfigT], pd = 'main') -> int:
     '''Return number of rom_ctrl's instantiated in the design
     '''
     num = 0
     for m in modules:
-        if m['type'] == 'rom_ctrl':
+        if m['type'] == 'rom_ctrl' and m.get('phys_pd', 'main') == pd:
             num += 1
 
     return num
@@ -876,7 +891,8 @@ def num_rom_ctrl(modules: List[ConfigT]) -> int:
 
 def find_modules(modules: List[Dict[str, object]],
                  type: str,
-                 use_base_template_type=True) -> List[Dict[str, object]]:
+                 use_base_template_type=True,
+                 phys_pd: str = None) -> List[Dict[str, object]]:
     '''Returns the modules of a given type
 
     If use_base_template_type is set to True, ipgen-based modules are
@@ -886,10 +902,12 @@ def find_modules(modules: List[Dict[str, object]],
     modules_found = []
     for m in modules:
         if m.get('attr') == 'ipgen' and use_base_template_type:
-            if m['template_type'] == type:
+            if m['template_type'] == type and \
+                (phys_pd == None or m.get('phys_pd', 'main') == phys_pd):
                 modules_found.append(m)
         else:
-            if m['type'] == type:
+            if m['type'] == type and \
+                (phys_pd == None or m.get('phys_pd', 'main') == phys_pd):
                 modules_found.append(m)
 
     return modules_found

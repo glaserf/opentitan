@@ -1814,6 +1814,10 @@ def main():
                         out_path / "rtl" / "autogen" / f"{top_name}.sv",
                         gencmd=gencmd_sv)
 
+        render_template(top_template_path / "toplevel_aon.sv.tpl",
+                        out_path / "rtl" / "autogen" / f"{top_name}_pd_aon.sv",
+                        gencmd=gencmd_sv)
+
         # Multiple chip-levels (ASIC, FPGA, Verilator, etc)
         for target in completecfg["targets"]:
             target_name = target["name"]

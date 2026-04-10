@@ -34,6 +34,8 @@ for x in top["inter_signal"]["external"]:
                if isinstance(x["width"], Parameter) else x["width"])
     num_im += width
 
+num_rom_ctrl = lib.num_rom_ctrl(lib.get_all_modules(top))
+
 max_sigwidth = max([x["width"] if "width" in x else 1 for x in top["pinmux"]["ios"]])
 max_sigwidth = len("{}".format(max_sigwidth))
 
@@ -49,16 +51,16 @@ plic_info = {}
 
 default_handler = top.get("default_alert_handler", None)
 
-alert_handlers = [handler["type"] for handler in lib.find_modules(top["module"], "alert_handler")]
+alert_handlers = [handler["type"] for handler in lib.find_modules(lib.get_all_modules(top), "alert_handler")]
 %>\
 module top_${top["name"]} #(
-% if not lib.num_rom_ctrl(top["module"]):
+% if num_rom_ctrl == 0:
   // Manually defined parameters
   parameter BootRomInitFile = "",
 
 % endif
   // Auto-inferred parameters
-% for m in top["module"]:
+% for m in lib.get_all_modules(top, phys_pd="main"):
   % if not lib.is_inst(m):
 <% continue %>
   % endif
@@ -181,7 +183,7 @@ module top_${top["name"]} #(
   import top_${top["name"]}_rnd_cnst_pkg::*;
 
   // Local Parameters
-% for m in top["module"]:
+% for m in lib.get_all_modules(top, phys_pd="main"):
   % if not lib.is_inst(m):
 <% continue %>
   % endif
@@ -215,7 +217,7 @@ module top_${top["name"]} #(
   logic [${num_dio_total - 1}:0] dio_p2d;
   logic [${num_dio_total - 1}:0] dio_d2p;
   logic [${num_dio_total - 1}:0] dio_en_d2p;
-% for m in top["module"]:
+% for m in lib.get_all_modules(top, phys_pd="main"):
   % if not lib.is_inst(m):
 <% continue %>
   % endif
@@ -318,7 +320,7 @@ module top_${top["name"]} #(
 
 ## Inter-module signal collection
 
-% for m in top["module"]:
+% for m in lib.get_all_modules(top, phys_pd="main"):
   % if m.get("template_type") == "otp_ctrl":
   // OTP HW_CFG* Broadcast signals.
   // TODO(#6713): The actual struct breakout and mapping currently needs to
@@ -359,7 +361,6 @@ module top_${top["name"]} #(
 
   ## Not all top levels have a rom controller.
   ## For those that do not, reference the ROM directly.
-<% num_rom_ctrl = lib.num_rom_ctrl(top["module"]) %>\
 % if num_rom_ctrl == 1:
   assign rv_core_ibex_boot_addr = ADDR_SPACE_ROM_CTRL__ROM;
 % elif num_rom_ctrl > 1:
@@ -474,7 +475,7 @@ for rst in output_rsts:
   // Peripheral Instantiation
 
 <% outgoing_interrupt_idx = defaultdict(int) %>\
-% for m in top["module"]:
+% for m in lib.get_all_modules(top, phys_pd="main"):
 <%
 if not lib.is_inst(m):
      continue

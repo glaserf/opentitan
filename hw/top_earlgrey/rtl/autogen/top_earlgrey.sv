@@ -11,7 +11,6 @@
 module top_earlgrey #(
   // Auto-inferred parameters
   // parameters for uart0
-  // parameters for uart1
   // parameters for uart2
   // parameters for uart3
   // parameters for gpio
@@ -282,10 +281,6 @@ module top_earlgrey #(
   logic        cio_uart0_rx_p2d;
   logic        cio_uart0_tx_d2p;
   logic        cio_uart0_tx_en_d2p;
-  // uart1
-  logic        cio_uart1_rx_p2d;
-  logic        cio_uart1_tx_d2p;
-  logic        cio_uart1_tx_en_d2p;
   // uart2
   logic        cio_uart2_rx_p2d;
   logic        cio_uart2_tx_d2p;
@@ -744,8 +739,6 @@ module top_earlgrey #(
   tlul_pkg::tl_d2h_t       sram_ctrl_main_ram_tl_rsp;
   tlul_pkg::tl_h2d_t       uart0_tl_req;
   tlul_pkg::tl_d2h_t       uart0_tl_rsp;
-  tlul_pkg::tl_h2d_t       uart1_tl_req;
-  tlul_pkg::tl_d2h_t       uart1_tl_rsp;
   tlul_pkg::tl_h2d_t       uart2_tl_req;
   tlul_pkg::tl_d2h_t       uart2_tl_rsp;
   tlul_pkg::tl_h2d_t       uart3_tl_req;
@@ -1094,45 +1087,6 @@ module top_earlgrey #(
     .racl_error_o(),
     .tl_i(uart0_tl_req),
     .tl_o(uart0_tl_rsp),
-
-    // Clock and reset connections
-    .clk_i (clkmgr_aon_clocks.clk_io_div4_peri),
-    .rst_ni (rstmgr_aon_resets.rst_lc_io_div4_n[rstmgr_pkg::Domain0Sel])
-  );
-
-  uart #(
-    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[1:1]),
-    .AlertSkewCycles(top_pkg::AlertSkewCycles)
-  ) u_uart1 (
-
-    // Input
-    .cio_rx_i    (cio_uart1_rx_p2d),
-
-    // Output
-    .cio_tx_o    (cio_uart1_tx_d2p),
-    .cio_tx_en_o (cio_uart1_tx_en_d2p),
-
-    // Interrupt
-    .intr_tx_watermark_o  (intr_uart1_tx_watermark),
-    .intr_rx_watermark_o  (intr_uart1_rx_watermark),
-    .intr_tx_done_o       (intr_uart1_tx_done),
-    .intr_rx_overflow_o   (intr_uart1_rx_overflow),
-    .intr_rx_frame_err_o  (intr_uart1_rx_frame_err),
-    .intr_rx_break_err_o  (intr_uart1_rx_break_err),
-    .intr_rx_timeout_o    (intr_uart1_rx_timeout),
-    .intr_rx_parity_err_o (intr_uart1_rx_parity_err),
-    .intr_tx_empty_o      (intr_uart1_tx_empty),
-
-    // alert_handler[1]: fatal_fault
-    .alert_tx_o  ( alert_tx[1:1] ),
-    .alert_rx_i  ( alert_rx[1:1] ),
-
-    // Inter-module signals
-    .lsio_trigger_o(),
-    .racl_policies_i(top_racl_pkg::RACL_POLICY_VEC_DEFAULT),
-    .racl_error_o(),
-    .tl_i(uart1_tl_req),
-    .tl_o(uart1_tl_rsp),
 
     // Clock and reset connections
     .clk_i (clkmgr_aon_clocks.clk_io_div4_peri),
@@ -3286,8 +3240,8 @@ module top_earlgrey #(
     .tl_uart0_i(uart0_tl_rsp),
 
     // port: tl_uart1
-    .tl_uart1_o(uart1_tl_req),
-    .tl_uart1_i(uart1_tl_rsp),
+    .tl_uart1_o(uart1_tl_req_o),
+    .tl_uart1_i(uart1_tl_rsp_i),
 
     // port: tl_uart2
     .tl_uart2_o(uart2_tl_req),
