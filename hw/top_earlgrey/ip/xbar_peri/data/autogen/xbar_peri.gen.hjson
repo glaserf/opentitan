@@ -26,6 +26,7 @@
   {
     clk_peri_i: clkmgr_aon_clocks.clk_io_div4_infra
   }
+  phys_pd: main
   domain:
   [
     "0"
@@ -663,6 +664,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: main_tl_peri
       index: -1
     }
@@ -675,6 +677,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: uart0_tl
       index: -1
     }
@@ -687,6 +690,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: uart1_tl
       index: -1
     }
@@ -699,6 +703,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: uart2_tl
       index: -1
     }
@@ -711,6 +716,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: uart3_tl
       index: -1
     }
@@ -723,6 +729,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: i2c0_tl
       index: -1
     }
@@ -735,6 +742,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: i2c1_tl
       index: -1
     }
@@ -747,6 +755,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: i2c2_tl
       index: -1
     }
@@ -759,6 +768,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: pattgen_tl
       index: -1
     }
@@ -771,6 +781,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: pwm_aon_tl
       index: -1
     }
@@ -783,6 +794,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: gpio_tl
       index: -1
     }
@@ -795,6 +807,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: spi_device_tl
       index: -1
     }
@@ -807,6 +820,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: rv_timer_tl
       index: -1
     }
@@ -819,6 +833,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: pwrmgr_aon_tl
       index: -1
     }
@@ -831,6 +846,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: rstmgr_aon_tl
       index: -1
     }
@@ -843,6 +859,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: clkmgr_aon_tl
       index: -1
     }
@@ -855,6 +872,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: pinmux_aon_tl
       index: -1
     }
@@ -867,6 +885,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: otp_ctrl_core_tl
       index: -1
     }
@@ -879,6 +898,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: otp_macro_prim_tl
       index: -1
     }
@@ -891,6 +911,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: lc_ctrl_regs_tl
       index: -1
     }
@@ -903,6 +924,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: sensor_ctrl_aon_tl
       index: -1
     }
@@ -915,6 +937,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: alert_handler_tl
       index: -1
     }
@@ -927,6 +950,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: sram_ctrl_ret_aon_regs_tl
       index: -1
     }
@@ -939,6 +963,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: sram_ctrl_ret_aon_ram_tl
       index: -1
     }
@@ -951,6 +976,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: aon_timer_aon_tl
       index: -1
     }
@@ -963,6 +989,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: sysrst_ctrl_aon_tl
       index: -1
     }
@@ -975,6 +1002,7 @@
       inst_name: peri
       width: 1
       default: ""
+      phys_pd: main
       top_signame: adc_ctrl_aon_tl
       index: -1
     }

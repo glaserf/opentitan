@@ -54,6 +54,7 @@
     clk_spi_host0_i: clkmgr_aon_clocks.clk_io_infra
     clk_spi_host1_i: clkmgr_aon_clocks.clk_io_div2_infra
   }
+  phys_pd: main
   domain:
   [
     "0"
@@ -754,6 +755,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: rv_dm_regs_tl_d
       index: -1
     }
@@ -766,6 +768,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: rv_dm_mem_tl_d
       index: -1
     }
@@ -778,6 +781,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: rom_ctrl_rom_tl
       index: -1
     }
@@ -790,6 +794,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: rom_ctrl_regs_tl
       index: -1
     }
@@ -815,6 +820,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: spi_host0_tl
       index: -1
     }
@@ -827,6 +833,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: spi_host1_tl
       index: -1
     }
@@ -839,6 +846,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: usbdev_tl
       index: -1
     }
@@ -851,6 +859,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: flash_ctrl_core_tl
       index: -1
     }
@@ -863,6 +872,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: flash_ctrl_prim_tl
       index: -1
     }
@@ -875,6 +885,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: flash_ctrl_mem_tl
       index: -1
     }
@@ -887,6 +898,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: hmac_tl
       index: -1
     }
@@ -899,6 +911,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: kmac_tl
       index: -1
     }
@@ -911,6 +924,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: aes_tl
       index: -1
     }
@@ -923,6 +937,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: entropy_src_tl
       index: -1
     }
@@ -935,6 +950,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: csrng_tl
       index: -1
     }
@@ -947,6 +963,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: edn0_tl
       index: -1
     }
@@ -959,6 +976,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: edn1_tl
       index: -1
     }
@@ -971,6 +989,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: rv_plic_tl
       index: -1
     }
@@ -983,6 +1002,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: otbn_tl
       index: -1
     }
@@ -995,6 +1015,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: keymgr_tl
       index: -1
     }
@@ -1007,6 +1028,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: rv_core_ibex_cfg_tl_d
       index: -1
     }
@@ -1019,6 +1041,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: sram_ctrl_main_regs_tl
       index: -1
     }
@@ -1031,6 +1054,7 @@
       inst_name: main
       width: 1
       default: ""
+      phys_pd: main
       top_signame: sram_ctrl_main_ram_tl
       index: -1
     }

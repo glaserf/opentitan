@@ -92,6 +92,7 @@ Crossbar configuration format.
             ' If not specified, it is assumed to be in main clock domain'
         ],
         'reset': ['s', 'Main reset'],
+        'phys_pd': ['s', 'Physical power domain for the crossbar'],
         'connections': [
             'g',
             "List of edge. Key is host, entry in value list is device"

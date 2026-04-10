@@ -267,6 +267,7 @@ module_optional = {
         'l', 'optional list with prefixes for exported '
         'clocks and resets at the chip level'
     ],
+    'phys_pd': ['s', 'physical power domain'],
     'attr': [
         's', 'optional attribute indicating whether the IP is '
         '"ipgen", "reggen_top", or "reggen_only"'
@@ -1184,6 +1185,9 @@ def check_power_domains(top: ConfigT):
     # If not, give it a default.
     # If there is one defined, check that it is a valid definition
     for end_point in top['module'] + top['xbar']:
+        if 'phys_pd' not in end_point:
+            end_point['phys_pd'] = 'main'
+
         if 'domain' not in end_point:
             end_point['domain'] = [top['power']['default']]
 

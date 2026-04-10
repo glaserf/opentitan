@@ -538,6 +538,7 @@ def elab_intermodule(topcfg: OrderedDict):
         assert sig_i == -1, 'top net connection should not use bit index'
         sig = find_intermodule_signal(list_of_intersignals, sig_m, sig_s)
         sig_name = intersignal_format(sig)
+        phys_pd = lib.get_module_by_name(topcfg, sig['inst_name'], True)['phys_pd']
         sig["top_signame"] = sig_name
         if "index" not in sig:
             sig["index"] = -1
@@ -548,6 +549,7 @@ def elab_intermodule(topcfg: OrderedDict):
             definitions.append(
                 OrderedDict([('package', sig["package"]),
                              ('struct', sig["struct"] + req_suffix),
+                             ('phys_pd', phys_pd),
                              ('signame', sig_name + "_req"),
                              ('width', sig["width"]), ('type', sig["type"]),
                              ('end_idx', -1),
@@ -555,6 +557,7 @@ def elab_intermodule(topcfg: OrderedDict):
             definitions.append(
                 OrderedDict([('package', sig["package"]),
                              ('struct', sig["struct"] + rsp_suffix),
+                             ('phys_pd', phys_pd),
                              ('signame', sig_name + "_rsp"),
                              ('width', sig["width"]), ('type', sig["type"]),
                              ('end_idx', -1),
@@ -563,6 +566,7 @@ def elab_intermodule(topcfg: OrderedDict):
             definitions.append(
                 OrderedDict([('package', sig["package"]),
                              ('struct', sig["struct"]), ('signame', sig_name),
+                             ('phys_pd', phys_pd),
                              ('width', sig["width"]), ('type', sig["type"]),
                              ('end_idx', -1),
                              ('default', sig["default"])]))

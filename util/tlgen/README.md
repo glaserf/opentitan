@@ -89,6 +89,7 @@ Field | Kind | Type | Description
 name | required | string | Name of the crossbar
 clock | required | string | Main clock. Internal components use this clock. If not specified, it is assumed to be in main clock domain
 reset | required | string | Main reset
+phys_pd | required | string | Physical power domain for the crossbar
 connections | required | group | List of edge. Key is host, entry in value list is device
 clock_connections | required | group | list of clocks
 nodes | required | list of group | List of nodes group

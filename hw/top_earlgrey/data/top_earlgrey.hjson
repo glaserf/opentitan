@@ -19,6 +19,8 @@
     // Default power domain used for the design
     default: "0"
 
+    physical: ["main", "aon"],
+
     // Discrete OpenTitan does not need to wait for external resets
     wait_for_external_reset: false
   },
@@ -301,6 +303,8 @@
     { name: "uart1",    // instance name
       type: "uart",     // Must be matched to the ip name in `ip.hjson` (_reg, _cfg permitted)
                         // and `hw/ip/{type}`
+
+      phys_pd: "aon",
 
       // clock connections defines the port to top level clock connection
       // the ip.hjson will declare the clock port names
