@@ -443,6 +443,14 @@ def intersignal_to_signalname(top, m_name: str, s_name: str) -> str:
 
     return "{m_name}_{s_name}".format(m_name=m_name, s_name=s_name)
 
+def get_intermodule_list(top: ConfigT, phys_pd: str = 'main'):
+    return [x for x in top["inter_signal"]["definitions"] if x["phys_pd"] == phys_pd]
+
+
+def get_intermodule_ports(top: ConfigT, phys_pd: str = 'main', inter_pd = False):
+    return [x for x in top["inter_signal"]["external"]
+            if x["phys_pd"] == phys_pd and x["inter_pd"] == inter_pd]
+
 
 def get_package_name_by_intermodule_signal(top: ConfigT, struct: str) -> str:
     """Search inter-module signal package with the struct name
@@ -586,10 +594,14 @@ def parameterize(text: str) -> str:
     return text
 
 
-def index(i: int) -> str:
-    """Return index if it is not -1
+def index(sig: Dict) -> str:
+    """Return index if it is not -1 and signal does not connect to
+    an intermediate net.
     """
-    return "[{}]".format(i) if i != -1 else ""
+    if sig.get("conn_type", False):
+        return ""
+    else:
+        return "[{}]".format(sig["index"]) if sig["index"] != -1 else ""
 
 
 def get_clk_name(clk: str) -> str:

@@ -165,6 +165,10 @@ module top_earlgrey #(
 
 
   // Inter-module Signal External type
+  input  tlul_pkg::tl_h2d_t       uart1_tl_req_i,
+  output tlul_pkg::tl_d2h_t       uart1_tl_rsp_o,
+  output tlul_pkg::tl_h2d_t       uart1_tl_req_o,
+  input  tlul_pkg::tl_d2h_t       uart1_tl_rsp_i,
   output ast_pkg::adc_ast_req_t       adc_req_o,
   input  ast_pkg::adc_ast_rsp_t       adc_rsp_i,
   input  edn_pkg::edn_req_t       ast_edn_req_i,

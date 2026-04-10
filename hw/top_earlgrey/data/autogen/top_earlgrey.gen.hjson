@@ -805,8 +805,8 @@
           top_type: one-to-one
           top_signame: uart1_tl
           index: -1
-          conn_type: false
           external: true
+          conn_type: false
         }
       ]
       base_addrs:
@@ -12620,6 +12620,8 @@
           phys_pd: main
           top_signame: uart1_tl
           index: -1
+          external: true
+          conn_type: false
         }
         {
           name: tl_uart2
@@ -19733,6 +19735,8 @@
         top_type: one-to-one
         top_signame: uart1_tl
         index: -1
+        external: true
+        conn_type: false
       }
       {
         name: lsio_trigger
@@ -25861,6 +25865,8 @@
         phys_pd: main
         top_signame: uart1_tl
         index: -1
+        external: true
+        conn_type: false
       }
       {
         name: tl_uart2
@@ -26302,8 +26308,90 @@
     external:
     [
       {
+        package: tlul_pkg
+        struct: tl_h2d
+        phys_pd: aon
+        inter_pd: true
+        signame: uart1_tl_req_i
+        signame_chip:
+        {
+          asic: uart1_tl_req
+          cw310: uart1_tl_req
+          cw340: uart1_tl_req
+        }
+        width: 1
+        type: req_rsp
+        default: ""
+        direction: in
+        conn_type: false
+        index: -1
+        netname: uart1_tl_h2d
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        phys_pd: aon
+        inter_pd: true
+        signame: uart1_tl_rsp_o
+        signame_chip:
+        {
+          asic: uart1_tl_rsp
+          cw310: uart1_tl_rsp
+          cw340: uart1_tl_rsp
+        }
+        width: 1
+        type: req_rsp
+        default: ""
+        direction: out
+        conn_type: false
+        index: -1
+        netname: uart1_tl_d2h
+      }
+      {
+        package: tlul_pkg
+        struct: tl_h2d
+        phys_pd: main
+        inter_pd: true
+        signame: uart1_tl_req_o
+        signame_chip:
+        {
+          asic: uart1_tl_req
+          cw310: uart1_tl_req
+          cw340: uart1_tl_req
+        }
+        width: 1
+        type: req_rsp
+        default: ""
+        direction: out
+        conn_type: false
+        index: -1
+        netname: uart1_tl_h2d
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        phys_pd: main
+        inter_pd: true
+        signame: uart1_tl_rsp_i
+        signame_chip:
+        {
+          asic: uart1_tl_rsp
+          cw310: uart1_tl_rsp
+          cw340: uart1_tl_rsp
+        }
+        width: 1
+        type: req_rsp
+        default: ""
+        direction: in
+        conn_type: false
+        index: -1
+        netname: uart1_tl_d2h
+      }
+      {
         package: ast_pkg
         struct: adc_ast_req
+        phys_pd: main
+        inter_pd: false
         signame: adc_req_o
         signame_chip:
         {
@@ -26322,6 +26410,8 @@
       {
         package: ast_pkg
         struct: adc_ast_rsp
+        phys_pd: main
+        inter_pd: false
         signame: adc_rsp_i
         signame_chip:
         {
@@ -26340,6 +26430,8 @@
       {
         package: edn_pkg
         struct: edn_req
+        phys_pd: main
+        inter_pd: false
         signame: ast_edn_req_i
         signame_chip:
         {
@@ -26358,6 +26450,8 @@
       {
         package: edn_pkg
         struct: edn_rsp
+        phys_pd: main
+        inter_pd: false
         signame: ast_edn_rsp_o
         signame_chip:
         {
@@ -26376,6 +26470,8 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
+        inter_pd: false
         signame: ast_lc_dft_en_o
         signame_chip:
         {
@@ -26394,6 +26490,8 @@
       {
         package: ast_pkg
         struct: ast_obs_ctrl
+        phys_pd: main
+        inter_pd: false
         signame: obs_ctrl_i
         signame_chip:
         {
@@ -26412,6 +26510,8 @@
       {
         package: prim_ram_1p_pkg
         struct: ram_1p_cfg
+        phys_pd: main
+        inter_pd: false
         signame: ram_1p_cfg_i
         signame_chip:
         {
@@ -26430,6 +26530,8 @@
       {
         package: prim_ram_1p_pkg
         struct: ram_1p_cfg
+        phys_pd: main
+        inter_pd: false
         signame: sram_ctrl_main_cfg_i
         signame_chip:
         {
@@ -26458,6 +26560,8 @@
       {
         package: prim_ram_1p_pkg
         struct: ram_1p_cfg
+        phys_pd: main
+        inter_pd: false
         signame: sram_ctrl_ret_aon_cfg_i
         signame_chip:
         {
@@ -26486,6 +26590,8 @@
       {
         package: prim_ram_2p_pkg
         struct: ram_2p_cfg
+        phys_pd: main
+        inter_pd: false
         signame: spi_ram_2p_cfg_i
         signame_chip:
         {
@@ -26504,6 +26610,8 @@
       {
         package: prim_ram_1p_pkg
         struct: ram_1p_cfg
+        phys_pd: main
+        inter_pd: false
         signame: usb_ram_1p_cfg_i
         signame_chip:
         {
@@ -26522,6 +26630,8 @@
       {
         package: prim_rom_pkg
         struct: rom_cfg
+        phys_pd: main
+        inter_pd: false
         signame: rom_cfg_i
         signame_chip:
         {
@@ -26540,6 +26650,8 @@
       {
         package: prim_mubi_pkg
         struct: mubi4
+        phys_pd: main
+        inter_pd: false
         signame: clk_main_jitter_en_o
         signame_chip:
         {
@@ -26558,6 +26670,8 @@
       {
         package: prim_mubi_pkg
         struct: mubi4
+        phys_pd: main
+        inter_pd: false
         signame: io_clk_byp_req_o
         signame_chip:
         {
@@ -26576,6 +26690,8 @@
       {
         package: prim_mubi_pkg
         struct: mubi4
+        phys_pd: main
+        inter_pd: false
         signame: io_clk_byp_ack_i
         signame_chip:
         {
@@ -26594,6 +26710,8 @@
       {
         package: prim_mubi_pkg
         struct: mubi4
+        phys_pd: main
+        inter_pd: false
         signame: all_clk_byp_req_o
         signame_chip:
         {
@@ -26612,6 +26730,8 @@
       {
         package: prim_mubi_pkg
         struct: mubi4
+        phys_pd: main
+        inter_pd: false
         signame: all_clk_byp_ack_i
         signame_chip:
         {
@@ -26630,6 +26750,8 @@
       {
         package: prim_mubi_pkg
         struct: mubi4
+        phys_pd: main
+        inter_pd: false
         signame: hi_speed_sel_o
         signame_chip:
         {
@@ -26648,6 +26770,8 @@
       {
         package: prim_mubi_pkg
         struct: mubi4
+        phys_pd: main
+        inter_pd: false
         signame: div_step_down_req_i
         signame_chip:
         {
@@ -26666,6 +26790,8 @@
       {
         package: prim_mubi_pkg
         struct: mubi4
+        phys_pd: main
+        inter_pd: false
         signame: calib_rdy_i
         signame_chip:
         {
@@ -26684,6 +26810,8 @@
       {
         package: prim_mubi_pkg
         struct: mubi4
+        phys_pd: main
+        inter_pd: false
         signame: flash_bist_enable_i
         signame_chip:
         {
@@ -26702,6 +26830,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: flash_power_down_h_i
         signame_chip:
         {
@@ -26720,6 +26850,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: flash_power_ready_h_i
         signame_chip:
         {
@@ -26738,6 +26870,8 @@
       {
         package: ""
         struct: ""
+        phys_pd: main
+        inter_pd: false
         signame: flash_test_mode_a_io
         signame_chip:
         {
@@ -26756,6 +26890,8 @@
       {
         package: ""
         struct: ""
+        phys_pd: main
+        inter_pd: false
         signame: flash_test_voltage_h_io
         signame_chip:
         {
@@ -26774,6 +26910,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: flash_obs_o
         signame_chip:
         {
@@ -26792,6 +26930,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: es_rng_enable_o
         signame_chip:
         {
@@ -26810,6 +26950,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: es_rng_valid_i
         signame_chip:
         {
@@ -26828,6 +26970,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: es_rng_bit_i
         signame_chip:
         {
@@ -26861,6 +27005,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: es_rng_fips_o
         signame_chip:
         {
@@ -26879,6 +27025,8 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
+        inter_pd: false
         signame: ast_tl_req_o
         signame_chip:
         {
@@ -26897,6 +27045,8 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
+        inter_pd: false
         signame: ast_tl_rsp_i
         signame_chip:
         {
@@ -26915,6 +27065,8 @@
       {
         package: pinmux_pkg
         struct: dft_strap_test_req
+        phys_pd: main
+        inter_pd: false
         signame: dft_strap_test_o
         signame_chip:
         {
@@ -26933,6 +27085,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: dft_hold_tap_sel_i
         signame_chip:
         {
@@ -26951,6 +27105,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: usb_dp_pullup_en_o
         signame_chip:
         {
@@ -26969,6 +27125,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: usb_dn_pullup_en_o
         signame_chip:
         {
@@ -26987,6 +27145,8 @@
       {
         package: pwrmgr_pkg
         struct: pwr_ast_req
+        phys_pd: main
+        inter_pd: false
         signame: pwrmgr_ast_req_o
         signame_chip:
         {
@@ -27005,6 +27165,8 @@
       {
         package: pwrmgr_pkg
         struct: pwr_ast_rsp
+        phys_pd: main
+        inter_pd: false
         signame: pwrmgr_ast_rsp_i
         signame_chip:
         {
@@ -27023,6 +27185,8 @@
       {
         package: otp_macro_pkg
         struct: pwr_seq
+        phys_pd: main
+        inter_pd: false
         signame: otp_macro_pwr_seq_o
         signame_chip:
         {
@@ -27041,6 +27205,8 @@
       {
         package: otp_macro_pkg
         struct: pwr_seq
+        phys_pd: main
+        inter_pd: false
         signame: otp_macro_pwr_seq_h_i
         signame_chip:
         {
@@ -27059,6 +27225,8 @@
       {
         package: ""
         struct: ""
+        phys_pd: main
+        inter_pd: false
         signame: otp_ext_voltage_h_io
         signame_chip:
         {
@@ -27077,6 +27245,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: otp_obs_o
         signame_chip:
         {
@@ -27095,6 +27265,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: por_n_i
         signame_chip:
         {
@@ -27113,6 +27285,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: fpga_info_i
         signame_chip:
         {
@@ -27131,6 +27305,8 @@
       {
         package: ast_pkg
         struct: ast_alert_req
+        phys_pd: main
+        inter_pd: false
         signame: sensor_ctrl_ast_alert_req_i
         signame_chip:
         {
@@ -27149,6 +27325,8 @@
       {
         package: ast_pkg
         struct: ast_alert_rsp
+        phys_pd: main
+        inter_pd: false
         signame: sensor_ctrl_ast_alert_rsp_o
         signame_chip:
         {
@@ -27167,6 +27345,8 @@
       {
         package: ast_pkg
         struct: ast_status
+        phys_pd: main
+        inter_pd: false
         signame: sensor_ctrl_ast_status_i
         signame_chip:
         {
@@ -27185,6 +27365,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: ast2pinmux_i
         signame_chip:
         {
@@ -27203,6 +27385,8 @@
       {
         package: prim_mubi_pkg
         struct: mubi4
+        phys_pd: main
+        inter_pd: false
         signame: ast_init_done_i
         signame_chip:
         {
@@ -27221,6 +27405,8 @@
       {
         package: prim_pad_wrapper_pkg
         struct: pad_attr
+        phys_pd: main
+        inter_pd: false
         signame: sensor_ctrl_manual_pad_attr_o
         signame_chip:
         {
@@ -27239,6 +27425,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: sck_monitor_o
         signame_chip:
         {
@@ -27257,6 +27445,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: usbdev_usb_rx_d_i
         signame_chip:
         {
@@ -27275,6 +27465,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: usbdev_usb_tx_d_o
         signame_chip:
         {
@@ -27293,6 +27485,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: usbdev_usb_tx_se0_o
         signame_chip:
         {
@@ -27311,6 +27505,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: usbdev_usb_tx_use_d_se0_o
         signame_chip:
         {
@@ -27329,6 +27525,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: usbdev_usb_rx_enable_o
         signame_chip:
         {
@@ -27347,6 +27545,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: usbdev_usb_ref_val_o
         signame_chip:
         {
@@ -27365,6 +27565,8 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
+        inter_pd: false
         signame: usbdev_usb_ref_pulse_o
         signame_chip:
         {
@@ -27386,6 +27588,7 @@
       {
         package: ast_pkg
         struct: ast_obs_ctrl
+        phys_pd: main
         signame: ast_obs_ctrl
         width: 1
         type: uni
@@ -27397,6 +27600,7 @@
       {
         package: prim_ram_1p_pkg
         struct: ram_1p_cfg
+        phys_pd: main
         signame: ast_ram_1p_cfg
         width: 1
         type: uni
@@ -27408,6 +27612,7 @@
       {
         package: prim_ram_2p_pkg
         struct: ram_2p_cfg
+        phys_pd: main
         signame: ast_spi_ram_2p_cfg
         width: 1
         type: uni
@@ -27419,6 +27624,7 @@
       {
         package: prim_ram_1p_pkg
         struct: ram_1p_cfg
+        phys_pd: main
         signame: ast_usb_ram_1p_cfg
         width: 1
         type: uni
@@ -27430,6 +27636,7 @@
       {
         package: prim_rom_pkg
         struct: rom_cfg
+        phys_pd: main
         signame: ast_rom_cfg
         width: 1
         type: uni
@@ -27441,6 +27648,7 @@
       {
         package: alert_handler_pkg
         struct: alert_crashdump
+        phys_pd: main
         signame: alert_handler_crashdump
         width: 1
         type: uni
@@ -27452,6 +27660,7 @@
       {
         package: prim_esc_pkg
         struct: esc_rx
+        phys_pd: main
         signame: alert_handler_esc_rx
         width: 4
         type: uni
@@ -27463,6 +27672,7 @@
       {
         package: prim_esc_pkg
         struct: esc_tx
+        phys_pd: main
         signame: alert_handler_esc_tx
         width: 4
         type: uni
@@ -27474,6 +27684,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: aon_timer_aon_nmi_wdog_timer_bark
         width: 1
         type: uni
@@ -27485,6 +27696,7 @@
       {
         package: csrng_pkg
         struct: csrng_req
+        phys_pd: main
         signame: csrng_csrng_cmd_req
         width: 2
         type: req_rsp
@@ -27496,6 +27708,7 @@
       {
         package: csrng_pkg
         struct: csrng_rsp
+        phys_pd: main
         signame: csrng_csrng_cmd_rsp
         width: 2
         type: req_rsp
@@ -27507,6 +27720,7 @@
       {
         package: entropy_src_pkg
         struct: entropy_src_hw_if_req
+        phys_pd: main
         signame: csrng_entropy_src_hw_if_req
         width: 1
         type: req_rsp
@@ -27518,6 +27732,7 @@
       {
         package: entropy_src_pkg
         struct: entropy_src_hw_if_rsp
+        phys_pd: main
         signame: csrng_entropy_src_hw_if_rsp
         width: 1
         type: req_rsp
@@ -27529,6 +27744,7 @@
       {
         package: flash_ctrl_pkg
         struct: keymgr_flash
+        phys_pd: main
         signame: flash_ctrl_keymgr
         width: 1
         type: uni
@@ -27540,6 +27756,7 @@
       {
         package: otp_ctrl_pkg
         struct: nvm_otp_key_req
+        phys_pd: main
         signame: flash_ctrl_otp_req
         width: 1
         type: req_rsp
@@ -27551,6 +27768,7 @@
       {
         package: otp_ctrl_pkg
         struct: nvm_otp_key_rsp
+        phys_pd: main
         signame: flash_ctrl_otp_rsp
         width: 1
         type: req_rsp
@@ -27562,6 +27780,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_nvm_rma_seed
+        phys_pd: main
         signame: lc_ctrl_lc_nvm_rma_seed
         width: 1
         type: uni
@@ -27573,6 +27792,7 @@
       {
         package: otp_ctrl_pkg
         struct: sram_otp_key_req
+        phys_pd: main
         signame: otp_ctrl_sram_otp_key_req
         width: 4
         type: req_rsp
@@ -27584,6 +27804,7 @@
       {
         package: otp_ctrl_pkg
         struct: sram_otp_key_rsp
+        phys_pd: main
         signame: otp_ctrl_sram_otp_key_rsp
         width: 4
         type: req_rsp
@@ -27595,6 +27816,7 @@
       {
         package: pwrmgr_pkg
         struct: pwr_nvm
+        phys_pd: main
         signame: pwrmgr_aon_pwr_nvm
         width: 1
         type: uni
@@ -27606,6 +27828,7 @@
       {
         package: pwrmgr_pkg
         struct: pwr_rst_req
+        phys_pd: main
         signame: pwrmgr_aon_pwr_rst_req
         width: 1
         type: req_rsp
@@ -27617,6 +27840,7 @@
       {
         package: pwrmgr_pkg
         struct: pwr_rst_rsp
+        phys_pd: main
         signame: pwrmgr_aon_pwr_rst_rsp
         width: 1
         type: req_rsp
@@ -27628,6 +27852,7 @@
       {
         package: pwrmgr_pkg
         struct: pwr_clk_req
+        phys_pd: main
         signame: pwrmgr_aon_pwr_clk_req
         width: 1
         type: req_rsp
@@ -27639,6 +27864,7 @@
       {
         package: pwrmgr_pkg
         struct: pwr_clk_rsp
+        phys_pd: main
         signame: pwrmgr_aon_pwr_clk_rsp
         width: 1
         type: req_rsp
@@ -27650,6 +27876,7 @@
       {
         package: pwrmgr_pkg
         struct: pwr_otp_req
+        phys_pd: main
         signame: pwrmgr_aon_pwr_otp_req
         width: 1
         type: req_rsp
@@ -27661,6 +27888,7 @@
       {
         package: pwrmgr_pkg
         struct: pwr_otp_rsp
+        phys_pd: main
         signame: pwrmgr_aon_pwr_otp_rsp
         width: 1
         type: req_rsp
@@ -27672,6 +27900,7 @@
       {
         package: lc_ctrl_pkg
         struct: pwr_lc_req
+        phys_pd: main
         signame: pwrmgr_aon_pwr_lc_req
         width: 1
         type: req_rsp
@@ -27683,6 +27912,7 @@
       {
         package: lc_ctrl_pkg
         struct: pwr_lc_rsp
+        phys_pd: main
         signame: pwrmgr_aon_pwr_lc_rsp
         width: 1
         type: req_rsp
@@ -27694,6 +27924,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: pwrmgr_aon_strap
         width: 1
         type: uni
@@ -27705,6 +27936,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: pwrmgr_aon_low_power
         width: 1
         type: uni
@@ -27716,6 +27948,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: pwrmgr_aon_fetch_en
         width: 1
         type: uni
@@ -27727,6 +27960,7 @@
       {
         package: rom_ctrl_pkg
         struct: pwrmgr_data
+        phys_pd: main
         signame: rom_ctrl_pwrmgr_data
         width: 1
         type: uni
@@ -27738,6 +27972,7 @@
       {
         package: rom_ctrl_pkg
         struct: keymgr_data
+        phys_pd: main
         signame: rom_ctrl_keymgr_data
         width: 1
         type: uni
@@ -27749,6 +27984,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_nvm_rma_req
         width: 1
         type: uni
@@ -27760,6 +27996,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_nvm_rma_ack
         width: 2
         type: uni
@@ -27771,6 +28008,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: usbdev_usb_dp_pullup
         width: 1
         type: uni
@@ -27782,6 +28020,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: usbdev_usb_dn_pullup
         width: 1
         type: uni
@@ -27793,6 +28032,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: usbdev_usb_aon_suspend_req
         width: 1
         type: uni
@@ -27804,6 +28044,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: usbdev_usb_aon_wake_ack
         width: 1
         type: uni
@@ -27815,6 +28056,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: usbdev_usb_aon_bus_not_idle
         width: 1
         type: uni
@@ -27826,6 +28068,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: usbdev_usb_aon_bus_reset
         width: 1
         type: uni
@@ -27837,6 +28080,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: usbdev_usb_aon_sense_lost
         width: 1
         type: uni
@@ -27848,6 +28092,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: pinmux_aon_usbdev_wake_detect_active
         width: 1
         type: uni
@@ -27859,6 +28104,7 @@
       {
         package: edn_pkg
         struct: edn_req
+        phys_pd: main
         signame: edn0_edn_req
         width:
         {
@@ -27880,6 +28126,7 @@
       {
         package: edn_pkg
         struct: edn_rsp
+        phys_pd: main
         signame: edn0_edn_rsp
         width:
         {
@@ -27901,6 +28148,7 @@
       {
         package: edn_pkg
         struct: edn_req
+        phys_pd: main
         signame: edn1_edn_req
         width:
         {
@@ -27922,6 +28170,7 @@
       {
         package: edn_pkg
         struct: edn_rsp
+        phys_pd: main
         signame: edn1_edn_rsp
         width:
         {
@@ -27943,6 +28192,7 @@
       {
         package: otp_ctrl_pkg
         struct: otbn_otp_key_req
+        phys_pd: main
         signame: otp_ctrl_otbn_otp_key_req
         width: 1
         type: req_rsp
@@ -27954,6 +28204,7 @@
       {
         package: otp_ctrl_pkg
         struct: otbn_otp_key_rsp
+        phys_pd: main
         signame: otp_ctrl_otbn_otp_key_rsp
         width: 1
         type: req_rsp
@@ -27965,6 +28216,7 @@
       {
         package: otp_ctrl_pkg
         struct: otp_keymgr_key
+        phys_pd: main
         signame: otp_ctrl_otp_keymgr_key
         width: 1
         type: uni
@@ -27976,6 +28228,7 @@
       {
         package: keymgr_pkg
         struct: hw_key_req
+        phys_pd: main
         signame: keymgr_aes_key
         width: 1
         type: uni
@@ -27987,6 +28240,7 @@
       {
         package: keymgr_pkg
         struct: hw_key_req
+        phys_pd: main
         signame: keymgr_kmac_key
         width: 1
         type: uni
@@ -27998,6 +28252,7 @@
       {
         package: keymgr_pkg
         struct: otbn_key_req
+        phys_pd: main
         signame: keymgr_otbn_key
         width: 1
         type: uni
@@ -28009,6 +28264,7 @@
       {
         package: kmac_pkg
         struct: app_req
+        phys_pd: main
         signame: kmac_app_req
         width:
         {
@@ -28030,6 +28286,7 @@
       {
         package: kmac_pkg
         struct: app_rsp
+        phys_pd: main
         signame: kmac_app_rsp
         width:
         {
@@ -28051,6 +28308,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: kmac_en_masking
         width: 1
         type: uni
@@ -28062,6 +28320,7 @@
       {
         package: prim_mubi_pkg
         struct: mubi4
+        phys_pd: main
         signame: clkmgr_aon_idle
         width: 4
         type: uni
@@ -28073,6 +28332,7 @@
       {
         package: jtag_pkg
         struct: jtag_req
+        phys_pd: main
         signame: pinmux_aon_lc_jtag_req
         width: 1
         type: req_rsp
@@ -28084,6 +28344,7 @@
       {
         package: jtag_pkg
         struct: jtag_rsp
+        phys_pd: main
         signame: pinmux_aon_lc_jtag_rsp
         width: 1
         type: req_rsp
@@ -28095,6 +28356,7 @@
       {
         package: jtag_pkg
         struct: jtag_req
+        phys_pd: main
         signame: pinmux_aon_rv_jtag_req
         width: 1
         type: req_rsp
@@ -28106,6 +28368,7 @@
       {
         package: jtag_pkg
         struct: jtag_rsp
+        phys_pd: main
         signame: pinmux_aon_rv_jtag_rsp
         width: 1
         type: req_rsp
@@ -28117,6 +28380,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: pinmux_aon_pinmux_hw_debug_en
         width: 1
         type: uni
@@ -28128,6 +28392,7 @@
       {
         package: otp_ctrl_pkg
         struct: otp_lc_data
+        phys_pd: main
         signame: otp_ctrl_otp_lc_data
         width: 1
         type: uni
@@ -28139,6 +28404,7 @@
       {
         package: otp_ctrl_pkg
         struct: lc_otp_program_req
+        phys_pd: main
         signame: lc_ctrl_lc_otp_program_req
         width: 1
         type: req_rsp
@@ -28150,6 +28416,7 @@
       {
         package: otp_ctrl_pkg
         struct: lc_otp_program_rsp
+        phys_pd: main
         signame: lc_ctrl_lc_otp_program_rsp
         width: 1
         type: req_rsp
@@ -28161,6 +28428,7 @@
       {
         package: otp_macro_pkg
         struct: otp_test_req
+        phys_pd: main
         signame: lc_ctrl_lc_otp_vendor_test_req
         width: 1
         type: req_rsp
@@ -28172,6 +28440,7 @@
       {
         package: otp_macro_pkg
         struct: otp_test_rsp
+        phys_pd: main
         signame: lc_ctrl_lc_otp_vendor_test_rsp
         width: 1
         type: req_rsp
@@ -28183,6 +28452,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_keymgr_div
+        phys_pd: main
         signame: lc_ctrl_lc_keymgr_div
         width: 1
         type: uni
@@ -28194,6 +28464,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: lc_ctrl_strap_en_override
         width: 1
         type: uni
@@ -28205,6 +28476,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_dft_en
         width: 1
         type: uni
@@ -28216,6 +28488,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_nvm_debug_en
         width: 1
         type: uni
@@ -28227,6 +28500,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_hw_debug_clr
         width: 1
         type: uni
@@ -28238,6 +28512,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_init_done
         width: 1
         type: uni
@@ -28249,6 +28524,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_hw_debug_en
         width: 1
         type: uni
@@ -28260,6 +28536,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_cpu_en
         width: 1
         type: uni
@@ -28271,6 +28548,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_keymgr_en
         width: 1
         type: uni
@@ -28282,6 +28560,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_escalate_en
         width: 1
         type: uni
@@ -28293,6 +28572,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_check_byp_en
         width: 1
         type: uni
@@ -28304,6 +28584,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_clk_byp_req
         width: 1
         type: uni
@@ -28315,6 +28596,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_clk_byp_ack
         width: 1
         type: uni
@@ -28326,6 +28608,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_creator_seed_sw_rw_en
         width: 1
         type: uni
@@ -28337,6 +28620,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_owner_seed_sw_rw_en
         width: 1
         type: uni
@@ -28348,6 +28632,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_iso_part_sw_rd_en
         width: 1
         type: uni
@@ -28359,6 +28644,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_iso_part_sw_wr_en
         width: 1
         type: uni
@@ -28370,6 +28656,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_seed_hw_rd_en
         width: 1
         type: uni
@@ -28381,6 +28668,7 @@
       {
         package: lc_ctrl_pkg
         struct: lc_tx
+        phys_pd: main
         signame: lc_ctrl_lc_rma_state
         width: 1
         type: uni
@@ -28392,6 +28680,7 @@
       {
         package: otp_ctrl_macro_pkg
         struct: otp_ctrl_macro_req
+        phys_pd: main
         signame: otp_ctrl_otp_macro_req
         width: 1
         type: req_rsp
@@ -28403,6 +28692,7 @@
       {
         package: otp_ctrl_macro_pkg
         struct: otp_ctrl_macro_rsp
+        phys_pd: main
         signame: otp_ctrl_otp_macro_rsp
         width: 1
         type: req_rsp
@@ -28414,6 +28704,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: rv_plic_msip
         width: 1
         type: uni
@@ -28425,6 +28716,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: rv_plic_irq
         width: 1
         type: uni
@@ -28436,6 +28728,7 @@
       {
         package: ""
         struct: logic [rv_dm_reg_pkg::NrHarts-1:0]
+        phys_pd: main
         signame: rv_dm_debug_req
         width: 1
         type: uni
@@ -28447,6 +28740,7 @@
       {
         package: rv_core_ibex_pkg
         struct: cpu_crash_dump
+        phys_pd: main
         signame: rv_core_ibex_crash_dump
         width: 1
         type: uni
@@ -28458,6 +28752,7 @@
       {
         package: rv_core_ibex_pkg
         struct: cpu_pwrmgr
+        phys_pd: main
         signame: rv_core_ibex_pwrmgr
         width: 1
         type: uni
@@ -28469,6 +28764,7 @@
       {
         package: spi_device_pkg
         struct: passthrough_req
+        phys_pd: main
         signame: spi_device_passthrough_req
         width: 1
         type: req_rsp
@@ -28480,6 +28776,7 @@
       {
         package: spi_device_pkg
         struct: passthrough_rsp
+        phys_pd: main
         signame: spi_device_passthrough_rsp
         width: 1
         type: req_rsp
@@ -28491,6 +28788,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: rv_dm_ndmreset_req
         width: 1
         type: uni
@@ -28502,6 +28800,7 @@
       {
         package: prim_mubi_pkg
         struct: mubi4
+        phys_pd: main
         signame: rstmgr_aon_sw_rst_req
         width: 1
         type: uni
@@ -28513,6 +28812,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: pwrmgr_aon_wakeups
         width: 6
         type: uni
@@ -28524,6 +28824,7 @@
       {
         package: ""
         struct: logic
+        phys_pd: main
         signame: pwrmgr_aon_rstreqs
         width: 2
         type: uni
@@ -28535,6 +28836,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: main_tl_rv_core_ibex__corei_req
         width: 1
         type: req_rsp
@@ -28546,6 +28848,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: main_tl_rv_core_ibex__corei_rsp
         width: 1
         type: req_rsp
@@ -28557,6 +28860,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: main_tl_rv_core_ibex__cored_req
         width: 1
         type: req_rsp
@@ -28568,6 +28872,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: main_tl_rv_core_ibex__cored_rsp
         width: 1
         type: req_rsp
@@ -28579,6 +28884,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: main_tl_rv_dm__sba_req
         width: 1
         type: req_rsp
@@ -28590,6 +28896,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: main_tl_rv_dm__sba_rsp
         width: 1
         type: req_rsp
@@ -28601,6 +28908,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: rv_dm_regs_tl_d_req
         width: 1
         type: req_rsp
@@ -28612,6 +28920,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: rv_dm_regs_tl_d_rsp
         width: 1
         type: req_rsp
@@ -28623,6 +28932,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: rv_dm_mem_tl_d_req
         width: 1
         type: req_rsp
@@ -28634,6 +28944,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: rv_dm_mem_tl_d_rsp
         width: 1
         type: req_rsp
@@ -28645,6 +28956,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: rom_ctrl_rom_tl_req
         width: 1
         type: req_rsp
@@ -28656,6 +28968,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: rom_ctrl_rom_tl_rsp
         width: 1
         type: req_rsp
@@ -28667,6 +28980,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: rom_ctrl_regs_tl_req
         width: 1
         type: req_rsp
@@ -28678,6 +28992,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: rom_ctrl_regs_tl_rsp
         width: 1
         type: req_rsp
@@ -28689,6 +29004,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: main_tl_peri_req
         width: 1
         type: req_rsp
@@ -28700,6 +29016,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: main_tl_peri_rsp
         width: 1
         type: req_rsp
@@ -28711,6 +29028,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: spi_host0_tl_req
         width: 1
         type: req_rsp
@@ -28722,6 +29040,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: spi_host0_tl_rsp
         width: 1
         type: req_rsp
@@ -28733,6 +29052,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: spi_host1_tl_req
         width: 1
         type: req_rsp
@@ -28744,6 +29064,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: spi_host1_tl_rsp
         width: 1
         type: req_rsp
@@ -28755,6 +29076,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: usbdev_tl_req
         width: 1
         type: req_rsp
@@ -28766,6 +29088,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: usbdev_tl_rsp
         width: 1
         type: req_rsp
@@ -28777,6 +29100,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: flash_ctrl_core_tl_req
         width: 1
         type: req_rsp
@@ -28788,6 +29112,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: flash_ctrl_core_tl_rsp
         width: 1
         type: req_rsp
@@ -28799,6 +29124,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: flash_ctrl_prim_tl_req
         width: 1
         type: req_rsp
@@ -28810,6 +29136,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: flash_ctrl_prim_tl_rsp
         width: 1
         type: req_rsp
@@ -28821,6 +29148,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: flash_ctrl_mem_tl_req
         width: 1
         type: req_rsp
@@ -28832,6 +29160,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: flash_ctrl_mem_tl_rsp
         width: 1
         type: req_rsp
@@ -28843,6 +29172,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: hmac_tl_req
         width: 1
         type: req_rsp
@@ -28854,6 +29184,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: hmac_tl_rsp
         width: 1
         type: req_rsp
@@ -28865,6 +29196,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: kmac_tl_req
         width: 1
         type: req_rsp
@@ -28876,6 +29208,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: kmac_tl_rsp
         width: 1
         type: req_rsp
@@ -28887,6 +29220,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: aes_tl_req
         width: 1
         type: req_rsp
@@ -28898,6 +29232,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: aes_tl_rsp
         width: 1
         type: req_rsp
@@ -28909,6 +29244,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: entropy_src_tl_req
         width: 1
         type: req_rsp
@@ -28920,6 +29256,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: entropy_src_tl_rsp
         width: 1
         type: req_rsp
@@ -28931,6 +29268,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: csrng_tl_req
         width: 1
         type: req_rsp
@@ -28942,6 +29280,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: csrng_tl_rsp
         width: 1
         type: req_rsp
@@ -28953,6 +29292,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: edn0_tl_req
         width: 1
         type: req_rsp
@@ -28964,6 +29304,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: edn0_tl_rsp
         width: 1
         type: req_rsp
@@ -28975,6 +29316,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: edn1_tl_req
         width: 1
         type: req_rsp
@@ -28986,6 +29328,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: edn1_tl_rsp
         width: 1
         type: req_rsp
@@ -28997,6 +29340,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: rv_plic_tl_req
         width: 1
         type: req_rsp
@@ -29008,6 +29352,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: rv_plic_tl_rsp
         width: 1
         type: req_rsp
@@ -29019,6 +29364,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: otbn_tl_req
         width: 1
         type: req_rsp
@@ -29030,6 +29376,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: otbn_tl_rsp
         width: 1
         type: req_rsp
@@ -29041,6 +29388,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: keymgr_tl_req
         width: 1
         type: req_rsp
@@ -29052,6 +29400,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: keymgr_tl_rsp
         width: 1
         type: req_rsp
@@ -29063,6 +29412,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: rv_core_ibex_cfg_tl_d_req
         width: 1
         type: req_rsp
@@ -29074,6 +29424,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: rv_core_ibex_cfg_tl_d_rsp
         width: 1
         type: req_rsp
@@ -29085,6 +29436,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: sram_ctrl_main_regs_tl_req
         width: 1
         type: req_rsp
@@ -29096,6 +29448,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: sram_ctrl_main_regs_tl_rsp
         width: 1
         type: req_rsp
@@ -29107,6 +29460,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: sram_ctrl_main_ram_tl_req
         width: 1
         type: req_rsp
@@ -29118,6 +29472,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: sram_ctrl_main_ram_tl_rsp
         width: 1
         type: req_rsp
@@ -29129,6 +29484,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: uart0_tl_req
         width: 1
         type: req_rsp
@@ -29140,6 +29496,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: uart0_tl_rsp
         width: 1
         type: req_rsp
@@ -29151,28 +29508,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
-        signame: uart1_tl_req
-        width: 1
-        type: req_rsp
-        end_idx: -1
-        act: rsp
-        suffix: req
-        default: tlul_pkg::TL_H2D_DEFAULT
-      }
-      {
-        package: tlul_pkg
-        struct: tl_d2h
-        signame: uart1_tl_rsp
-        width: 1
-        type: req_rsp
-        end_idx: -1
-        act: rsp
-        suffix: rsp
-        default: ""
-      }
-      {
-        package: tlul_pkg
-        struct: tl_h2d
+        phys_pd: main
         signame: uart2_tl_req
         width: 1
         type: req_rsp
@@ -29184,6 +29520,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: uart2_tl_rsp
         width: 1
         type: req_rsp
@@ -29195,6 +29532,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: uart3_tl_req
         width: 1
         type: req_rsp
@@ -29206,6 +29544,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: uart3_tl_rsp
         width: 1
         type: req_rsp
@@ -29217,6 +29556,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: i2c0_tl_req
         width: 1
         type: req_rsp
@@ -29228,6 +29568,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: i2c0_tl_rsp
         width: 1
         type: req_rsp
@@ -29239,6 +29580,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: i2c1_tl_req
         width: 1
         type: req_rsp
@@ -29250,6 +29592,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: i2c1_tl_rsp
         width: 1
         type: req_rsp
@@ -29261,6 +29604,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: i2c2_tl_req
         width: 1
         type: req_rsp
@@ -29272,6 +29616,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: i2c2_tl_rsp
         width: 1
         type: req_rsp
@@ -29283,6 +29628,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: pattgen_tl_req
         width: 1
         type: req_rsp
@@ -29294,6 +29640,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: pattgen_tl_rsp
         width: 1
         type: req_rsp
@@ -29305,6 +29652,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: pwm_aon_tl_req
         width: 1
         type: req_rsp
@@ -29316,6 +29664,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: pwm_aon_tl_rsp
         width: 1
         type: req_rsp
@@ -29327,6 +29676,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: gpio_tl_req
         width: 1
         type: req_rsp
@@ -29338,6 +29688,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: gpio_tl_rsp
         width: 1
         type: req_rsp
@@ -29349,6 +29700,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: spi_device_tl_req
         width: 1
         type: req_rsp
@@ -29360,6 +29712,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: spi_device_tl_rsp
         width: 1
         type: req_rsp
@@ -29371,6 +29724,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: rv_timer_tl_req
         width: 1
         type: req_rsp
@@ -29382,6 +29736,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: rv_timer_tl_rsp
         width: 1
         type: req_rsp
@@ -29393,6 +29748,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: pwrmgr_aon_tl_req
         width: 1
         type: req_rsp
@@ -29404,6 +29760,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: pwrmgr_aon_tl_rsp
         width: 1
         type: req_rsp
@@ -29415,6 +29772,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: rstmgr_aon_tl_req
         width: 1
         type: req_rsp
@@ -29426,6 +29784,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: rstmgr_aon_tl_rsp
         width: 1
         type: req_rsp
@@ -29437,6 +29796,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: clkmgr_aon_tl_req
         width: 1
         type: req_rsp
@@ -29448,6 +29808,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: clkmgr_aon_tl_rsp
         width: 1
         type: req_rsp
@@ -29459,6 +29820,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: pinmux_aon_tl_req
         width: 1
         type: req_rsp
@@ -29470,6 +29832,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: pinmux_aon_tl_rsp
         width: 1
         type: req_rsp
@@ -29481,6 +29844,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: otp_ctrl_core_tl_req
         width: 1
         type: req_rsp
@@ -29492,6 +29856,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: otp_ctrl_core_tl_rsp
         width: 1
         type: req_rsp
@@ -29503,6 +29868,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: otp_macro_prim_tl_req
         width: 1
         type: req_rsp
@@ -29514,6 +29880,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: otp_macro_prim_tl_rsp
         width: 1
         type: req_rsp
@@ -29525,6 +29892,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: lc_ctrl_regs_tl_req
         width: 1
         type: req_rsp
@@ -29536,6 +29904,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: lc_ctrl_regs_tl_rsp
         width: 1
         type: req_rsp
@@ -29547,6 +29916,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: sensor_ctrl_aon_tl_req
         width: 1
         type: req_rsp
@@ -29558,6 +29928,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: sensor_ctrl_aon_tl_rsp
         width: 1
         type: req_rsp
@@ -29569,6 +29940,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: alert_handler_tl_req
         width: 1
         type: req_rsp
@@ -29580,6 +29952,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: alert_handler_tl_rsp
         width: 1
         type: req_rsp
@@ -29591,6 +29964,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: sram_ctrl_ret_aon_regs_tl_req
         width: 1
         type: req_rsp
@@ -29602,6 +29976,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: sram_ctrl_ret_aon_regs_tl_rsp
         width: 1
         type: req_rsp
@@ -29613,6 +29988,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: sram_ctrl_ret_aon_ram_tl_req
         width: 1
         type: req_rsp
@@ -29624,6 +30000,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: sram_ctrl_ret_aon_ram_tl_rsp
         width: 1
         type: req_rsp
@@ -29635,6 +30012,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: aon_timer_aon_tl_req
         width: 1
         type: req_rsp
@@ -29646,6 +30024,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: aon_timer_aon_tl_rsp
         width: 1
         type: req_rsp
@@ -29657,6 +30036,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: sysrst_ctrl_aon_tl_req
         width: 1
         type: req_rsp
@@ -29668,6 +30048,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: sysrst_ctrl_aon_tl_rsp
         width: 1
         type: req_rsp
@@ -29679,6 +30060,7 @@
       {
         package: tlul_pkg
         struct: tl_h2d
+        phys_pd: main
         signame: adc_ctrl_aon_tl_req
         width: 1
         type: req_rsp
@@ -29690,6 +30072,7 @@
       {
         package: tlul_pkg
         struct: tl_d2h
+        phys_pd: main
         signame: adc_ctrl_aon_tl_rsp
         width: 1
         type: req_rsp
@@ -29702,6 +30085,7 @@
         package: clkmgr_pkg
         struct: clkmgr_out
         signame: clkmgr_aon_clocks
+        phys_pd: main
         width: 1
         type: uni
         end_idx: -1
@@ -29711,6 +30095,7 @@
         package: clkmgr_pkg
         struct: clkmgr_cg_en
         signame: clkmgr_aon_cg_en
+        phys_pd: main
         width: 1
         type: uni
         end_idx: -1
@@ -29720,6 +30105,7 @@
         package: rstmgr_pkg
         struct: rstmgr_out
         signame: rstmgr_aon_resets
+        phys_pd: main
         width: 1
         type: uni
         end_idx: -1
@@ -29729,6 +30115,7 @@
         package: rstmgr_pkg
         struct: rstmgr_rst_en
         signame: rstmgr_aon_rst_en
+        phys_pd: main
         width: 1
         type: uni
         end_idx: -1
@@ -29738,6 +30125,7 @@
         package: ""
         struct: logic
         signame: rv_core_ibex_irq_timer
+        phys_pd: main
         width: 1
         type: uni
         end_idx: -1
@@ -29747,6 +30135,7 @@
         package: ""
         struct: logic
         signame: rv_core_ibex_hart_id
+        phys_pd: main
         width: 32
         type: uni
         end_idx: -1
@@ -29756,6 +30145,7 @@
         package: ""
         struct: logic
         signame: rv_core_ibex_boot_addr
+        phys_pd: main
         width: 32
         type: uni
         end_idx: -1
@@ -29764,6 +30154,7 @@
       {
         package: jtag_pkg
         struct: jtag_req
+        phys_pd: main
         signame: pinmux_aon_dft_jtag_req
         width: 1
         type: req_rsp
@@ -29773,6 +30164,7 @@
       {
         package: jtag_pkg
         struct: jtag_rsp
+        phys_pd: main
         signame: pinmux_aon_dft_jtag_rsp
         width: 1
         type: req_rsp
@@ -29783,6 +30175,7 @@
         package: otp_ctrl_part_pkg
         struct: otp_broadcast
         signame: otp_ctrl_otp_broadcast
+        phys_pd: main
         width: 1
         type: uni
         end_idx: -1
@@ -29792,6 +30185,7 @@
         package: prim_mubi_pkg
         struct: mubi8
         signame: csrng_otp_en_csrng_sw_app_read
+        phys_pd: main
         width: 1
         type: uni
         end_idx: -1
@@ -29801,6 +30195,7 @@
         package: otp_ctrl_pkg
         struct: otp_device_id
         signame: lc_ctrl_otp_device_id
+        phys_pd: main
         width: 1
         type: uni
         end_idx: -1
@@ -29810,6 +30205,7 @@
         package: otp_ctrl_pkg
         struct: otp_manuf_state
         signame: lc_ctrl_otp_manuf_state
+        phys_pd: main
         width: 1
         type: uni
         end_idx: -1
@@ -29819,6 +30215,7 @@
         package: otp_ctrl_pkg
         struct: otp_device_id
         signame: keymgr_otp_device_id
+        phys_pd: main
         width: 1
         type: uni
         end_idx: -1
@@ -29828,6 +30225,7 @@
         package: prim_mubi_pkg
         struct: mubi8
         signame: sram_ctrl_main_otp_en_sram_ifetch
+        phys_pd: main
         width: 1
         type: uni
         end_idx: -1
@@ -29837,10 +30235,41 @@
         package: prim_mubi_pkg
         struct: mubi8
         signame: rv_dm_otp_dis_rv_dm_late_debug
+        phys_pd: main
         width: 1
         type: uni
         end_idx: -1
         default: prim_mubi_pkg::MuBi8False
+      }
+    ]
+  }
+  inter_pd:
+  {
+    definitions:
+    [
+      {
+        package: tlul_pkg
+        struct: tl_h2d
+        phys_pd: chip
+        signame: uart1_tl_req
+        width: 1
+        type: req_rsp
+        end_idx: -1
+        act: rsp
+        suffix: req
+        default: tlul_pkg::TL_H2D_DEFAULT
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        phys_pd: chip
+        signame: uart1_tl_rsp
+        width: 1
+        type: req_rsp
+        end_idx: -1
+        act: rsp
+        suffix: rsp
+        default: tlul_pkg::TL_D2H_DEFAULT
       }
     ]
   }

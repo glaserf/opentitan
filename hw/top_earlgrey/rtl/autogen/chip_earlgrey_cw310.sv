@@ -1083,6 +1083,10 @@ module chip_earlgrey_cw310 #(
     .scanmode_i (scanmode  ),
 
     // Auto-generated port map
+    .uart1_tl_req_i               (uart1_tl_req       ),
+    .uart1_tl_rsp_o               (uart1_tl_rsp       ),
+    .uart1_tl_req_o               (uart1_tl_req       ),
+    .uart1_tl_rsp_i               (uart1_tl_rsp       ),
     .adc_req_o                    (adc_req            ),
     .adc_rsp_i                    (adc_rsp            ),
     .ast_edn_req_i                (ast_edn_req        ),

@@ -372,7 +372,8 @@ def generate_outgoing_alerts(top: ConfigT, out_path: Path) -> None:
 
     for alert_group, alerts in top['outgoing_alert'].items():
         # Outgoing alert definition
-        # 'outgoing_alerts.hjson.tpl' -> 'data/autogen/{top_name}.sv'
+        # 'outgoing_alerts.hjson.tpl' ->
+        # 'data/autogen/outgoing_alerts_{alert_group}.hjson'
         render_template(TOPGEN_TEMPLATE_PATH / 'outgoing_alerts.hjson.tpl',
                         out_path / 'data' / 'autogen' /
                         f'outgoing_alerts_{alert_group}.hjson',
@@ -394,7 +395,8 @@ def generate_outgoing_interrupts(top: ConfigT, out_path: Path) -> None:
 
     for interrupt_group, interrupts in top["outgoing_interrupt"].items():
         # Outgoing interrupt definition
-        # "outgoing_interrupts.hjson.tpl" -> "data/autogen/{top_name}.sv"
+        # "outgoing_interrupts.hjson.tpl" ->
+        # "data/autogen/outgoing_interrupts_{interrupt_group}.hjson"
         render_template(TOPGEN_TEMPLATE_PATH / "outgoing_interrupts.hjson.tpl",
                         out_path / "data" / "autogen" /
                         f"outgoing_interrupts_{interrupt_group}.hjson",
