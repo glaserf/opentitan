@@ -447,9 +447,12 @@ def get_intermodule_list(top: ConfigT, phys_pd: str = 'main'):
     return [x for x in top["inter_signal"]["definitions"] if x["phys_pd"] == phys_pd]
 
 
-def get_intermodule_ports(top: ConfigT, phys_pd: str = 'main', inter_pd = False):
-    return [x for x in top["inter_signal"]["external"]
-            if x["phys_pd"] == phys_pd and x["inter_pd"] == inter_pd]
+def get_intermodule_ports(top: ConfigT, phys_pd: str = 'main', inter_pd = None):
+    if inter_pd is not None:
+        return [x for x in top["inter_signal"]["external"]
+                if x["phys_pd"] == phys_pd and x["inter_pd"] == inter_pd]
+    else:
+        return [x for x in top["inter_signal"]["external"] if x["phys_pd"] == phys_pd]
 
 
 def get_package_name_by_intermodule_signal(top: ConfigT, struct: str) -> str:

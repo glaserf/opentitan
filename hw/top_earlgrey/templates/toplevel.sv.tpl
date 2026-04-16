@@ -26,14 +26,6 @@ num_dio_total = top['pinmux']['io_counts']['dedicated']['inouts'] + \
                 top['pinmux']['io_counts']['dedicated']['inputs'] + \
                 top['pinmux']['io_counts']['dedicated']['outputs']
 
-num_im = 0
-for x in top["inter_signal"]["external"]:
-    width = 1
-    if "width" in x:
-      width = (x["width"].default
-               if isinstance(x["width"], Parameter) else x["width"])
-    num_im += width
-
 num_rom_ctrl = lib.num_rom_ctrl(lib.get_all_modules(top))
 
 max_sigwidth = max([x["width"] if "width" in x else 1 for x in top["pinmux"]["ios"]])
@@ -108,10 +100,9 @@ module top_${top["name"]} #(
   output prim_pad_wrapper_pkg::pad_attr_t [pinmux_reg_pkg::NDioPads-1:0] dio_attr_o,
 % endif
 
-% if num_im != 0:
-
+% if lib.get_intermodule_ports(top):
   // Inter-module Signal External type
-  % for sig in top["inter_signal"]["external"]:
+  % for sig in lib.get_intermodule_ports(top):
     % if isinstance(sig["width"], Parameter):
   ${lib.get_direction(sig)} ${lib.im_defname(sig)} [${sig["width"].name_top}-1:0] ${sig["signame"]},
     % else:
@@ -257,10 +248,10 @@ module top_${top["name"]} #(
 % endif
 
 ## Inter-module Definitions
-% if len(top["inter_signal"]["definitions"]) >= 1:
+% if len(lib.get_intermodule_list(top)) >= 1:
   // define inter-module signals
 % endif
-% for sig in top["inter_signal"]["definitions"]:
+% for sig in lib.get_intermodule_list(top):
   % if isinstance(sig["width"], Parameter):
   ${lib.im_defname(sig)} [${sig["width"].name_top}-1:0] ${sig["signame"]};
   % else:
@@ -271,9 +262,17 @@ module top_${top["name"]} #(
 ## Mixed connection to port
 ## Index greater than 0 means a port is assigned to an inter-module array
 ## whereas an index of 0 means a port is directly driven by a module
-  // define mixed connection to port
-% for port in top['inter_signal']['external']:
-  % if port['conn_type'] and port['index'] > 0:
+  // Create mixed connections to ports
+% for port in lib.get_intermodule_ports(top):
+  % if port['conn_type'] and isinstance(port['index'], list):
+    % for idx in port['index']:
+    % if port['direction'] == 'in':
+  assign ${port['netname']}[${idx}] = ${port['signame']};
+    % else:
+  assign ${port['signame']} = ${port['netname']}[${idx}];
+    % endif
+    % endfor
+  % elif port['conn_type'] and port['index'] > 0:
     % if port['direction'] == 'in':
   assign ${port['netname']}[${port['index']}] = ${port['signame']};
     % else:

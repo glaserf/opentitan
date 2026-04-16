@@ -2864,6 +2864,8 @@
           top_type: broadcast
           top_signame: lc_ctrl_lc_escalate_en
           index: -1
+          external: true
+          conn_type: true
         }
         {
           name: lc_clk_byp_req
@@ -4062,7 +4064,9 @@
           end_idx: -1
           top_type: one-to-N
           top_signame: pwrmgr_aon_wakeups
-          index: -1
+          index: 4
+          external: true
+          conn_type: true
         }
         {
           name: rstreqs
@@ -4076,7 +4080,9 @@
           end_idx: -1
           top_type: one-to-N
           top_signame: pwrmgr_aon_rstreqs
-          index: -1
+          index: 1
+          external: true
+          conn_type: true
         }
         {
           name: ndmreset_req
@@ -4118,6 +4124,8 @@
           top_type: broadcast
           top_signame: pwrmgr_aon_low_power
           index: -1
+          external: true
+          conn_type: true
         }
         {
           name: rom_ctrl
@@ -5544,6 +5552,7 @@
       [
         Aon
       ]
+      phys_pd: aon
       clock_connections:
       {
         clk_i: clkmgr_aon_clocks.clk_io_div4_timers
@@ -5567,6 +5576,8 @@
           top_type: broadcast
           top_signame: aon_timer_aon_nmi_wdog_timer_bark
           index: -1
+          external: true
+          conn_type: false
         }
         {
           name: wkup_req
@@ -5577,9 +5588,11 @@
           default: 1'b0
           inst_name: aon_timer_aon
           package: ""
-          phys_pd: main
+          phys_pd: aon
           top_signame: pwrmgr_aon_wakeups
-          index: 4
+          index: -1
+          external: true
+          conn_type: false
         }
         {
           name: aon_timer_rst_req
@@ -5590,9 +5603,11 @@
           default: 1'b0
           inst_name: aon_timer_aon
           package: ""
-          phys_pd: main
+          phys_pd: aon
           top_signame: pwrmgr_aon_rstreqs
-          index: 1
+          index: -1
+          external: true
+          conn_type: false
         }
         {
           name: lc_escalate_en
@@ -5603,9 +5618,11 @@
           width: 1
           default: lc_ctrl_pkg::Off
           inst_name: aon_timer_aon
-          phys_pd: main
+          phys_pd: aon
           top_signame: lc_ctrl_lc_escalate_en
           index: -1
+          external: true
+          conn_type: false
         }
         {
           name: sleep_mode
@@ -5616,9 +5633,11 @@
           inst_name: aon_timer_aon
           default: ""
           package: ""
-          phys_pd: main
+          phys_pd: aon
           top_signame: pwrmgr_aon_low_power
           index: -1
+          external: true
+          conn_type: false
         }
         {
           name: racl_policies
@@ -5659,6 +5678,8 @@
           top_type: one-to-one
           top_signame: aon_timer_aon_tl
           index: -1
+          external: true
+          conn_type: false
         }
       ]
       base_addrs:
@@ -5669,7 +5690,6 @@
         }
       }
       generate_dif: true
-      phys_pd: main
     }
     {
       name: ast
@@ -9982,6 +10002,8 @@
           phys_pd: main
           top_signame: aon_timer_aon_nmi_wdog_timer_bark
           index: -1
+          external: true
+          conn_type: false
         }
         {
           name: edn
@@ -12908,6 +12930,8 @@
           phys_pd: main
           top_signame: aon_timer_aon_tl
           index: -1
+          external: true
+          conn_type: false
         }
         {
           name: tl_sysrst_ctrl_aon
@@ -21043,6 +21067,8 @@
         top_type: broadcast
         top_signame: lc_ctrl_lc_escalate_en
         index: -1
+        external: true
+        conn_type: true
       }
       {
         name: lc_clk_byp_req
@@ -21902,7 +21928,9 @@
         end_idx: -1
         top_type: one-to-N
         top_signame: pwrmgr_aon_wakeups
-        index: -1
+        index: 4
+        external: true
+        conn_type: true
       }
       {
         name: rstreqs
@@ -21916,7 +21944,9 @@
         end_idx: -1
         top_type: one-to-N
         top_signame: pwrmgr_aon_rstreqs
-        index: -1
+        index: 1
+        external: true
+        conn_type: true
       }
       {
         name: ndmreset_req
@@ -21958,6 +21988,8 @@
         top_type: broadcast
         top_signame: pwrmgr_aon_low_power
         index: -1
+        external: true
+        conn_type: true
       }
       {
         name: rom_ctrl
@@ -22916,6 +22948,8 @@
         top_type: broadcast
         top_signame: aon_timer_aon_nmi_wdog_timer_bark
         index: -1
+        external: true
+        conn_type: false
       }
       {
         name: wkup_req
@@ -22926,9 +22960,11 @@
         default: 1'b0
         inst_name: aon_timer_aon
         package: ""
-        phys_pd: main
+        phys_pd: aon
         top_signame: pwrmgr_aon_wakeups
-        index: 4
+        index: -1
+        external: true
+        conn_type: false
       }
       {
         name: aon_timer_rst_req
@@ -22939,9 +22975,11 @@
         default: 1'b0
         inst_name: aon_timer_aon
         package: ""
-        phys_pd: main
+        phys_pd: aon
         top_signame: pwrmgr_aon_rstreqs
-        index: 1
+        index: -1
+        external: true
+        conn_type: false
       }
       {
         name: lc_escalate_en
@@ -22952,9 +22990,11 @@
         width: 1
         default: lc_ctrl_pkg::Off
         inst_name: aon_timer_aon
-        phys_pd: main
+        phys_pd: aon
         top_signame: lc_ctrl_lc_escalate_en
         index: -1
+        external: true
+        conn_type: false
       }
       {
         name: sleep_mode
@@ -22965,9 +23005,11 @@
         inst_name: aon_timer_aon
         default: ""
         package: ""
-        phys_pd: main
+        phys_pd: aon
         top_signame: pwrmgr_aon_low_power
         index: -1
+        external: true
+        conn_type: false
       }
       {
         name: racl_policies
@@ -23008,6 +23050,8 @@
         top_type: one-to-one
         top_signame: aon_timer_aon_tl
         index: -1
+        external: true
+        conn_type: false
       }
       {
         name: tl
@@ -25391,6 +25435,8 @@
         phys_pd: main
         top_signame: aon_timer_aon_nmi_wdog_timer_bark
         index: -1
+        external: true
+        conn_type: false
       }
       {
         name: edn
@@ -26153,6 +26199,8 @@
         phys_pd: main
         top_signame: aon_timer_aon_tl
         index: -1
+        external: true
+        conn_type: false
       }
       {
         name: tl_sysrst_ctrl_aon
@@ -26308,6 +26356,206 @@
     external:
     [
       {
+        package: ""
+        struct: logic
+        phys_pd: aon
+        inter_pd: true
+        signame: aon_timer_aon_nmi_wdog_timer_bark_o
+        signame_chip:
+        {
+          asic: aon_timer_aon_nmi_wdog_timer_bark
+          cw310: aon_timer_aon_nmi_wdog_timer_bark
+          cw340: aon_timer_aon_nmi_wdog_timer_bark
+        }
+        width: 1
+        type: uni
+        default: 1'b0
+        direction: out
+        conn_type: false
+        index: -1
+        netname: aon_timer_aon_nmi_wdog_timer_bark
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: main
+        inter_pd: true
+        signame: aon_timer_aon_nmi_wdog_timer_bark_i
+        signame_chip:
+        {
+          asic: aon_timer_aon_nmi_wdog_timer_bark
+          cw310: aon_timer_aon_nmi_wdog_timer_bark
+          cw340: aon_timer_aon_nmi_wdog_timer_bark
+        }
+        width: 1
+        type: uni
+        default: 1'b0
+        direction: in
+        conn_type: false
+        index: -1
+        netname: aon_timer_aon_nmi_wdog_timer_bark
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: main
+        inter_pd: true
+        signame: pwrmgr_aon_low_power_o
+        signame_chip:
+        {
+          asic: pwrmgr_aon_low_power
+          cw310: pwrmgr_aon_low_power
+          cw340: pwrmgr_aon_low_power
+        }
+        width: 1
+        type: uni
+        default: ""
+        direction: out
+        conn_type: true
+        index: -1
+        netname: pwrmgr_aon_low_power
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: aon
+        inter_pd: true
+        signame: pwrmgr_aon_low_power_i
+        signame_chip:
+        {
+          asic: pwrmgr_aon_low_power
+          cw310: pwrmgr_aon_low_power
+          cw340: pwrmgr_aon_low_power
+        }
+        width: 1
+        type: uni
+        default: ""
+        direction: in
+        conn_type: true
+        index: -1
+        netname: pwrmgr_aon_low_power
+      }
+      {
+        package: lc_ctrl_pkg
+        struct: lc_tx
+        phys_pd: main
+        inter_pd: true
+        signame: lc_ctrl_lc_escalate_en_o
+        signame_chip:
+        {
+          asic: lc_ctrl_lc_escalate_en
+          cw310: lc_ctrl_lc_escalate_en
+          cw340: lc_ctrl_lc_escalate_en
+        }
+        width: 1
+        type: uni
+        default: lc_ctrl_pkg::Off
+        direction: out
+        conn_type: true
+        index: -1
+        netname: lc_ctrl_lc_escalate_en
+      }
+      {
+        package: lc_ctrl_pkg
+        struct: lc_tx
+        phys_pd: aon
+        inter_pd: true
+        signame: lc_ctrl_lc_escalate_en_i
+        signame_chip:
+        {
+          asic: lc_ctrl_lc_escalate_en
+          cw310: lc_ctrl_lc_escalate_en
+          cw340: lc_ctrl_lc_escalate_en
+        }
+        width: 1
+        type: uni
+        default: lc_ctrl_pkg::Off
+        direction: in
+        conn_type: true
+        index: -1
+        netname: lc_ctrl_lc_escalate_en
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: main
+        inter_pd: true
+        signame: pwrmgr_aon_wakeups_i
+        signame_chip:
+        {
+          asic: pwrmgr_aon_wakeups
+          cw310: pwrmgr_aon_wakeups
+          cw340: pwrmgr_aon_wakeups
+        }
+        width: 1
+        type: uni
+        default: ""
+        direction: in
+        conn_type: true
+        index: 4
+        netname: pwrmgr_aon_wakeups
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: aon
+        inter_pd: true
+        signame: pwrmgr_aon_wakeups_o
+        signame_chip:
+        {
+          asic: pwrmgr_aon_wakeups
+          cw310: pwrmgr_aon_wakeups
+          cw340: pwrmgr_aon_wakeups
+        }
+        width: 1
+        type: uni
+        default: ""
+        direction: out
+        conn_type: true
+        index: 4
+        netname: pwrmgr_aon_wakeups
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: main
+        inter_pd: true
+        signame: pwrmgr_aon_rstreqs_i
+        signame_chip:
+        {
+          asic: pwrmgr_aon_rstreqs
+          cw310: pwrmgr_aon_rstreqs
+          cw340: pwrmgr_aon_rstreqs
+        }
+        width: 1
+        type: uni
+        default: ""
+        direction: in
+        conn_type: true
+        index: 1
+        netname: pwrmgr_aon_rstreqs
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: aon
+        inter_pd: true
+        signame: pwrmgr_aon_rstreqs_o
+        signame_chip:
+        {
+          asic: pwrmgr_aon_rstreqs
+          cw310: pwrmgr_aon_rstreqs
+          cw340: pwrmgr_aon_rstreqs
+        }
+        width: 1
+        type: uni
+        default: ""
+        direction: out
+        conn_type: true
+        index: 1
+        netname: pwrmgr_aon_rstreqs
+      }
+      {
         package: tlul_pkg
         struct: tl_h2d
         phys_pd: aon
@@ -26386,6 +26634,86 @@
         conn_type: false
         index: -1
         netname: uart1_tl_d2h
+      }
+      {
+        package: tlul_pkg
+        struct: tl_h2d
+        phys_pd: aon
+        inter_pd: true
+        signame: aon_timer_aon_tl_req_i
+        signame_chip:
+        {
+          asic: aon_timer_aon_tl_req
+          cw310: aon_timer_aon_tl_req
+          cw340: aon_timer_aon_tl_req
+        }
+        width: 1
+        type: req_rsp
+        default: ""
+        direction: in
+        conn_type: false
+        index: -1
+        netname: aon_timer_aon_tl_h2d
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        phys_pd: aon
+        inter_pd: true
+        signame: aon_timer_aon_tl_rsp_o
+        signame_chip:
+        {
+          asic: aon_timer_aon_tl_rsp
+          cw310: aon_timer_aon_tl_rsp
+          cw340: aon_timer_aon_tl_rsp
+        }
+        width: 1
+        type: req_rsp
+        default: ""
+        direction: out
+        conn_type: false
+        index: -1
+        netname: aon_timer_aon_tl_d2h
+      }
+      {
+        package: tlul_pkg
+        struct: tl_h2d
+        phys_pd: main
+        inter_pd: true
+        signame: aon_timer_aon_tl_req_o
+        signame_chip:
+        {
+          asic: aon_timer_aon_tl_req
+          cw310: aon_timer_aon_tl_req
+          cw340: aon_timer_aon_tl_req
+        }
+        width: 1
+        type: req_rsp
+        default: ""
+        direction: out
+        conn_type: false
+        index: -1
+        netname: aon_timer_aon_tl_h2d
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        phys_pd: main
+        inter_pd: true
+        signame: aon_timer_aon_tl_rsp_i
+        signame_chip:
+        {
+          asic: aon_timer_aon_tl_rsp
+          cw310: aon_timer_aon_tl_rsp
+          cw340: aon_timer_aon_tl_rsp
+        }
+        width: 1
+        type: req_rsp
+        default: ""
+        direction: in
+        conn_type: false
+        index: -1
+        netname: aon_timer_aon_tl_d2h
       }
       {
         package: ast_pkg
@@ -27680,18 +28008,6 @@
         act: req
         suffix: ""
         default: "'{prim_esc_pkg::ESC_TX_DEFAULT}"
-      }
-      {
-        package: ""
-        struct: logic
-        phys_pd: main
-        signame: aon_timer_aon_nmi_wdog_timer_bark
-        width: 1
-        type: uni
-        end_idx: -1
-        act: req
-        suffix: ""
-        default: 1'b0
       }
       {
         package: csrng_pkg
@@ -30013,30 +30329,6 @@
         package: tlul_pkg
         struct: tl_h2d
         phys_pd: main
-        signame: aon_timer_aon_tl_req
-        width: 1
-        type: req_rsp
-        end_idx: -1
-        act: rsp
-        suffix: req
-        default: tlul_pkg::TL_H2D_DEFAULT
-      }
-      {
-        package: tlul_pkg
-        struct: tl_d2h
-        phys_pd: main
-        signame: aon_timer_aon_tl_rsp
-        width: 1
-        type: req_rsp
-        end_idx: -1
-        act: rsp
-        suffix: rsp
-        default: ""
-      }
-      {
-        package: tlul_pkg
-        struct: tl_h2d
-        phys_pd: main
         signame: sysrst_ctrl_aon_tl_req
         width: 1
         type: req_rsp
@@ -30248,6 +30540,66 @@
     definitions:
     [
       {
+        package: ""
+        struct: logic
+        phys_pd: chip
+        signame: aon_timer_aon_nmi_wdog_timer_bark
+        width: 1
+        type: uni
+        end_idx: -1
+        act: req
+        suffix: ""
+        default: 1'b0
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: chip
+        signame: pwrmgr_aon_low_power
+        width: 1
+        type: uni
+        end_idx: -1
+        act: req
+        suffix: ""
+        default: 1'b0
+      }
+      {
+        package: lc_ctrl_pkg
+        struct: lc_tx
+        phys_pd: chip
+        signame: lc_ctrl_lc_escalate_en
+        width: 1
+        type: uni
+        end_idx: -1
+        act: req
+        suffix: ""
+        default: lc_ctrl_pkg::Off
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: chip
+        signame: pwrmgr_aon_wakeups
+        width: 1
+        type: uni
+        end_idx: -1
+        act: rcv
+        suffix: ""
+        default: "'0"
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: chip
+        signame: pwrmgr_aon_rstreqs
+        width: 1
+        type: uni
+        end_idx: -1
+        act: rcv
+        suffix: ""
+        default: "'0"
+      }
+      {
         package: tlul_pkg
         struct: tl_h2d
         phys_pd: chip
@@ -30264,6 +30616,30 @@
         struct: tl_d2h
         phys_pd: chip
         signame: uart1_tl_rsp
+        width: 1
+        type: req_rsp
+        end_idx: -1
+        act: rsp
+        suffix: rsp
+        default: tlul_pkg::TL_D2H_DEFAULT
+      }
+      {
+        package: tlul_pkg
+        struct: tl_h2d
+        phys_pd: chip
+        signame: aon_timer_aon_tl_req
+        width: 1
+        type: req_rsp
+        end_idx: -1
+        act: rsp
+        suffix: req
+        default: tlul_pkg::TL_H2D_DEFAULT
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        phys_pd: chip
+        signame: aon_timer_aon_tl_rsp
         width: 1
         type: req_rsp
         end_idx: -1

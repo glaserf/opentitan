@@ -693,6 +693,7 @@
       clock_group: "timers",
       reset_connections: {rst_ni: "lc_io_div4", rst_aon_ni: "lc_aon"},
       domain: ["Aon"],
+      phys_pd: "aon",
       base_addr: {
         hart: "0x40470000",
       },

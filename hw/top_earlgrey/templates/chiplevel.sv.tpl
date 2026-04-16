@@ -5,6 +5,8 @@ ${gencmd}
 <%
 import re
 import topgen.lib as lib
+from reggen.params import Parameter
+
 from copy import deepcopy
 
 # Provide shortcuts for some commonly used variables
@@ -1007,6 +1009,15 @@ module chip_${top["name"]}_${target["name"]} #(
   prim_mubi_pkg::mubi4_t lc_clk_bypass;   // TODO Tim
 % endif
 
+  // Inter-Power Domain signals
+% for sig in top["inter_pd"]["definitions"]:
+  % if isinstance(sig["width"], Parameter):
+  ${lib.im_defname(sig)} [${sig["width"].name_top}-1:0] ${sig["signame"]};
+  % else:
+  ${lib.im_defname(sig)} ${lib.bitarray(sig["width"],1)} ${sig["signame"]};
+  % endif
+% endfor
+
   //////////////////////
   // Top-level design //
   //////////////////////
@@ -1080,7 +1091,7 @@ module chip_${top["name"]}_${target["name"]} #(
     .scanmode_i (scanmode  ),
 
 <%
-port_list = top["inter_signal"]["external"]
+port_list = lib.get_intermodule_ports(top, inter_pd = True)
 max_portwidth = max(len(x["signame"]) for x in port_list) if port_list else 0
 if port_list:
   filtered_port_list = [p for p in port_list if len(p["signame_chip"][target["name"]]) <= 25]
@@ -1088,7 +1099,21 @@ if port_list:
 else:
   max_sigwidth = 0
 %>\
-    // Auto-generated port map
+    // Ports to and from other power domains (auto-generated)
+    % for sig in port_list:
+    .${lib.ljust(sig["signame"], max_portwidth)}(${lib.ljust(sig["signame_chip"][target["name"]], max_sigwidth)}),
+    % endfor
+
+<%
+port_list = lib.get_intermodule_ports(top, inter_pd = False)
+max_portwidth = max(len(x["signame"]) for x in port_list) if port_list else 0
+if port_list:
+  filtered_port_list = [p for p in port_list if len(p["signame_chip"][target["name"]]) <= 25]
+  max_sigwidth = max(len(p["signame_chip"][target["name"]]) for p in filtered_port_list)
+else:
+  max_sigwidth = 0
+%>\
+    // Regular ports (auto-generated)
     % for sig in port_list:
     .${lib.ljust(sig["signame"], max_portwidth)}(${lib.ljust(sig["signame_chip"][target["name"]], max_sigwidth)}),
     % endfor
@@ -1106,6 +1131,31 @@ else:
     // Pad attributes
     .mio_attr_o(mio_attr),
     .dio_attr_o(dio_attr)
+  );
+
+
+  //////////////////////
+  // Always-on Domain //
+  //////////////////////
+  top_${top["name"]}_aon top_${top["name"]}_aon (
+    // Manual DFT signals
+    .scan_en_i  (scan_en   ),
+    .scan_rst_ni(scan_rst_n),
+    .scanmode_i (scanmode  ),
+
+<%
+port_list = lib.get_intermodule_ports(top, "aon", inter_pd = True)
+max_portwidth = max(len(x["signame"]) for x in port_list) if port_list else 0
+if port_list:
+  filtered_port_list = [p for p in port_list if len(p["signame_chip"][target["name"]]) <= 25]
+  max_sigwidth = max(len(p["signame_chip"][target["name"]]) for p in filtered_port_list)
+else:
+  max_sigwidth = 0
+%>\
+    // Ports to and from other power domains (auto-generated)
+    % for sig in port_list:
+    .${lib.ljust(sig["signame"], max_portwidth)}(${lib.ljust(sig["signame_chip"][target["name"]], max_sigwidth)}),
+    % endfor
   );
 
 ###################################################################

@@ -55,7 +55,6 @@ module top_earlgrey #(
   // parameters for pinmux_aon
   parameter bit SecPinmuxAonVolatileRawUnlockEn = top_pkg::SecVolatileRawUnlockEn,
   parameter pinmux_pkg::target_cfg_t PinmuxAonTargetCfg = pinmux_pkg::DefaultTargetCfg,
-  // parameters for aon_timer_aon
   // parameters for sensor_ctrl_aon
   // parameters for sram_ctrl_ret_aon
   parameter int SramCtrlRetAonInstSize = 4096,
@@ -163,12 +162,16 @@ module top_earlgrey #(
   output prim_pad_wrapper_pkg::pad_attr_t [pinmux_reg_pkg::NMioPads-1:0] mio_attr_o,
   output prim_pad_wrapper_pkg::pad_attr_t [pinmux_reg_pkg::NDioPads-1:0] dio_attr_o,
 
-
   // Inter-module Signal External type
-  input  tlul_pkg::tl_h2d_t       uart1_tl_req_i,
-  output tlul_pkg::tl_d2h_t       uart1_tl_rsp_o,
+  input  logic       aon_timer_aon_nmi_wdog_timer_bark_i,
+  output logic       pwrmgr_aon_low_power_o,
+  output lc_ctrl_pkg::lc_tx_t       lc_ctrl_lc_escalate_en_o,
+  input  logic       pwrmgr_aon_wakeups_i,
+  input  logic       pwrmgr_aon_rstreqs_i,
   output tlul_pkg::tl_h2d_t       uart1_tl_req_o,
   input  tlul_pkg::tl_d2h_t       uart1_tl_rsp_i,
+  output tlul_pkg::tl_h2d_t       aon_timer_aon_tl_req_o,
+  input  tlul_pkg::tl_d2h_t       aon_timer_aon_tl_rsp_i,
   output ast_pkg::adc_ast_req_t       adc_req_o,
   input  ast_pkg::adc_ast_rsp_t       adc_rsp_i,
   input  edn_pkg::edn_req_t       ast_edn_req_i,
@@ -398,7 +401,6 @@ module top_earlgrey #(
   logic [5:0]  cio_pwm_aon_pwm_d2p;
   logic [5:0]  cio_pwm_aon_pwm_en_d2p;
   // pinmux_aon
-  // aon_timer_aon
   // sensor_ctrl_aon
   logic [8:0]  cio_sensor_ctrl_aon_ast_debug_out_d2p;
   logic [8:0]  cio_sensor_ctrl_aon_ast_debug_out_en_d2p;
@@ -596,7 +598,6 @@ module top_earlgrey #(
   alert_handler_pkg::alert_crashdump_t       alert_handler_crashdump;
   prim_esc_pkg::esc_rx_t [3:0] alert_handler_esc_rx;
   prim_esc_pkg::esc_tx_t [3:0] alert_handler_esc_tx;
-  logic       aon_timer_aon_nmi_wdog_timer_bark;
   csrng_pkg::csrng_req_t [1:0] csrng_csrng_cmd_req;
   csrng_pkg::csrng_rsp_t [1:0] csrng_csrng_cmd_rsp;
   entropy_src_pkg::entropy_src_hw_if_req_t       csrng_entropy_src_hw_if_req;
@@ -785,8 +786,6 @@ module top_earlgrey #(
   tlul_pkg::tl_d2h_t       sram_ctrl_ret_aon_regs_tl_rsp;
   tlul_pkg::tl_h2d_t       sram_ctrl_ret_aon_ram_tl_req;
   tlul_pkg::tl_d2h_t       sram_ctrl_ret_aon_ram_tl_rsp;
-  tlul_pkg::tl_h2d_t       aon_timer_aon_tl_req;
-  tlul_pkg::tl_d2h_t       aon_timer_aon_tl_rsp;
   tlul_pkg::tl_h2d_t       sysrst_ctrl_aon_tl_req;
   tlul_pkg::tl_d2h_t       sysrst_ctrl_aon_tl_rsp;
   tlul_pkg::tl_h2d_t       adc_ctrl_aon_tl_req;
@@ -808,7 +807,11 @@ module top_earlgrey #(
   prim_mubi_pkg::mubi8_t       sram_ctrl_main_otp_en_sram_ifetch;
   prim_mubi_pkg::mubi8_t       rv_dm_otp_dis_rv_dm_late_debug;
 
-  // define mixed connection to port
+  // Create mixed connections to ports
+  assign pwrmgr_aon_low_power_o = pwrmgr_aon_low_power;
+  assign lc_ctrl_lc_escalate_en_o = lc_ctrl_lc_escalate_en;
+  assign pwrmgr_aon_wakeups[4] = pwrmgr_aon_wakeups_i;
+  assign pwrmgr_aon_rstreqs[1] = pwrmgr_aon_rstreqs_i;
   assign edn0_edn_req[2] = ast_edn_req_i;
   assign ast_edn_rsp_o = edn0_edn_rsp[2];
   assign ast_lc_dft_en_o = lc_ctrl_lc_dft_en;
@@ -2165,37 +2168,6 @@ module top_earlgrey #(
     .rst_sys_ni (rstmgr_aon_resets.rst_sys_io_div4_n[rstmgr_pkg::DomainAonSel])
   );
 
-  aon_timer #(
-    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[31:31]),
-    .AlertSkewCycles(top_pkg::AlertSkewCycles)
-  ) u_aon_timer_aon (
-
-    // Interrupt
-    .intr_wkup_timer_expired_o (intr_aon_timer_aon_wkup_timer_expired),
-    .intr_wdog_timer_bark_o    (intr_aon_timer_aon_wdog_timer_bark),
-
-    // alert_handler[31]: fatal_fault
-    .alert_tx_o  ( alert_tx[31:31] ),
-    .alert_rx_i  ( alert_rx[31:31] ),
-
-    // Inter-module signals
-    .nmi_wdog_timer_bark_o(aon_timer_aon_nmi_wdog_timer_bark),
-    .wkup_req_o(pwrmgr_aon_wakeups[4]),
-    .aon_timer_rst_req_o(pwrmgr_aon_rstreqs[1]),
-    .lc_escalate_en_i(lc_ctrl_lc_escalate_en),
-    .sleep_mode_i(pwrmgr_aon_low_power),
-    .racl_policies_i(top_racl_pkg::RACL_POLICY_VEC_DEFAULT),
-    .racl_error_o(),
-    .tl_i(aon_timer_aon_tl_req),
-    .tl_o(aon_timer_aon_tl_rsp),
-
-    // Clock and reset connections
-    .clk_i (clkmgr_aon_clocks.clk_io_div4_timers),
-    .clk_aon_i (clkmgr_aon_clocks.clk_aon_timers),
-    .rst_ni (rstmgr_aon_resets.rst_lc_io_div4_n[rstmgr_pkg::DomainAonSel]),
-    .rst_aon_ni (rstmgr_aon_resets.rst_lc_aon_n[rstmgr_pkg::DomainAonSel])
-  );
-
   sensor_ctrl #(
     .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[33:32]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
@@ -2921,7 +2893,7 @@ module top_earlgrey #(
     .lc_cpu_en_i(lc_ctrl_lc_cpu_en),
     .pwrmgr_cpu_en_i(pwrmgr_aon_fetch_en),
     .pwrmgr_o(rv_core_ibex_pwrmgr),
-    .nmi_wdog_i(aon_timer_aon_nmi_wdog_timer_bark),
+    .nmi_wdog_i(aon_timer_aon_nmi_wdog_timer_bark_i),
     .edn_o(edn0_edn_req[7]),
     .edn_i(edn0_edn_rsp[7]),
     .icache_otp_key_o(otp_ctrl_sram_otp_key_req[2]),
@@ -3332,8 +3304,8 @@ module top_earlgrey #(
     .tl_sram_ctrl_ret_aon__ram_i(sram_ctrl_ret_aon_ram_tl_rsp),
 
     // port: tl_aon_timer_aon
-    .tl_aon_timer_aon_o(aon_timer_aon_tl_req),
-    .tl_aon_timer_aon_i(aon_timer_aon_tl_rsp),
+    .tl_aon_timer_aon_o(aon_timer_aon_tl_req_o),
+    .tl_aon_timer_aon_i(aon_timer_aon_tl_rsp_i),
 
     // port: tl_sysrst_ctrl_aon
     .tl_sysrst_ctrl_aon_o(sysrst_ctrl_aon_tl_req),

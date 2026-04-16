@@ -1042,6 +1042,17 @@ module chip_earlgrey_cw310 #(
   // for verilator purposes, make these two the same.
   prim_mubi_pkg::mubi4_t lc_clk_bypass;   // TODO Tim
 
+  // Inter-Power Domain signals
+  logic       aon_timer_aon_nmi_wdog_timer_bark;
+  logic       pwrmgr_aon_low_power;
+  lc_ctrl_pkg::lc_tx_t       lc_ctrl_lc_escalate_en;
+  logic       pwrmgr_aon_wakeups;
+  logic       pwrmgr_aon_rstreqs;
+  tlul_pkg::tl_h2d_t       uart1_tl_req;
+  tlul_pkg::tl_d2h_t       uart1_tl_rsp;
+  tlul_pkg::tl_h2d_t       aon_timer_aon_tl_req;
+  tlul_pkg::tl_d2h_t       aon_timer_aon_tl_rsp;
+
   //////////////////////
   // Top-level design //
   //////////////////////
@@ -1082,11 +1093,18 @@ module chip_earlgrey_cw310 #(
     .scan_rst_ni(scan_rst_n),
     .scanmode_i (scanmode  ),
 
-    // Auto-generated port map
-    .uart1_tl_req_i               (uart1_tl_req       ),
-    .uart1_tl_rsp_o               (uart1_tl_rsp       ),
-    .uart1_tl_req_o               (uart1_tl_req       ),
-    .uart1_tl_rsp_i               (uart1_tl_rsp       ),
+    // Ports to and from other power domains (auto-generated)
+    .aon_timer_aon_nmi_wdog_timer_bark_i(aon_timer_aon_nmi_wdog_timer_bark),
+    .pwrmgr_aon_low_power_o             (pwrmgr_aon_low_power  ),
+    .lc_ctrl_lc_escalate_en_o           (lc_ctrl_lc_escalate_en),
+    .pwrmgr_aon_wakeups_i               (pwrmgr_aon_wakeups    ),
+    .pwrmgr_aon_rstreqs_i               (pwrmgr_aon_rstreqs    ),
+    .uart1_tl_req_o                     (uart1_tl_req          ),
+    .uart1_tl_rsp_i                     (uart1_tl_rsp          ),
+    .aon_timer_aon_tl_req_o             (aon_timer_aon_tl_req  ),
+    .aon_timer_aon_tl_rsp_i             (aon_timer_aon_tl_rsp  ),
+
+    // Regular ports (auto-generated)
     .adc_req_o                    (adc_req            ),
     .adc_rsp_i                    (adc_rsp            ),
     .ast_edn_req_i                (ast_edn_req        ),
@@ -1159,6 +1177,28 @@ module chip_earlgrey_cw310 #(
     // Pad attributes
     .mio_attr_o(mio_attr),
     .dio_attr_o(dio_attr)
+  );
+
+
+  //////////////////////
+  // Always-on Domain //
+  //////////////////////
+  top_earlgrey_aon top_earlgrey_aon (
+    // Manual DFT signals
+    .scan_en_i  (scan_en   ),
+    .scan_rst_ni(scan_rst_n),
+    .scanmode_i (scanmode  ),
+
+    // Ports to and from other power domains (auto-generated)
+    .aon_timer_aon_nmi_wdog_timer_bark_o(aon_timer_aon_nmi_wdog_timer_bark),
+    .pwrmgr_aon_low_power_i             (pwrmgr_aon_low_power  ),
+    .lc_ctrl_lc_escalate_en_i           (lc_ctrl_lc_escalate_en),
+    .pwrmgr_aon_wakeups_o               (pwrmgr_aon_wakeups    ),
+    .pwrmgr_aon_rstreqs_o               (pwrmgr_aon_rstreqs    ),
+    .uart1_tl_req_i                     (uart1_tl_req          ),
+    .uart1_tl_rsp_o                     (uart1_tl_rsp          ),
+    .aon_timer_aon_tl_req_i             (aon_timer_aon_tl_req  ),
+    .aon_timer_aon_tl_rsp_o             (aon_timer_aon_tl_rsp  ),
   );
 
 
