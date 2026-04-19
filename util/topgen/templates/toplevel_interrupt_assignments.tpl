@@ -2,11 +2,14 @@
 ## Licensed under the Apache License, Version 2.0, see LICENSE for details.
 ## SPDX-License-Identifier: Apache-2.0
 <%import topgen.lib as lib%>\
-<%page args="top, plic_info"/>\
-% for plic, info in plic_info.items():
+<%page args="top,phys_pd"/>\
+% for plic, info in top["plic_info"].items():
+% if info["phys_pd"] == phys_pd:
 <%
-  base = info["count"]
+  base = info["count_tot"]
+  count_pd = info["count_pd"].copy()
   default_plic = top.get("default_plic", None)
+  vector_prefix = plic + "_" if len(top["plic_info"]) > 1 else ""
   max_namelen = max(len(irq["name"]) for irq in top["interrupt"]
     if not(irq['incoming'] or irq['plic'] != plic))
   if plic == default_plic and top['incoming_interrupt']:
@@ -16,7 +19,7 @@
   else:
     max_namelen += 6
 %>\
-  assign ${info["vector"]} = {
+  assign ${vector_prefix}intr_vector = {
   % if plic == default_plic:
   %   for irq_group, irqs in reversed(top['incoming_interrupt'].items()):
 <%
@@ -39,9 +42,31 @@
     intr_comment = f"// IDs [{base} +: {intr['width']}]"
   else:
     intr_comment = f"// ID {base}"
+  if intr["phys_pd"] == phys_pd:
+    intr_sig = f"intr_{intr['name']}"
+  else:
+    count_pd[intr["phys_pd"]] -= intr["width"]
+    idx_l = count_pd[intr["phys_pd"]]
+    plic_str = "_" + plic if len(top["plic_info"]) > 1 else ""
+    intr_sig = f"intr_vector{plic_str}_pd_{intr['phys_pd']}_i[{idx_l}]"
+    intr_comment += f" ({intr['name']})"
 %>\
-    ${lib.ljust(f"intr_{intr['name']},", max_namelen)} ${intr_comment}
+    ${lib.ljust(f"{intr_sig},", max_namelen)} ${intr_comment}
   % endfor
     1'b0 // ID 0 is a special case and tied to zero.
   };
+% else:
+<%
+  intrs = [i for i in top["interrupt"] if i["plic"] == plic and i["phys_pd"] == phys_pd]
+  if len(intrs) == 0:
+    continue
+  plic_str = "_" + plic if len(top["plic_info"]) > 1 else ""
+%>\
+  // Interrupt vector to PLIC ${plic} in power domain ${info["phys_pd"]}
+  assign intr_vector${plic_str}_o = {
+    % for intr in intrs[::-1]:
+    intr_${intr["name"]}${"," if not loop.last else ""}
+    % endfor
+  };
+% endif
 % endfor

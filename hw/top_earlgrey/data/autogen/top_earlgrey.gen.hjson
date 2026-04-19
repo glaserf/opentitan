@@ -16677,6 +16677,7 @@
       intr_type: IntrType.Status
       default_val: true
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16689,6 +16690,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16701,6 +16703,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16713,6 +16716,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16725,6 +16729,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16737,6 +16742,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16749,6 +16755,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16761,6 +16768,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16773,6 +16781,7 @@
       intr_type: IntrType.Status
       default_val: true
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16785,6 +16794,7 @@
       intr_type: IntrType.Status
       default_val: true
       incoming: false
+      phys_pd: aon
       plic: rv_plic
       outgoing: false
     }
@@ -16797,6 +16807,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: aon
       plic: rv_plic
       outgoing: false
     }
@@ -16809,6 +16820,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: aon
       plic: rv_plic
       outgoing: false
     }
@@ -16821,6 +16833,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: aon
       plic: rv_plic
       outgoing: false
     }
@@ -16833,6 +16846,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: aon
       plic: rv_plic
       outgoing: false
     }
@@ -16845,6 +16859,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: aon
       plic: rv_plic
       outgoing: false
     }
@@ -16857,6 +16872,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: aon
       plic: rv_plic
       outgoing: false
     }
@@ -16869,6 +16885,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: aon
       plic: rv_plic
       outgoing: false
     }
@@ -16881,6 +16898,7 @@
       intr_type: IntrType.Status
       default_val: true
       incoming: false
+      phys_pd: aon
       plic: rv_plic
       outgoing: false
     }
@@ -16893,6 +16911,7 @@
       intr_type: IntrType.Status
       default_val: true
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16905,6 +16924,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16917,6 +16937,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16929,6 +16950,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16941,6 +16963,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16953,6 +16976,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16965,6 +16989,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16977,6 +17002,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -16989,6 +17015,7 @@
       intr_type: IntrType.Status
       default_val: true
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17001,6 +17028,7 @@
       intr_type: IntrType.Status
       default_val: true
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17013,6 +17041,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17025,6 +17054,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17037,6 +17067,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17049,6 +17080,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17061,6 +17093,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17073,6 +17106,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17085,6 +17119,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17097,6 +17132,7 @@
       intr_type: IntrType.Status
       default_val: true
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17109,6 +17145,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17121,6 +17158,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17133,6 +17171,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17145,6 +17184,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17157,6 +17197,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17169,6 +17210,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17181,6 +17223,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17193,6 +17236,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17205,6 +17249,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17217,6 +17262,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17229,6 +17275,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17241,6 +17288,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17253,6 +17301,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17265,6 +17314,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17277,6 +17327,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17289,6 +17340,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17301,6 +17353,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17313,6 +17366,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17325,6 +17379,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17337,6 +17392,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17349,6 +17405,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17361,6 +17418,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17373,6 +17431,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17385,6 +17444,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17397,6 +17457,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17409,6 +17470,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17421,6 +17483,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17433,6 +17496,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17445,6 +17509,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17457,6 +17522,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17469,6 +17535,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17481,6 +17548,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17493,6 +17561,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17505,6 +17574,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17517,6 +17587,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17529,6 +17600,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17541,6 +17613,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17553,6 +17626,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17565,6 +17639,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17577,6 +17652,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17589,6 +17665,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17601,6 +17678,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17613,6 +17691,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17625,6 +17704,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17637,6 +17717,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17649,6 +17730,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17661,6 +17743,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17673,6 +17756,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17685,6 +17769,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17697,6 +17782,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17709,6 +17795,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17721,6 +17808,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17733,6 +17821,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17745,6 +17834,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17757,6 +17847,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17769,6 +17860,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17781,6 +17873,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17793,6 +17886,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17805,6 +17899,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17817,6 +17912,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17829,6 +17925,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17841,6 +17938,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17853,6 +17951,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17865,6 +17964,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17877,6 +17977,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17889,6 +17990,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17901,6 +18003,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17913,6 +18016,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17925,6 +18029,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17937,6 +18042,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17949,6 +18055,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17961,6 +18068,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17973,6 +18081,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17985,6 +18094,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -17997,6 +18107,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18009,6 +18120,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18021,6 +18133,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18033,6 +18146,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18045,6 +18159,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18057,6 +18172,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18069,6 +18185,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18081,6 +18198,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18093,6 +18211,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18105,6 +18224,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18117,6 +18237,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18129,6 +18250,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18141,6 +18263,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18153,6 +18276,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18165,6 +18289,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: aon
       plic: rv_plic
       outgoing: false
     }
@@ -18177,6 +18302,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: aon
       plic: rv_plic
       outgoing: false
     }
@@ -18189,6 +18315,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18201,6 +18328,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18213,6 +18341,7 @@
       intr_type: IntrType.Status
       default_val: true
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18225,6 +18354,7 @@
       intr_type: IntrType.Status
       default_val: true
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18237,6 +18367,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18249,6 +18380,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18261,6 +18393,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18273,6 +18406,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18285,6 +18419,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18297,6 +18432,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18309,6 +18445,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18321,6 +18458,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18333,6 +18471,7 @@
       intr_type: IntrType.Status
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18345,6 +18484,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18357,6 +18497,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18369,6 +18510,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18381,6 +18523,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18393,6 +18536,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18405,6 +18549,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18417,6 +18562,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18429,6 +18575,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18441,6 +18588,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18453,6 +18601,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18465,6 +18614,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18477,6 +18627,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18489,6 +18640,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18501,6 +18653,7 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
@@ -18513,11 +18666,152 @@
       intr_type: IntrType.Event
       default_val: false
       incoming: false
+      phys_pd: main
       plic: rv_plic
       outgoing: false
     }
   ]
   outgoing_interrupt: {}
+  plic_info:
+  {
+    rv_plic:
+    {
+      phys_pd: main
+      count_tot: 186
+      count_pd:
+      {
+        main: 174
+        aon: 11
+      }
+    }
+  }
+  inter_pd:
+  {
+    definitions:
+    [
+      {
+        package: ""
+        struct: logic
+        phys_pd: chip
+        signame: intr_vector_pd_aon
+        width: 11
+        type: uni
+        special: interrupt
+        end_idx: -1
+        act: req
+        suffix: ""
+        default: "'0"
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: chip
+        signame: aon_timer_aon_nmi_wdog_timer_bark
+        width: 1
+        type: uni
+        end_idx: -1
+        act: req
+        suffix: ""
+        default: 1'b0
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: chip
+        signame: pwrmgr_aon_low_power
+        width: 1
+        type: uni
+        end_idx: -1
+        act: req
+        suffix: ""
+        default: 1'b0
+      }
+      {
+        package: lc_ctrl_pkg
+        struct: lc_tx
+        phys_pd: chip
+        signame: lc_ctrl_lc_escalate_en
+        width: 1
+        type: uni
+        end_idx: -1
+        act: req
+        suffix: ""
+        default: lc_ctrl_pkg::Off
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: chip
+        signame: pwrmgr_aon_wakeups
+        width: 1
+        type: uni
+        end_idx: -1
+        act: rcv
+        suffix: ""
+        default: "'0"
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: chip
+        signame: pwrmgr_aon_rstreqs
+        width: 1
+        type: uni
+        end_idx: -1
+        act: rcv
+        suffix: ""
+        default: "'0"
+      }
+      {
+        package: tlul_pkg
+        struct: tl_h2d
+        phys_pd: chip
+        signame: uart1_tl_req
+        width: 1
+        type: req_rsp
+        end_idx: -1
+        act: rsp
+        suffix: req
+        default: tlul_pkg::TL_H2D_DEFAULT
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        phys_pd: chip
+        signame: uart1_tl_rsp
+        width: 1
+        type: req_rsp
+        end_idx: -1
+        act: rsp
+        suffix: rsp
+        default: tlul_pkg::TL_D2H_DEFAULT
+      }
+      {
+        package: tlul_pkg
+        struct: tl_h2d
+        phys_pd: chip
+        signame: aon_timer_aon_tl_req
+        width: 1
+        type: req_rsp
+        end_idx: -1
+        act: rsp
+        suffix: req
+        default: tlul_pkg::TL_H2D_DEFAULT
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        phys_pd: chip
+        signame: aon_timer_aon_tl_rsp
+        width: 1
+        type: req_rsp
+        end_idx: -1
+        act: rsp
+        suffix: rsp
+        default: tlul_pkg::TL_D2H_DEFAULT
+      }
+    ]
+  }
   alert_module:
   [
     uart0
@@ -30532,120 +30826,6 @@
         type: uni
         end_idx: -1
         default: prim_mubi_pkg::MuBi8False
-      }
-    ]
-  }
-  inter_pd:
-  {
-    definitions:
-    [
-      {
-        package: ""
-        struct: logic
-        phys_pd: chip
-        signame: aon_timer_aon_nmi_wdog_timer_bark
-        width: 1
-        type: uni
-        end_idx: -1
-        act: req
-        suffix: ""
-        default: 1'b0
-      }
-      {
-        package: ""
-        struct: logic
-        phys_pd: chip
-        signame: pwrmgr_aon_low_power
-        width: 1
-        type: uni
-        end_idx: -1
-        act: req
-        suffix: ""
-        default: 1'b0
-      }
-      {
-        package: lc_ctrl_pkg
-        struct: lc_tx
-        phys_pd: chip
-        signame: lc_ctrl_lc_escalate_en
-        width: 1
-        type: uni
-        end_idx: -1
-        act: req
-        suffix: ""
-        default: lc_ctrl_pkg::Off
-      }
-      {
-        package: ""
-        struct: logic
-        phys_pd: chip
-        signame: pwrmgr_aon_wakeups
-        width: 1
-        type: uni
-        end_idx: -1
-        act: rcv
-        suffix: ""
-        default: "'0"
-      }
-      {
-        package: ""
-        struct: logic
-        phys_pd: chip
-        signame: pwrmgr_aon_rstreqs
-        width: 1
-        type: uni
-        end_idx: -1
-        act: rcv
-        suffix: ""
-        default: "'0"
-      }
-      {
-        package: tlul_pkg
-        struct: tl_h2d
-        phys_pd: chip
-        signame: uart1_tl_req
-        width: 1
-        type: req_rsp
-        end_idx: -1
-        act: rsp
-        suffix: req
-        default: tlul_pkg::TL_H2D_DEFAULT
-      }
-      {
-        package: tlul_pkg
-        struct: tl_d2h
-        phys_pd: chip
-        signame: uart1_tl_rsp
-        width: 1
-        type: req_rsp
-        end_idx: -1
-        act: rsp
-        suffix: rsp
-        default: tlul_pkg::TL_D2H_DEFAULT
-      }
-      {
-        package: tlul_pkg
-        struct: tl_h2d
-        phys_pd: chip
-        signame: aon_timer_aon_tl_req
-        width: 1
-        type: req_rsp
-        end_idx: -1
-        act: rsp
-        suffix: req
-        default: tlul_pkg::TL_H2D_DEFAULT
-      }
-      {
-        package: tlul_pkg
-        struct: tl_d2h
-        phys_pd: chip
-        signame: aon_timer_aon_tl_rsp
-        width: 1
-        type: req_rsp
-        end_idx: -1
-        act: rsp
-        suffix: rsp
-        default: tlul_pkg::TL_D2H_DEFAULT
       }
     ]
   }

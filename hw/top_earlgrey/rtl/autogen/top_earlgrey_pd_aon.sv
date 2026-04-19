@@ -26,9 +26,11 @@ module top_earlgrey_pd_aon #(
   input  tlul_pkg::tl_h2d_t       aon_timer_aon_tl_req_i,
   output tlul_pkg::tl_d2h_t       aon_timer_aon_tl_rsp_o,
 
+  output logic [10:0] intr_vector_o,
 
-  input                      scan_rst_ni, // reset used for test mode
-  input                      scan_en_i,
+  // Manual DFT signals 
+  input                        scan_rst_ni, // reset used for test mode
+  input                        scan_en_i,
   input prim_mubi_pkg::mubi4_t scanmode_i   // lc_ctrl_pkg::On for Scan
 );
 
@@ -49,6 +51,20 @@ module top_earlgrey_pd_aon #(
   // aon_timer_aon
 
 
+  // Interrupt source list
+  logic intr_uart1_tx_watermark;
+  logic intr_uart1_rx_watermark;
+  logic intr_uart1_tx_done;
+  logic intr_uart1_rx_overflow;
+  logic intr_uart1_rx_frame_err;
+  logic intr_uart1_rx_break_err;
+  logic intr_uart1_rx_timeout;
+  logic intr_uart1_rx_parity_err;
+  logic intr_uart1_tx_empty;
+  logic intr_aon_timer_aon_wkup_timer_expired;
+  logic intr_aon_timer_aon_wdog_timer_bark;
+
+
   // Peripheral Instantiation
 
   uart #(
@@ -64,15 +80,15 @@ module top_earlgrey_pd_aon #(
     .cio_tx_en_o (cio_uart1_tx_en_d2p),
 
     // Interrupt
-    .intr_tx_watermark_o  (intr_uart1_tx_watermark),
-    .intr_rx_watermark_o  (intr_uart1_rx_watermark),
-    .intr_tx_done_o       (intr_uart1_tx_done),
-    .intr_rx_overflow_o   (intr_uart1_rx_overflow),
-    .intr_rx_frame_err_o  (intr_uart1_rx_frame_err),
-    .intr_rx_break_err_o  (intr_uart1_rx_break_err),
-    .intr_rx_timeout_o    (intr_uart1_rx_timeout),
-    .intr_rx_parity_err_o (intr_uart1_rx_parity_err),
-    .intr_tx_empty_o      (intr_uart1_tx_empty),
+    .intr_tx_watermark_o (intr_uart1_tx_watermark),
+    .intr_rx_watermark_o (intr_uart1_rx_watermark),
+    .intr_tx_done_o      (intr_uart1_tx_done),
+    .intr_rx_overflow_o  (intr_uart1_rx_overflow),
+    .intr_rx_frame_err_o (intr_uart1_rx_frame_err),
+    .intr_rx_break_err_o (intr_uart1_rx_break_err),
+    .intr_rx_timeout_o   (intr_uart1_rx_timeout),
+    .intr_rx_parity_err_o(intr_uart1_rx_parity_err),
+    .intr_tx_empty_o     (intr_uart1_tx_empty),
 
     // alert_handler[1]: fatal_fault
     .alert_tx_o  ( alert_tx[1:1] ),
@@ -96,8 +112,8 @@ module top_earlgrey_pd_aon #(
   ) u_aon_timer_aon (
 
     // Interrupt
-    .intr_wkup_timer_expired_o (intr_aon_timer_aon_wkup_timer_expired),
-    .intr_wdog_timer_bark_o    (intr_aon_timer_aon_wdog_timer_bark),
+    .intr_wkup_timer_expired_o(intr_aon_timer_aon_wkup_timer_expired),
+    .intr_wdog_timer_bark_o   (intr_aon_timer_aon_wdog_timer_bark),
 
     // alert_handler[31]: fatal_fault
     .alert_tx_o  ( alert_tx[31:31] ),
@@ -121,6 +137,22 @@ module top_earlgrey_pd_aon #(
     .rst_aon_ni (rstmgr_aon_resets.rst_lc_aon_n[rstmgr_pkg::DomainAonSel])
   );
 
+
+  // Interrupt assignments
+  // Interrupt vector to PLIC rv_plic in power domain main
+  assign intr_vector_o = {
+    intr_aon_timer_aon_wdog_timer_bark,
+    intr_aon_timer_aon_wkup_timer_expired,
+    intr_uart1_tx_empty,
+    intr_uart1_rx_parity_err,
+    intr_uart1_rx_timeout,
+    intr_uart1_rx_break_err,
+    intr_uart1_rx_frame_err,
+    intr_uart1_rx_overflow,
+    intr_uart1_tx_done,
+    intr_uart1_rx_watermark,
+    intr_uart1_tx_watermark
+  };
 
 endmodule
 

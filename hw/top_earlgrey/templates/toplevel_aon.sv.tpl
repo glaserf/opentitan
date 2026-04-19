@@ -57,9 +57,12 @@ module top_${top["name"]}_pd_aon #(
   % endfor
 
 % endif
+\
+<%include file="/toplevel_interrupt_ports.tpl" args="top=top,phys_pd='aon'" />\
 
-  input                      scan_rst_ni, // reset used for test mode
-  input                      scan_en_i,
+  // Manual DFT signals 
+  input                        scan_rst_ni, // reset used for test mode
+  input                        scan_en_i,
   input prim_mubi_pkg::mubi4_t scanmode_i   // lc_ctrl_pkg::On for Scan
 );
 
@@ -78,7 +81,7 @@ module top_${top["name"]}_pd_aon #(
 <%
     localparams = [p for p in m["param_list"] if p.get("local") == "true" and p.get("expose") == "true"]
     if not len(localparams):
-        continue
+      continue
 %>\
   // local parameters for ${m['name']}
   % for p_exp in localparams:
@@ -116,6 +119,8 @@ module top_${top["name"]}_pd_aon #(
   logic ${lib.bitarray(p_out.bits.width(), max_sigwidth)} cio_${m["name"]}_${p_out.name}_en_d2p;
   % endfor
 % endfor
+
+<%include file="/toplevel_interrupts.tpl" args="lib=lib,top=top,name_to_block=name_to_block,plic_info=plic_info,phys_pd='aon'" />\
 
 ## Inter-module Definitions
 % if len(lib.get_intermodule_list(top, "aon")) >= 1:
@@ -185,9 +190,9 @@ has_params, param_items = lib.get_params(top, m)
       outgoing_interrupt_idx[intr_group] += intr.bits.width()
 %>\
     // External interrupt group "${intr_group}" [${intr_slice}]: ${intr.name}
-    .${lib.ljust("intr_"+intr.name+"_o",max_intrwidth+7)} (outgoing_interrupt_${intr_group}_o[${intr_slice}]),
+    .${lib.ljust("intr_"+intr.name+"_o",max_intrwidth+7)}(outgoing_interrupt_${intr_group}_o[${intr_slice}]),
     % else:
-    .${lib.ljust("intr_"+intr.name+"_o",max_intrwidth+7)} (intr_${m["name"]}_${intr.name}),
+    .${lib.ljust("intr_"+intr.name+"_o",max_intrwidth+7)}(intr_${m["name"]}_${intr.name}),
     % endif
   % endfor
   % if alert_info:
@@ -282,6 +287,9 @@ has_params, param_items = lib.get_params(top, m)
   );
 
 % endfor
+
+  // Interrupt assignments
+<%include file="/toplevel_interrupt_assignments.tpl" args="top=top,phys_pd='aon'" />\
 
 endmodule
 

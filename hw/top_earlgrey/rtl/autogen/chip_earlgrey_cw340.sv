@@ -1029,6 +1029,7 @@ module chip_earlgrey_cw340 #(
   prim_mubi_pkg::mubi4_t lc_clk_bypass;   // TODO Tim
 
   // Inter-Power Domain signals
+  logic [10:0] intr_vector_pd_aon;
   logic       aon_timer_aon_nmi_wdog_timer_bark;
   logic       pwrmgr_aon_low_power;
   lc_ctrl_pkg::lc_tx_t       lc_ctrl_lc_escalate_en;
@@ -1087,6 +1088,9 @@ module chip_earlgrey_cw340 #(
     .uart1_tl_rsp_i                     (uart1_tl_rsp          ),
     .aon_timer_aon_tl_req_o             (aon_timer_aon_tl_req  ),
     .aon_timer_aon_tl_rsp_i             (aon_timer_aon_tl_rsp  ),
+
+    // Special inter-power domain signals
+    .intr_vector_pd_aon_i(intr_vector_pd_aon),
 
     // Regular ports (auto-generated)
     .adc_req_o                    (adc_req            ),
@@ -1183,6 +1187,11 @@ module chip_earlgrey_cw340 #(
     .uart1_tl_rsp_o                     (uart1_tl_rsp          ),
     .aon_timer_aon_tl_req_i             (aon_timer_aon_tl_req  ),
     .aon_timer_aon_tl_rsp_o             (aon_timer_aon_tl_rsp  ),
+
+    // Special inter-power domain signals
+    .intr_vector_o(intr_vector_pd_aon),
+
+    // Regular ports (auto-generated)
   );
 
 

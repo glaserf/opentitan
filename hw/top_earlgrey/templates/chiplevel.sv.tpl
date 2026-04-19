@@ -1104,6 +1104,9 @@ else:
     .${lib.ljust(sig["signame"], max_portwidth)}(${lib.ljust(sig["signame_chip"][target["name"]], max_sigwidth)}),
     % endfor
 
+    // Special inter-power domain signals
+<%include file="/chiplevel_interrupt_portmap.tpl" args="top=top,phys_pd='main'" />\
+
 <%
 port_list = lib.get_intermodule_ports(top, inter_pd = False)
 max_portwidth = max(len(x["signame"]) for x in port_list) if port_list else 0
@@ -1153,6 +1156,23 @@ else:
   max_sigwidth = 0
 %>\
     // Ports to and from other power domains (auto-generated)
+    % for sig in port_list:
+    .${lib.ljust(sig["signame"], max_portwidth)}(${lib.ljust(sig["signame_chip"][target["name"]], max_sigwidth)}),
+    % endfor
+
+    // Special inter-power domain signals
+<%include file="/chiplevel_interrupt_portmap.tpl" args="top=top,phys_pd='aon'" />\
+
+<%
+port_list = lib.get_intermodule_ports(top, "aon", inter_pd = False)
+max_portwidth = max(len(x["signame"]) for x in port_list) if port_list else 0
+if port_list:
+  filtered_port_list = [p for p in port_list if len(p["signame_chip"][target["name"]]) <= 25]
+  max_sigwidth = max(len(p["signame_chip"][target["name"]]) for p in filtered_port_list)
+else:
+  max_sigwidth = 0
+%>\
+    // Regular ports (auto-generated)
     % for sig in port_list:
     .${lib.ljust(sig["signame"], max_portwidth)}(${lib.ljust(sig["signame_chip"][target["name"]], max_sigwidth)}),
     % endfor

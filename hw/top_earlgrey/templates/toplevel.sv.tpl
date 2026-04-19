@@ -39,7 +39,6 @@ unused_im_defs, undriven_im_defs = lib.get_dangling_im_def(top["inter_signal"]["
 last_modidx_with_params = lib.idx_of_last_module_with_params(top)
 
 # plic -> {count, prefix}
-plic_info = {}
 
 default_handler = top.get("default_alert_handler", None)
 
@@ -111,6 +110,9 @@ module top_${top["name"]} #(
   % endfor
 
 % endif
+\
+<%include file="/toplevel_interrupt_ports.tpl" args="top=top,phys_pd='main'" />\
+\
   % for irq_group, irqs in top['incoming_interrupt'].items():
   // Incoming interrupt of group ${irq_group}
   input logic [${len(irqs)-1}:0] incoming_interrupt_${irq_group}_i,
@@ -227,7 +229,7 @@ module top_${top["name"]} #(
 % endfor
 
 
-<%include file="/toplevel_interrupts.tpl" args="lib=lib,top=top,name_to_block=name_to_block,plic_info=plic_info" />\
+<%include file="/toplevel_interrupts.tpl" args="lib=lib,top=top,name_to_block=name_to_block,phys_pd='main'" />\
 
   // Alert list
 % for handler in alert_handlers:
@@ -527,9 +529,9 @@ has_params, param_items = lib.get_params(top, m)
       outgoing_interrupt_idx[intr_group] += intr.bits.width()
 %>\
     // External interrupt group "${intr_group}" [${intr_slice}]: ${intr.name}
-    .${lib.ljust("intr_"+intr.name+"_o",max_intrwidth+7)} (outgoing_interrupt_${intr_group}_o[${intr_slice}]),
+    .${lib.ljust("intr_"+intr.name+"_o",max_intrwidth+7)}(outgoing_interrupt_${intr_group}_o[${intr_slice}]),
     % else:
-    .${lib.ljust("intr_"+intr.name+"_o",max_intrwidth+7)} (intr_${m["name"]}_${intr.name}),
+    .${lib.ljust("intr_"+intr.name+"_o",max_intrwidth+7)}(intr_${m["name"]}_${intr.name}),
     % endif
   % endfor
   % if alert_info:
@@ -562,7 +564,9 @@ has_params, param_items = lib.get_params(top, m)
     % endfor
   % endif
   % if m.get("template_type") == "rv_plic":
-    .intr_src_i (${plic_info[m["name"]]["vector"]}),
+<% prefix = m["name"] + "_" if len(top["plic_info"]) > 1 else "" %>
+    // Interrupt source vector
+    .intr_src_i (${prefix}intr_vector),
   % endif
   % if m.get("template_type") == "pinmux":
 
@@ -639,7 +643,7 @@ has_params, param_items = lib.get_params(top, m)
 % endfor\
 
   // Interrupt assignments
-<%include file="/toplevel_interrupt_assignments.tpl" args="top=top,plic_info=plic_info" />\
+<%include file="/toplevel_interrupt_assignments.tpl" args="top=top,phys_pd='main'" />\
 
   // TL-UL Crossbar
 % for xbar in top["xbar"]:
