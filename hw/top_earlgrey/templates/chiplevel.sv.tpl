@@ -6,6 +6,7 @@ ${gencmd}
 import re
 import topgen.lib as lib
 from reggen.params import Parameter
+from topgen.merge import alert_handler_signals
 
 from copy import deepcopy
 
@@ -1105,7 +1106,7 @@ else:
     % endfor
 
     // Special inter-power domain signals
-<%include file="/chiplevel_interrupt_portmap.tpl" args="top=top,phys_pd='main'" />\
+<%include file="/chiplevel_specialsig_portmap.tpl" args="top=top, phys_pd='main', alert_handler_signals=alert_handler_signals" />\
 
 <%
 port_list = lib.get_intermodule_ports(top, inter_pd = False)
@@ -1161,7 +1162,7 @@ else:
     % endfor
 
     // Special inter-power domain signals
-<%include file="/chiplevel_interrupt_portmap.tpl" args="top=top,phys_pd='aon'" />\
+<%include file="/chiplevel_specialsig_portmap.tpl" args="top=top, phys_pd='aon', alert_handler_signals=alert_handler_signals" />\
 
 <%
 port_list = lib.get_intermodule_ports(top, "aon", inter_pd = False)

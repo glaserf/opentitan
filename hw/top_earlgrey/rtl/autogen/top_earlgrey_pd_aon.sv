@@ -28,6 +28,9 @@ module top_earlgrey_pd_aon #(
 
   output logic [10:0] intr_vector_o,
 
+  output logic [1:0] alert_tx_o,
+  input  logic [1:0] alert_rx_i,
+
   // Manual DFT signals 
   input                        scan_rst_ni, // reset used for test mode
   input                        scan_en_i,
@@ -68,7 +71,7 @@ module top_earlgrey_pd_aon #(
   // Peripheral Instantiation
 
   uart #(
-    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[1:1]),
+    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[0]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
   ) u_uart1 (
 
@@ -91,8 +94,8 @@ module top_earlgrey_pd_aon #(
     .intr_tx_empty_o     (intr_uart1_tx_empty),
 
     // alert_handler[1]: fatal_fault
-    .alert_tx_o  ( alert_tx[1:1] ),
-    .alert_rx_i  ( alert_rx[1:1] ),
+    .alert_tx_o(alert_tx_o[0]),
+    .alert_rx_i(alert_rx_i[0]),
 
     // Inter-module signals
     .lsio_trigger_o(),
@@ -107,7 +110,7 @@ module top_earlgrey_pd_aon #(
   );
 
   aon_timer #(
-    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[31:31]),
+    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[1]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
   ) u_aon_timer_aon (
 
@@ -116,8 +119,8 @@ module top_earlgrey_pd_aon #(
     .intr_wdog_timer_bark_o   (intr_aon_timer_aon_wdog_timer_bark),
 
     // alert_handler[31]: fatal_fault
-    .alert_tx_o  ( alert_tx[31:31] ),
-    .alert_rx_i  ( alert_rx[31:31] ),
+    .alert_tx_o(alert_tx_o[1]),
+    .alert_rx_i(alert_rx_i[1]),
 
     // Inter-module signals
     .nmi_wdog_timer_bark_o(aon_timer_aon_nmi_wdog_timer_bark_o),

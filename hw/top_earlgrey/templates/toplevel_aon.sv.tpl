@@ -58,7 +58,7 @@ module top_${top["name"]}_pd_aon #(
 
 % endif
 \
-<%include file="/toplevel_interrupt_ports.tpl" args="top=top,phys_pd='aon'" />\
+<%include file="/toplevel_specialsig_ports.tpl" args="top=top, phys_pd='aon', alert_handler_signals=alert_handler_signals" />\
 
   // Manual DFT signals 
   input                        scan_rst_ni, // reset used for test mode
@@ -202,8 +202,8 @@ has_params, param_items = lib.get_params(top, m)
     % endif
     // ${comment}
     % endfor
-    .alert_tx_o  ( ${alert_info["tx_expr"]} ),
-    .alert_rx_i  ( ${alert_info["rx_expr"]} ),
+    .alert_tx_o(${alert_info["tx_expr"]}),
+    .alert_rx_i(${alert_info["rx_expr"]}),
   % endif
 <%include file="/toplevel_racl_signals.tpl" args="module=m,top=top,block=block"/>\
   ## TODO: Inter-module Connection
@@ -251,8 +251,8 @@ has_params, param_items = lib.get_params(top, m)
   % if m.get("template_type") == "alert_handler":
 <% alert_tx, alert_rx = alert_handler_signals(m["type"]) %>\
     // alert signals
-    .alert_rx_o  ( ${alert_rx} ),
-    .alert_tx_i  ( ${alert_tx} ),
+    .alert_rx_o(${alert_rx}),
+    .alert_tx_i(${alert_tx}),
     // synchronized clock gated / reset asserted
     // indications for each alert
     .lpg_cg_en_i  ( lpg_cg_en  ),

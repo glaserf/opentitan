@@ -18706,6 +18706,32 @@
         package: ""
         struct: logic
         phys_pd: chip
+        signame: alert_tx_pd_aon
+        width: 2
+        type: uni
+        special: alert
+        end_idx: -1
+        act: req
+        suffix: ""
+        default: "'0"
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: chip
+        signame: alert_rx_pd_aon
+        width: 2
+        type: uni
+        special: alert
+        end_idx: -1
+        act: req
+        suffix: ""
+        default: "'0"
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: chip
         signame: aon_timer_aon_nmi_wdog_timer_bark
         width: 1
         type: uni
@@ -18860,9 +18886,9 @@
   {
     module_uart0:
     {
-      tx_expr: alert_tx[0:0]
-      rx_expr: alert_rx[0:0]
-      async_expr: alert_handler_reg_pkg::AsyncOn[0:0]
+      tx_expr: alert_tx[0]
+      rx_expr: alert_rx[0]
+      async_expr: alert_handler_reg_pkg::AsyncOn[0]
       comments:
       [
         alert_handler[0]: fatal_fault
@@ -18870,9 +18896,9 @@
     }
     module_uart1:
     {
-      tx_expr: alert_tx[1:1]
-      rx_expr: alert_rx[1:1]
-      async_expr: alert_handler_reg_pkg::AsyncOn[1:1]
+      tx_expr: alert_tx_o[0]
+      rx_expr: alert_rx_i[0]
+      async_expr: alert_handler_reg_pkg::AsyncOn[0]
       comments:
       [
         alert_handler[1]: fatal_fault
@@ -18880,9 +18906,9 @@
     }
     module_uart2:
     {
-      tx_expr: alert_tx[2:2]
-      rx_expr: alert_rx[2:2]
-      async_expr: alert_handler_reg_pkg::AsyncOn[2:2]
+      tx_expr: alert_tx[2]
+      rx_expr: alert_rx[2]
+      async_expr: alert_handler_reg_pkg::AsyncOn[2]
       comments:
       [
         alert_handler[2]: fatal_fault
@@ -18890,9 +18916,9 @@
     }
     module_uart3:
     {
-      tx_expr: alert_tx[3:3]
-      rx_expr: alert_rx[3:3]
-      async_expr: alert_handler_reg_pkg::AsyncOn[3:3]
+      tx_expr: alert_tx[3]
+      rx_expr: alert_rx[3]
+      async_expr: alert_handler_reg_pkg::AsyncOn[3]
       comments:
       [
         alert_handler[3]: fatal_fault
@@ -18900,9 +18926,9 @@
     }
     module_gpio:
     {
-      tx_expr: alert_tx[4:4]
-      rx_expr: alert_rx[4:4]
-      async_expr: alert_handler_reg_pkg::AsyncOn[4:4]
+      tx_expr: alert_tx[4]
+      rx_expr: alert_rx[4]
+      async_expr: alert_handler_reg_pkg::AsyncOn[4]
       comments:
       [
         alert_handler[4]: fatal_fault
@@ -18910,9 +18936,9 @@
     }
     module_spi_device:
     {
-      tx_expr: alert_tx[5:5]
-      rx_expr: alert_rx[5:5]
-      async_expr: alert_handler_reg_pkg::AsyncOn[5:5]
+      tx_expr: alert_tx[5]
+      rx_expr: alert_rx[5]
+      async_expr: alert_handler_reg_pkg::AsyncOn[5]
       comments:
       [
         alert_handler[5]: fatal_fault
@@ -18920,9 +18946,9 @@
     }
     module_i2c0:
     {
-      tx_expr: alert_tx[6:6]
-      rx_expr: alert_rx[6:6]
-      async_expr: alert_handler_reg_pkg::AsyncOn[6:6]
+      tx_expr: alert_tx[6]
+      rx_expr: alert_rx[6]
+      async_expr: alert_handler_reg_pkg::AsyncOn[6]
       comments:
       [
         alert_handler[6]: fatal_fault
@@ -18930,9 +18956,9 @@
     }
     module_i2c1:
     {
-      tx_expr: alert_tx[7:7]
-      rx_expr: alert_rx[7:7]
-      async_expr: alert_handler_reg_pkg::AsyncOn[7:7]
+      tx_expr: alert_tx[7]
+      rx_expr: alert_rx[7]
+      async_expr: alert_handler_reg_pkg::AsyncOn[7]
       comments:
       [
         alert_handler[7]: fatal_fault
@@ -18940,9 +18966,9 @@
     }
     module_i2c2:
     {
-      tx_expr: alert_tx[8:8]
-      rx_expr: alert_rx[8:8]
-      async_expr: alert_handler_reg_pkg::AsyncOn[8:8]
+      tx_expr: alert_tx[8]
+      rx_expr: alert_rx[8]
+      async_expr: alert_handler_reg_pkg::AsyncOn[8]
       comments:
       [
         alert_handler[8]: fatal_fault
@@ -18950,9 +18976,9 @@
     }
     module_pattgen:
     {
-      tx_expr: alert_tx[9:9]
-      rx_expr: alert_rx[9:9]
-      async_expr: alert_handler_reg_pkg::AsyncOn[9:9]
+      tx_expr: alert_tx[9]
+      rx_expr: alert_rx[9]
+      async_expr: alert_handler_reg_pkg::AsyncOn[9]
       comments:
       [
         alert_handler[9]: fatal_fault
@@ -18960,9 +18986,9 @@
     }
     module_rv_timer:
     {
-      tx_expr: alert_tx[10:10]
-      rx_expr: alert_rx[10:10]
-      async_expr: alert_handler_reg_pkg::AsyncOn[10:10]
+      tx_expr: alert_tx[10]
+      rx_expr: alert_rx[10]
+      async_expr: alert_handler_reg_pkg::AsyncOn[10]
       comments:
       [
         alert_handler[10]: fatal_fault
@@ -18996,9 +19022,9 @@
     }
     module_spi_host0:
     {
-      tx_expr: alert_tx[19:19]
-      rx_expr: alert_rx[19:19]
-      async_expr: alert_handler_reg_pkg::AsyncOn[19:19]
+      tx_expr: alert_tx[19]
+      rx_expr: alert_rx[19]
+      async_expr: alert_handler_reg_pkg::AsyncOn[19]
       comments:
       [
         alert_handler[19]: fatal_fault
@@ -19006,9 +19032,9 @@
     }
     module_spi_host1:
     {
-      tx_expr: alert_tx[20:20]
-      rx_expr: alert_rx[20:20]
-      async_expr: alert_handler_reg_pkg::AsyncOn[20:20]
+      tx_expr: alert_tx[20]
+      rx_expr: alert_rx[20]
+      async_expr: alert_handler_reg_pkg::AsyncOn[20]
       comments:
       [
         alert_handler[20]: fatal_fault
@@ -19016,9 +19042,9 @@
     }
     module_usbdev:
     {
-      tx_expr: alert_tx[21:21]
-      rx_expr: alert_rx[21:21]
-      async_expr: alert_handler_reg_pkg::AsyncOn[21:21]
+      tx_expr: alert_tx[21]
+      rx_expr: alert_rx[21]
+      async_expr: alert_handler_reg_pkg::AsyncOn[21]
       comments:
       [
         alert_handler[21]: fatal_fault
@@ -19026,9 +19052,9 @@
     }
     module_pwrmgr_aon:
     {
-      tx_expr: alert_tx[22:22]
-      rx_expr: alert_rx[22:22]
-      async_expr: alert_handler_reg_pkg::AsyncOn[22:22]
+      tx_expr: alert_tx[22]
+      rx_expr: alert_rx[22]
+      async_expr: alert_handler_reg_pkg::AsyncOn[22]
       comments:
       [
         alert_handler[22]: fatal_fault
@@ -19058,9 +19084,9 @@
     }
     module_sysrst_ctrl_aon:
     {
-      tx_expr: alert_tx[27:27]
-      rx_expr: alert_rx[27:27]
-      async_expr: alert_handler_reg_pkg::AsyncOn[27:27]
+      tx_expr: alert_tx[27]
+      rx_expr: alert_rx[27]
+      async_expr: alert_handler_reg_pkg::AsyncOn[27]
       comments:
       [
         alert_handler[27]: fatal_fault
@@ -19068,9 +19094,9 @@
     }
     module_adc_ctrl_aon:
     {
-      tx_expr: alert_tx[28:28]
-      rx_expr: alert_rx[28:28]
-      async_expr: alert_handler_reg_pkg::AsyncOn[28:28]
+      tx_expr: alert_tx[28]
+      rx_expr: alert_rx[28]
+      async_expr: alert_handler_reg_pkg::AsyncOn[28]
       comments:
       [
         alert_handler[28]: fatal_fault
@@ -19078,9 +19104,9 @@
     }
     module_pwm_aon:
     {
-      tx_expr: alert_tx[29:29]
-      rx_expr: alert_rx[29:29]
-      async_expr: alert_handler_reg_pkg::AsyncOn[29:29]
+      tx_expr: alert_tx[29]
+      rx_expr: alert_rx[29]
+      async_expr: alert_handler_reg_pkg::AsyncOn[29]
       comments:
       [
         alert_handler[29]: fatal_fault
@@ -19088,9 +19114,9 @@
     }
     module_pinmux_aon:
     {
-      tx_expr: alert_tx[30:30]
-      rx_expr: alert_rx[30:30]
-      async_expr: alert_handler_reg_pkg::AsyncOn[30:30]
+      tx_expr: alert_tx[30]
+      rx_expr: alert_rx[30]
+      async_expr: alert_handler_reg_pkg::AsyncOn[30]
       comments:
       [
         alert_handler[30]: fatal_fault
@@ -19098,9 +19124,9 @@
     }
     module_aon_timer_aon:
     {
-      tx_expr: alert_tx[31:31]
-      rx_expr: alert_rx[31:31]
-      async_expr: alert_handler_reg_pkg::AsyncOn[31:31]
+      tx_expr: alert_tx_o[1]
+      rx_expr: alert_rx_i[1]
+      async_expr: alert_handler_reg_pkg::AsyncOn[1]
       comments:
       [
         alert_handler[31]: fatal_fault
@@ -19119,9 +19145,9 @@
     }
     module_sram_ctrl_ret_aon:
     {
-      tx_expr: alert_tx[34:34]
-      rx_expr: alert_rx[34:34]
-      async_expr: alert_handler_reg_pkg::AsyncOn[34:34]
+      tx_expr: alert_tx[34]
+      rx_expr: alert_rx[34]
+      async_expr: alert_handler_reg_pkg::AsyncOn[34]
       comments:
       [
         alert_handler[34]: fatal_error
@@ -19143,9 +19169,9 @@
     }
     module_rv_dm:
     {
-      tx_expr: alert_tx[40:40]
-      rx_expr: alert_rx[40:40]
-      async_expr: alert_handler_reg_pkg::AsyncOn[40:40]
+      tx_expr: alert_tx[40]
+      rx_expr: alert_rx[40]
+      async_expr: alert_handler_reg_pkg::AsyncOn[40]
       comments:
       [
         alert_handler[40]: fatal_fault
@@ -19153,9 +19179,9 @@
     }
     module_rv_plic:
     {
-      tx_expr: alert_tx[41:41]
-      rx_expr: alert_rx[41:41]
-      async_expr: alert_handler_reg_pkg::AsyncOn[41:41]
+      tx_expr: alert_tx[41]
+      rx_expr: alert_rx[41]
+      async_expr: alert_handler_reg_pkg::AsyncOn[41]
       comments:
       [
         alert_handler[41]: fatal_fault
@@ -19174,9 +19200,9 @@
     }
     module_hmac:
     {
-      tx_expr: alert_tx[44:44]
-      rx_expr: alert_rx[44:44]
-      async_expr: alert_handler_reg_pkg::AsyncOn[44:44]
+      tx_expr: alert_tx[44]
+      rx_expr: alert_rx[44]
+      async_expr: alert_handler_reg_pkg::AsyncOn[44]
       comments:
       [
         alert_handler[44]: fatal_fault
@@ -19261,9 +19287,9 @@
     }
     module_sram_ctrl_main:
     {
-      tx_expr: alert_tx[59:59]
-      rx_expr: alert_rx[59:59]
-      async_expr: alert_handler_reg_pkg::AsyncOn[59:59]
+      tx_expr: alert_tx[59]
+      rx_expr: alert_rx[59]
+      async_expr: alert_handler_reg_pkg::AsyncOn[59]
       comments:
       [
         alert_handler[59]: fatal_error
@@ -19271,9 +19297,9 @@
     }
     module_rom_ctrl:
     {
-      tx_expr: alert_tx[60:60]
-      rx_expr: alert_rx[60:60]
-      async_expr: alert_handler_reg_pkg::AsyncOn[60:60]
+      tx_expr: alert_tx[60]
+      rx_expr: alert_rx[60]
+      async_expr: alert_handler_reg_pkg::AsyncOn[60]
       comments:
       [
         alert_handler[60]: fatal
@@ -19291,6 +19317,32 @@
         alert_handler[63]: fatal_hw_err
         alert_handler[64]: recov_hw_err
       ]
+    }
+  }
+  alert_handler_info:
+  {
+    alert_handler:
+    {
+      phys_pd: main
+      count_tot: 65
+      count_pd:
+      {
+        main: 63
+        aon: 2
+      }
+      connect_pd:
+      {
+        1:
+        {
+          src_pd: aon
+          idx: 0
+        }
+        31:
+        {
+          src_pd: aon
+          idx: 1
+        }
+      }
     }
   }
   interrupt_module:

@@ -42,7 +42,7 @@ last_modidx_with_params = lib.idx_of_last_module_with_params(top)
 
 default_handler = top.get("default_alert_handler", None)
 
-alert_handlers = [handler["type"] for handler in lib.find_modules(lib.get_all_modules(top), "alert_handler")]
+alert_handlers = [handler["type"] for handler in lib.find_modules(lib.get_all_modules(top), "alert_handler", phys_pd="main")]
 %>\
 module top_${top["name"]} #(
 % if num_rom_ctrl == 0:
@@ -111,7 +111,7 @@ module top_${top["name"]} #(
 
 % endif
 \
-<%include file="/toplevel_interrupt_ports.tpl" args="top=top,phys_pd='main'" />\
+<%include file="/toplevel_specialsig_ports.tpl" args="top=top, phys_pd='main', alert_handler_signals=alert_handler_signals" />\
 \
   % for irq_group, irqs in top['incoming_interrupt'].items():
   // Incoming interrupt of group ${irq_group}
@@ -541,8 +541,8 @@ has_params, param_items = lib.get_params(top, m)
     % endif
     // ${comment}
     % endfor
-    .alert_tx_o  ( ${alert_info["tx_expr"]} ),
-    .alert_rx_i  ( ${alert_info["rx_expr"]} ),
+    .alert_tx_o(${alert_info["tx_expr"]}),
+    .alert_rx_i(${alert_info["rx_expr"]}),
   % endif
 <%include file="/toplevel_racl_signals.tpl" args="module=m,top=top,block=block"/>\
   ## TODO: Inter-module Connection
@@ -592,8 +592,8 @@ has_params, param_items = lib.get_params(top, m)
   % if m.get("template_type") == "alert_handler":
 <% alert_tx, alert_rx = alert_handler_signals(m["type"]) %>\
     // alert signals
-    .alert_rx_o  ( ${alert_rx} ),
-    .alert_tx_i  ( ${alert_tx} ),
+    .alert_rx_o(${alert_rx}),
+    .alert_tx_i(${alert_tx}),
     // synchronized clock gated / reset asserted
     // indications for each alert
     .lpg_cg_en_i  ( lpg_cg_en  ),
@@ -641,6 +641,19 @@ has_params, param_items = lib.get_params(top, m)
   assign ${alert_info["tx_expr"]} = incoming_alert_${alert_group}_tx_i;
   assign incoming_alert_${alert_group}_rx_o = ${alert_info["rx_expr"]};
 % endfor\
+
+% for handler in alert_handlers:
+<%  alert_tx, alert_rx = alert_handler_signals(handler) %>\
+  % if top["alert_handler_info"][handler]["connect_pd"]:
+  // External connections for ${handler}
+  % for idx, map in top["alert_handler_info"][handler]["connect_pd"].items():
+  assign ${alert_tx}[${idx}] = ${alert_tx}_pd_${map["src_pd"]}_i[${map["idx"]}];
+  % endfor
+  % for idx, map in top["alert_handler_info"][handler]["connect_pd"].items():
+  assign ${alert_rx}_pd_${map["src_pd"]}_o[${map["idx"]}] = ${alert_rx}[${idx}];
+  % endfor
+  % endif
+% endfor
 
   // Interrupt assignments
 <%include file="/toplevel_interrupt_assignments.tpl" args="top=top,phys_pd='main'" />\

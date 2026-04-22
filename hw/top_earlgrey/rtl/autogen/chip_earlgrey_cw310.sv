@@ -1044,6 +1044,8 @@ module chip_earlgrey_cw310 #(
 
   // Inter-Power Domain signals
   logic [10:0] intr_vector_pd_aon;
+  logic [1:0] alert_tx_pd_aon;
+  logic [1:0] alert_rx_pd_aon;
   logic       aon_timer_aon_nmi_wdog_timer_bark;
   logic       pwrmgr_aon_low_power;
   lc_ctrl_pkg::lc_tx_t       lc_ctrl_lc_escalate_en;
@@ -1107,6 +1109,9 @@ module chip_earlgrey_cw310 #(
 
     // Special inter-power domain signals
     .intr_vector_pd_aon_i(intr_vector_pd_aon),
+
+    .alert_tx_pd_aon_i(alert_tx_pd_aon),
+    .alert_rx_pd_aon_o(alert_rx_pd_aon),
 
     // Regular ports (auto-generated)
     .adc_req_o                    (adc_req            ),
@@ -1206,6 +1211,9 @@ module chip_earlgrey_cw310 #(
 
     // Special inter-power domain signals
     .intr_vector_o(intr_vector_pd_aon),
+
+    .alert_tx_o(alert_tx_pd_aon),
+    .alert_rx_i(alert_rx_pd_aon),
 
     // Regular ports (auto-generated)
   );
