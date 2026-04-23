@@ -230,6 +230,9 @@ module top_earlgrey #(
   output logic       usbdev_usb_rx_enable_o,
   output logic       usbdev_usb_ref_val_o,
   output logic       usbdev_usb_ref_pulse_o,
+  output logic       cio_uart1_rx_p2d_o,
+  input  logic       cio_uart1_tx_d2p_i,
+  input  logic       cio_uart1_tx_en_d2p_i,
 
   input  logic [10:0] intr_vector_pd_aon_i,
 
@@ -282,12 +285,14 @@ module top_earlgrey #(
   localparam bit RvCoreIbexInstructionPipeline = 1'b0;
 
   // Signals
+  // Comportable IO (CIO)
   logic [56:0] mio_p2d;
   logic [74:0] mio_d2p;
   logic [74:0] mio_en_d2p;
   logic [15:0] dio_p2d;
   logic [15:0] dio_d2p;
   logic [15:0] dio_en_d2p;
+
   // uart0
   logic        cio_uart0_rx_p2d;
   logic        cio_uart0_tx_d2p;
@@ -429,8 +434,6 @@ module top_earlgrey #(
   // sram_ctrl_main
   // rom_ctrl
   // rv_core_ibex
-
-
 
   logic [185:0] intr_vector;
   // Interrupt source list
@@ -577,7 +580,6 @@ module top_earlgrey #(
   logic intr_edn0_edn_fatal_err;
   logic intr_edn1_edn_cmd_req_done;
   logic intr_edn1_edn_fatal_err;
-
   // Alert list
   prim_alert_pkg::alert_tx_t [alert_handler_pkg::NAlerts-1:0]  alert_tx;
   prim_alert_pkg::alert_rx_t [alert_handler_pkg::NAlerts-1:0]  alert_rx;
@@ -1061,11 +1063,11 @@ module top_earlgrey #(
   ) u_uart0 (
 
     // Input
-    .cio_rx_i    (cio_uart0_rx_p2d),
+    .cio_rx_i   (cio_uart0_rx_p2d),
 
     // Output
-    .cio_tx_o    (cio_uart0_tx_d2p),
-    .cio_tx_en_o (cio_uart0_tx_en_d2p),
+    .cio_tx_o   (cio_uart0_tx_d2p),
+    .cio_tx_en_o(cio_uart0_tx_en_d2p),
 
     // Interrupt
     .intr_tx_watermark_o (intr_uart0_tx_watermark),
@@ -1100,11 +1102,11 @@ module top_earlgrey #(
   ) u_uart2 (
 
     // Input
-    .cio_rx_i    (cio_uart2_rx_p2d),
+    .cio_rx_i   (cio_uart2_rx_p2d),
 
     // Output
-    .cio_tx_o    (cio_uart2_tx_d2p),
-    .cio_tx_en_o (cio_uart2_tx_en_d2p),
+    .cio_tx_o   (cio_uart2_tx_d2p),
+    .cio_tx_en_o(cio_uart2_tx_en_d2p),
 
     // Interrupt
     .intr_tx_watermark_o (intr_uart2_tx_watermark),
@@ -1139,11 +1141,11 @@ module top_earlgrey #(
   ) u_uart3 (
 
     // Input
-    .cio_rx_i    (cio_uart3_rx_p2d),
+    .cio_rx_i   (cio_uart3_rx_p2d),
 
     // Output
-    .cio_tx_o    (cio_uart3_tx_d2p),
-    .cio_tx_en_o (cio_uart3_tx_en_d2p),
+    .cio_tx_o   (cio_uart3_tx_d2p),
+    .cio_tx_en_o(cio_uart3_tx_en_d2p),
 
     // Interrupt
     .intr_tx_watermark_o (intr_uart3_tx_watermark),
@@ -1180,11 +1182,11 @@ module top_earlgrey #(
   ) u_gpio (
 
     // Input
-    .cio_gpio_i    (cio_gpio_gpio_p2d),
+    .cio_gpio_i   (cio_gpio_gpio_p2d),
 
     // Output
-    .cio_gpio_o    (cio_gpio_gpio_d2p),
-    .cio_gpio_en_o (cio_gpio_gpio_en_d2p),
+    .cio_gpio_o   (cio_gpio_gpio_d2p),
+    .cio_gpio_en_o(cio_gpio_gpio_en_d2p),
 
     // Interrupt
     .intr_gpio_o(intr_gpio_gpio),
@@ -1213,14 +1215,14 @@ module top_earlgrey #(
   ) u_spi_device (
 
     // Input
-    .cio_sck_i        (cio_spi_device_sck_p2d),
-    .cio_csb_i        (cio_spi_device_csb_p2d),
-    .cio_tpm_csb_i    (cio_spi_device_tpm_csb_p2d),
-    .cio_sd_i         (cio_spi_device_sd_p2d),
+    .cio_sck_i       (cio_spi_device_sck_p2d),
+    .cio_csb_i       (cio_spi_device_csb_p2d),
+    .cio_tpm_csb_i   (cio_spi_device_tpm_csb_p2d),
+    .cio_sd_i        (cio_spi_device_sd_p2d),
 
     // Output
-    .cio_sd_o         (cio_spi_device_sd_d2p),
-    .cio_sd_en_o      (cio_spi_device_sd_en_d2p),
+    .cio_sd_o        (cio_spi_device_sd_d2p),
+    .cio_sd_en_o     (cio_spi_device_sd_en_d2p),
 
     // Interrupt
     .intr_upload_cmdfifo_not_empty_o(intr_spi_device_upload_cmdfifo_not_empty),
@@ -1265,14 +1267,14 @@ module top_earlgrey #(
   ) u_i2c0 (
 
     // Input
-    .cio_sda_i    (cio_i2c0_sda_p2d),
-    .cio_scl_i    (cio_i2c0_scl_p2d),
+    .cio_sda_i   (cio_i2c0_sda_p2d),
+    .cio_scl_i   (cio_i2c0_scl_p2d),
 
     // Output
-    .cio_sda_o    (cio_i2c0_sda_d2p),
-    .cio_sda_en_o (cio_i2c0_sda_en_d2p),
-    .cio_scl_o    (cio_i2c0_scl_d2p),
-    .cio_scl_en_o (cio_i2c0_scl_en_d2p),
+    .cio_sda_o   (cio_i2c0_sda_d2p),
+    .cio_sda_en_o(cio_i2c0_sda_en_d2p),
+    .cio_scl_o   (cio_i2c0_scl_d2p),
+    .cio_scl_en_o(cio_i2c0_scl_en_d2p),
 
     // Interrupt
     .intr_fmt_threshold_o   (intr_i2c0_fmt_threshold),
@@ -1316,14 +1318,14 @@ module top_earlgrey #(
   ) u_i2c1 (
 
     // Input
-    .cio_sda_i    (cio_i2c1_sda_p2d),
-    .cio_scl_i    (cio_i2c1_scl_p2d),
+    .cio_sda_i   (cio_i2c1_sda_p2d),
+    .cio_scl_i   (cio_i2c1_scl_p2d),
 
     // Output
-    .cio_sda_o    (cio_i2c1_sda_d2p),
-    .cio_sda_en_o (cio_i2c1_sda_en_d2p),
-    .cio_scl_o    (cio_i2c1_scl_d2p),
-    .cio_scl_en_o (cio_i2c1_scl_en_d2p),
+    .cio_sda_o   (cio_i2c1_sda_d2p),
+    .cio_sda_en_o(cio_i2c1_sda_en_d2p),
+    .cio_scl_o   (cio_i2c1_scl_d2p),
+    .cio_scl_en_o(cio_i2c1_scl_en_d2p),
 
     // Interrupt
     .intr_fmt_threshold_o   (intr_i2c1_fmt_threshold),
@@ -1367,14 +1369,14 @@ module top_earlgrey #(
   ) u_i2c2 (
 
     // Input
-    .cio_sda_i    (cio_i2c2_sda_p2d),
-    .cio_scl_i    (cio_i2c2_scl_p2d),
+    .cio_sda_i   (cio_i2c2_sda_p2d),
+    .cio_scl_i   (cio_i2c2_scl_p2d),
 
     // Output
-    .cio_sda_o    (cio_i2c2_sda_d2p),
-    .cio_sda_en_o (cio_i2c2_sda_en_d2p),
-    .cio_scl_o    (cio_i2c2_scl_d2p),
-    .cio_scl_en_o (cio_i2c2_scl_en_d2p),
+    .cio_sda_o   (cio_i2c2_sda_d2p),
+    .cio_sda_en_o(cio_i2c2_sda_en_d2p),
+    .cio_scl_o   (cio_i2c2_scl_d2p),
+    .cio_scl_en_o(cio_i2c2_scl_en_d2p),
 
     // Interrupt
     .intr_fmt_threshold_o   (intr_i2c2_fmt_threshold),
@@ -1417,14 +1419,14 @@ module top_earlgrey #(
   ) u_pattgen (
 
     // Output
-    .cio_pda0_tx_o    (cio_pattgen_pda0_tx_d2p),
-    .cio_pda0_tx_en_o (cio_pattgen_pda0_tx_en_d2p),
-    .cio_pcl0_tx_o    (cio_pattgen_pcl0_tx_d2p),
-    .cio_pcl0_tx_en_o (cio_pattgen_pcl0_tx_en_d2p),
-    .cio_pda1_tx_o    (cio_pattgen_pda1_tx_d2p),
-    .cio_pda1_tx_en_o (cio_pattgen_pda1_tx_en_d2p),
-    .cio_pcl1_tx_o    (cio_pattgen_pcl1_tx_d2p),
-    .cio_pcl1_tx_en_o (cio_pattgen_pcl1_tx_en_d2p),
+    .cio_pda0_tx_o   (cio_pattgen_pda0_tx_d2p),
+    .cio_pda0_tx_en_o(cio_pattgen_pda0_tx_en_d2p),
+    .cio_pcl0_tx_o   (cio_pattgen_pcl0_tx_d2p),
+    .cio_pcl0_tx_en_o(cio_pattgen_pcl0_tx_en_d2p),
+    .cio_pda1_tx_o   (cio_pattgen_pda1_tx_d2p),
+    .cio_pda1_tx_en_o(cio_pattgen_pda1_tx_en_d2p),
+    .cio_pcl1_tx_o   (cio_pattgen_pcl1_tx_d2p),
+    .cio_pcl1_tx_en_o(cio_pattgen_pcl1_tx_en_d2p),
 
     // Interrupt
     .intr_done_ch0_o(intr_pattgen_done_ch0),
@@ -1542,8 +1544,8 @@ module top_earlgrey #(
   ) u_otp_macro (
 
     // Output
-    .cio_test_o    (cio_otp_macro_test_d2p),
-    .cio_test_en_o (cio_otp_macro_test_en_d2p),
+    .cio_test_o   (cio_otp_macro_test_d2p),
+    .cio_test_en_o(cio_otp_macro_test_en_d2p),
 
     // Inter-module signals
     .obs_ctrl_i(ast_obs_ctrl),
@@ -1698,15 +1700,15 @@ module top_earlgrey #(
   ) u_spi_host0 (
 
     // Input
-    .cio_sd_i     (cio_spi_host0_sd_p2d),
+    .cio_sd_i    (cio_spi_host0_sd_p2d),
 
     // Output
-    .cio_sck_o    (cio_spi_host0_sck_d2p),
-    .cio_sck_en_o (cio_spi_host0_sck_en_d2p),
-    .cio_csb_o    (cio_spi_host0_csb_d2p),
-    .cio_csb_en_o (cio_spi_host0_csb_en_d2p),
-    .cio_sd_o     (cio_spi_host0_sd_d2p),
-    .cio_sd_en_o  (cio_spi_host0_sd_en_d2p),
+    .cio_sck_o   (cio_spi_host0_sck_d2p),
+    .cio_sck_en_o(cio_spi_host0_sck_en_d2p),
+    .cio_csb_o   (cio_spi_host0_csb_d2p),
+    .cio_csb_en_o(cio_spi_host0_csb_en_d2p),
+    .cio_sd_o    (cio_spi_host0_sd_d2p),
+    .cio_sd_en_o (cio_spi_host0_sd_en_d2p),
 
     // Interrupt
     .intr_error_o    (intr_spi_host0_error),
@@ -1737,15 +1739,15 @@ module top_earlgrey #(
   ) u_spi_host1 (
 
     // Input
-    .cio_sd_i     (cio_spi_host1_sd_p2d),
+    .cio_sd_i    (cio_spi_host1_sd_p2d),
 
     // Output
-    .cio_sck_o    (cio_spi_host1_sck_d2p),
-    .cio_sck_en_o (cio_spi_host1_sck_en_d2p),
-    .cio_csb_o    (cio_spi_host1_csb_d2p),
-    .cio_csb_en_o (cio_spi_host1_csb_en_d2p),
-    .cio_sd_o     (cio_spi_host1_sd_d2p),
-    .cio_sd_en_o  (cio_spi_host1_sd_en_d2p),
+    .cio_sck_o   (cio_spi_host1_sck_d2p),
+    .cio_sck_en_o(cio_spi_host1_sck_en_d2p),
+    .cio_csb_o   (cio_spi_host1_csb_d2p),
+    .cio_csb_en_o(cio_spi_host1_csb_en_d2p),
+    .cio_sd_o    (cio_spi_host1_sd_d2p),
+    .cio_sd_en_o (cio_spi_host1_sd_en_d2p),
 
     // Interrupt
     .intr_error_o    (intr_spi_host1_error),
@@ -1777,15 +1779,15 @@ module top_earlgrey #(
   ) u_usbdev (
 
     // Input
-    .cio_sense_i     (cio_usbdev_sense_p2d),
-    .cio_usb_dp_i    (cio_usbdev_usb_dp_p2d),
-    .cio_usb_dn_i    (cio_usbdev_usb_dn_p2d),
+    .cio_sense_i    (cio_usbdev_sense_p2d),
+    .cio_usb_dp_i   (cio_usbdev_usb_dp_p2d),
+    .cio_usb_dn_i   (cio_usbdev_usb_dn_p2d),
 
     // Output
-    .cio_usb_dp_o    (cio_usbdev_usb_dp_d2p),
-    .cio_usb_dp_en_o (cio_usbdev_usb_dp_en_d2p),
-    .cio_usb_dn_o    (cio_usbdev_usb_dn_d2p),
-    .cio_usb_dn_en_o (cio_usbdev_usb_dn_en_d2p),
+    .cio_usb_dp_o   (cio_usbdev_usb_dp_d2p),
+    .cio_usb_dp_en_o(cio_usbdev_usb_dp_en_d2p),
+    .cio_usb_dn_o   (cio_usbdev_usb_dn_d2p),
+    .cio_usb_dn_en_o(cio_usbdev_usb_dn_en_d2p),
 
     // Interrupt
     .intr_pkt_received_o   (intr_usbdev_pkt_received),
@@ -1991,32 +1993,32 @@ module top_earlgrey #(
   ) u_sysrst_ctrl_aon (
 
     // Input
-    .cio_ac_present_i     (cio_sysrst_ctrl_aon_ac_present_p2d),
-    .cio_key0_in_i        (cio_sysrst_ctrl_aon_key0_in_p2d),
-    .cio_key1_in_i        (cio_sysrst_ctrl_aon_key1_in_p2d),
-    .cio_key2_in_i        (cio_sysrst_ctrl_aon_key2_in_p2d),
-    .cio_pwrb_in_i        (cio_sysrst_ctrl_aon_pwrb_in_p2d),
-    .cio_lid_open_i       (cio_sysrst_ctrl_aon_lid_open_p2d),
-    .cio_ec_rst_l_i       (cio_sysrst_ctrl_aon_ec_rst_l_p2d),
-    .cio_flash_wp_l_i     (cio_sysrst_ctrl_aon_flash_wp_l_p2d),
+    .cio_ac_present_i    (cio_sysrst_ctrl_aon_ac_present_p2d),
+    .cio_key0_in_i       (cio_sysrst_ctrl_aon_key0_in_p2d),
+    .cio_key1_in_i       (cio_sysrst_ctrl_aon_key1_in_p2d),
+    .cio_key2_in_i       (cio_sysrst_ctrl_aon_key2_in_p2d),
+    .cio_pwrb_in_i       (cio_sysrst_ctrl_aon_pwrb_in_p2d),
+    .cio_lid_open_i      (cio_sysrst_ctrl_aon_lid_open_p2d),
+    .cio_ec_rst_l_i      (cio_sysrst_ctrl_aon_ec_rst_l_p2d),
+    .cio_flash_wp_l_i    (cio_sysrst_ctrl_aon_flash_wp_l_p2d),
 
     // Output
-    .cio_bat_disable_o    (cio_sysrst_ctrl_aon_bat_disable_d2p),
-    .cio_bat_disable_en_o (cio_sysrst_ctrl_aon_bat_disable_en_d2p),
-    .cio_key0_out_o       (cio_sysrst_ctrl_aon_key0_out_d2p),
-    .cio_key0_out_en_o    (cio_sysrst_ctrl_aon_key0_out_en_d2p),
-    .cio_key1_out_o       (cio_sysrst_ctrl_aon_key1_out_d2p),
-    .cio_key1_out_en_o    (cio_sysrst_ctrl_aon_key1_out_en_d2p),
-    .cio_key2_out_o       (cio_sysrst_ctrl_aon_key2_out_d2p),
-    .cio_key2_out_en_o    (cio_sysrst_ctrl_aon_key2_out_en_d2p),
-    .cio_pwrb_out_o       (cio_sysrst_ctrl_aon_pwrb_out_d2p),
-    .cio_pwrb_out_en_o    (cio_sysrst_ctrl_aon_pwrb_out_en_d2p),
-    .cio_z3_wakeup_o      (cio_sysrst_ctrl_aon_z3_wakeup_d2p),
-    .cio_z3_wakeup_en_o   (cio_sysrst_ctrl_aon_z3_wakeup_en_d2p),
-    .cio_ec_rst_l_o       (cio_sysrst_ctrl_aon_ec_rst_l_d2p),
-    .cio_ec_rst_l_en_o    (cio_sysrst_ctrl_aon_ec_rst_l_en_d2p),
-    .cio_flash_wp_l_o     (cio_sysrst_ctrl_aon_flash_wp_l_d2p),
-    .cio_flash_wp_l_en_o  (cio_sysrst_ctrl_aon_flash_wp_l_en_d2p),
+    .cio_bat_disable_o   (cio_sysrst_ctrl_aon_bat_disable_d2p),
+    .cio_bat_disable_en_o(cio_sysrst_ctrl_aon_bat_disable_en_d2p),
+    .cio_key0_out_o      (cio_sysrst_ctrl_aon_key0_out_d2p),
+    .cio_key0_out_en_o   (cio_sysrst_ctrl_aon_key0_out_en_d2p),
+    .cio_key1_out_o      (cio_sysrst_ctrl_aon_key1_out_d2p),
+    .cio_key1_out_en_o   (cio_sysrst_ctrl_aon_key1_out_en_d2p),
+    .cio_key2_out_o      (cio_sysrst_ctrl_aon_key2_out_d2p),
+    .cio_key2_out_en_o   (cio_sysrst_ctrl_aon_key2_out_en_d2p),
+    .cio_pwrb_out_o      (cio_sysrst_ctrl_aon_pwrb_out_d2p),
+    .cio_pwrb_out_en_o   (cio_sysrst_ctrl_aon_pwrb_out_en_d2p),
+    .cio_z3_wakeup_o     (cio_sysrst_ctrl_aon_z3_wakeup_d2p),
+    .cio_z3_wakeup_en_o  (cio_sysrst_ctrl_aon_z3_wakeup_en_d2p),
+    .cio_ec_rst_l_o      (cio_sysrst_ctrl_aon_ec_rst_l_d2p),
+    .cio_ec_rst_l_en_o   (cio_sysrst_ctrl_aon_ec_rst_l_en_d2p),
+    .cio_flash_wp_l_o    (cio_sysrst_ctrl_aon_flash_wp_l_d2p),
+    .cio_flash_wp_l_en_o (cio_sysrst_ctrl_aon_flash_wp_l_en_d2p),
 
     // Interrupt
     .intr_event_detected_o(intr_sysrst_ctrl_aon_event_detected),
@@ -2070,8 +2072,8 @@ module top_earlgrey #(
   ) u_pwm_aon (
 
     // Output
-    .cio_pwm_o    (cio_pwm_aon_pwm_d2p),
-    .cio_pwm_en_o (cio_pwm_aon_pwm_en_d2p),
+    .cio_pwm_o   (cio_pwm_aon_pwm_d2p),
+    .cio_pwm_en_o(cio_pwm_aon_pwm_en_d2p),
 
     // alert_handler[29]: fatal_fault
     .alert_tx_o(alert_tx[29]),
@@ -2134,18 +2136,18 @@ module top_earlgrey #(
     .tl_i(pinmux_aon_tl_req),
     .tl_o(pinmux_aon_tl_rsp),
 
-    .periph_to_mio_i      (mio_d2p    ),
-    .periph_to_mio_oe_i   (mio_en_d2p ),
-    .mio_to_periph_o      (mio_p2d    ),
+    .periph_to_mio_i   (mio_d2p   ),
+    .periph_to_mio_oe_i(mio_en_d2p),
+    .mio_to_periph_o   (mio_p2d   ),
 
     .mio_attr_o,
     .mio_out_o,
     .mio_oe_o,
     .mio_in_i,
 
-    .periph_to_dio_i      (dio_d2p    ),
-    .periph_to_dio_oe_i   (dio_en_d2p ),
-    .dio_to_periph_o      (dio_p2d    ),
+    .periph_to_dio_i   (dio_d2p   ),
+    .periph_to_dio_oe_i(dio_en_d2p),
+    .dio_to_periph_o   (dio_p2d   ),
 
     .dio_attr_o,
     .dio_out_o,
@@ -2168,8 +2170,8 @@ module top_earlgrey #(
   ) u_sensor_ctrl_aon (
 
     // Output
-    .cio_ast_debug_out_o    (cio_sensor_ctrl_aon_ast_debug_out_d2p),
-    .cio_ast_debug_out_en_o (cio_sensor_ctrl_aon_ast_debug_out_en_d2p),
+    .cio_ast_debug_out_o   (cio_sensor_ctrl_aon_ast_debug_out_d2p),
+    .cio_ast_debug_out_en_o(cio_sensor_ctrl_aon_ast_debug_out_en_d2p),
 
     // Interrupt
     .intr_io_status_change_o  (intr_sensor_ctrl_aon_io_status_change),
@@ -2258,13 +2260,13 @@ module top_earlgrey #(
   ) u_flash_ctrl (
 
     // Input
-    .cio_tck_i    (cio_flash_ctrl_tck_p2d),
-    .cio_tms_i    (cio_flash_ctrl_tms_p2d),
-    .cio_tdi_i    (cio_flash_ctrl_tdi_p2d),
+    .cio_tck_i   (cio_flash_ctrl_tck_p2d),
+    .cio_tms_i   (cio_flash_ctrl_tms_p2d),
+    .cio_tdi_i   (cio_flash_ctrl_tdi_p2d),
 
     // Output
-    .cio_tdo_o    (cio_flash_ctrl_tdo_d2p),
-    .cio_tdo_en_o (cio_flash_ctrl_tdo_en_d2p),
+    .cio_tdo_o   (cio_flash_ctrl_tdo_d2p),
+    .cio_tdo_en_o(cio_flash_ctrl_tdo_en_d2p),
 
     // Interrupt
     .intr_prog_empty_o(intr_flash_ctrl_prog_empty),
@@ -3370,7 +3372,7 @@ module top_earlgrey #(
   assign cio_spi_host1_sd_p2d[2] = mio_p2d[MioInSpiHost1Sd2];
   assign cio_spi_host1_sd_p2d[3] = mio_p2d[MioInSpiHost1Sd3];
   assign cio_uart0_rx_p2d = mio_p2d[MioInUart0Rx];
-  assign cio_uart1_rx_p2d = mio_p2d[MioInUart1Rx];
+  assign cio_uart1_rx_p2d_o = mio_p2d[MioInUart1Rx];
   assign cio_uart2_rx_p2d = mio_p2d[MioInUart2Rx];
   assign cio_uart3_rx_p2d = mio_p2d[MioInUart3Rx];
   assign cio_spi_device_tpm_csb_p2d = mio_p2d[MioInSpiDeviceTpmCsb];
@@ -3429,7 +3431,7 @@ module top_earlgrey #(
   assign mio_d2p[MioOutSpiHost1Sd2] = cio_spi_host1_sd_d2p[2];
   assign mio_d2p[MioOutSpiHost1Sd3] = cio_spi_host1_sd_d2p[3];
   assign mio_d2p[MioOutUart0Tx] = cio_uart0_tx_d2p;
-  assign mio_d2p[MioOutUart1Tx] = cio_uart1_tx_d2p;
+  assign mio_d2p[MioOutUart1Tx] = cio_uart1_tx_d2p_i;
   assign mio_d2p[MioOutUart2Tx] = cio_uart2_tx_d2p;
   assign mio_d2p[MioOutUart3Tx] = cio_uart3_tx_d2p;
   assign mio_d2p[MioOutPattgenPda0Tx] = cio_pattgen_pda0_tx_d2p;
@@ -3506,7 +3508,7 @@ module top_earlgrey #(
   assign mio_en_d2p[MioOutSpiHost1Sd2] = cio_spi_host1_sd_en_d2p[2];
   assign mio_en_d2p[MioOutSpiHost1Sd3] = cio_spi_host1_sd_en_d2p[3];
   assign mio_en_d2p[MioOutUart0Tx] = cio_uart0_tx_en_d2p;
-  assign mio_en_d2p[MioOutUart1Tx] = cio_uart1_tx_en_d2p;
+  assign mio_en_d2p[MioOutUart1Tx] = cio_uart1_tx_en_d2p_i;
   assign mio_en_d2p[MioOutUart2Tx] = cio_uart2_tx_en_d2p;
   assign mio_en_d2p[MioOutUart3Tx] = cio_uart3_tx_en_d2p;
   assign mio_en_d2p[MioOutPattgenPda0Tx] = cio_pattgen_pda0_tx_en_d2p;

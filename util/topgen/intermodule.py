@@ -879,6 +879,13 @@ def elab_intermodule(topcfg: OrderedDict):
     if "definitions" not in topcfg["inter_signal"]:
         topcfg["inter_signal"]["definitions"] = definitions
 
+    # Append inter-pd signals and ports emitted by pinmux
+    if topcfg["pinmux"]["inter_pd"] is not None:
+        topcfg["inter_signal"]["external"].extend(topcfg["pinmux"]["inter_pd"]["ports"])
+        topcfg["inter_pd"]["definitions"].extend(topcfg["pinmux"]["inter_pd"]["definitions"])
+        # No longer needed, delete
+        del topcfg["pinmux"]["inter_pd"]
+
 
 def filter_index(signame: str) -> Tuple[str, str, int]:
     """If the signal has array indicator `[N]` then split and return name and

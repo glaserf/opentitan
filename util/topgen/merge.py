@@ -1642,6 +1642,125 @@ def amend_pinmux_io(top: ConfigT,
     temp['inputs'] = []
     temp['outputs'] = []
 
+    # Multi-PD fun
+    pd_default = top["power"]["physical"][0]
+    m_pinmux = lib.find_module(top["module"], "pinmux")
+    pd_pinmux = m_pinmux.get("phys_pd", pd_default)
+
+    port_proto = OrderedDict([('package', ''),
+                              ('struct', 'logic'),
+                              ('phys_pd', ''),
+                              ('inter_pd', True),
+                              ('signame', ''),
+                              ('signame_chip', ''),
+                              ('width', -1),
+                              ('type', 'uni'),
+                              ('default', "'0"),
+                              ('direction', 'invalid'),
+                              ('conn_type', False),
+                              ('index', -1),
+                              ('netname', '')])
+
+    sig_proto = OrderedDict([('package', ''),
+                             ('struct', 'logic'),
+                             ('phys_pd', 'chip'),
+                             ('signame', ''),
+                             ('width', -1),
+                             ('type', 'uni'),
+                             ('end_idx', -1),
+                             ('act', ''),
+                             ('suffix', ''),
+                             ('default', "'0")])
+
+
+    inter_pd_ports = []
+    chiplevel_sigs = []
+
+    for m in top["module"]:
+        # Skip all modules that are in the same PD as the pinmux
+        pd_mod = m.get("phys_pd", pd_default)
+        if pd_mod == pd_pinmux:
+            continue
+
+        block = name_to_block.get(m['type'])
+        sig_list = deepcopy(block.get_signals_as_list_of_dicts())
+        for sig_inst in sig_list:
+            sig_inst['name'] = f"cio_{m['name']}_{sig_inst['name']}"
+            # What we need to do:
+            # 1) Create ports for both PDs
+            # 2) Create a chiplevel signal
+
+            if sig_inst["type"] in ['output', 'inout']:
+                port_mod = port_proto.copy()
+                port_mod["phys_pd"] = pd_mod
+                port_mod["signame"] = sig_inst['name'] + '_d2p_o'
+                port_mod["netname"] = sig_inst['name'] + '_d2p'
+                port_mod["width"] = sig_inst['width']
+                port_mod["direction"] = 'out'
+
+                port_pinm = port_mod.copy()
+                port_pinm["phys_pd"] = pd_pinmux
+                port_pinm["signame"] = sig_inst['name'] + '_d2p_i'
+                port_pinm["netname"] = sig_inst['name'] + '_d2p'
+                port_pinm["direction"] = 'in'
+
+                chip_sig = sig_proto.copy()
+                chip_sig["signame"] = sig_inst['name'] + '_d2p'
+                chip_sig["width"] = sig_inst['width']
+
+                inter_pd_ports.append(port_mod)
+                inter_pd_ports.append(port_pinm)
+                chiplevel_sigs.append(chip_sig)
+
+                # Output enable
+                port_mod = port_mod.copy()
+                port_mod["signame"] = sig_inst['name'] + '_en_d2p_o'
+                port_mod["netname"] = sig_inst['name'] + '_en_d2p'
+
+                port_pinm = port_pinm.copy()
+                port_pinm["signame"] = sig_inst['name'] + '_en_d2p_i'
+                port_pinm["netname"] = sig_inst['name'] + '_en_d2p'
+
+                chip_sig = chip_sig.copy()
+                chip_sig["signame"] = sig_inst['name'] + '_en_d2p'
+
+                inter_pd_ports.append(port_mod)
+                inter_pd_ports.append(port_pinm)
+                chiplevel_sigs.append(chip_sig)
+
+            if sig_inst["type"] in ['input', 'inout']:
+                port_mod = port_proto.copy()
+                port_mod["phys_pd"] = pd_mod
+                port_mod["signame"] = sig_inst['name'] + '_p2d_i'
+                port_mod["netname"] = sig_inst['name'] + '_p2d'
+                port_mod["width"] = sig_inst['width']
+                port_mod["direction"] = 'in'
+
+                port_pinm = port_mod.copy()
+                port_pinm["phys_pd"] = pd_pinmux
+                port_pinm["signame"] = sig_inst['name'] + '_p2d_o'
+                port_pinm["netname"] = sig_inst['name'] + '_p2d'
+                port_pinm["direction"] = 'out'
+
+                chip_sig = sig_proto.copy()
+                chip_sig["signame"] = sig_inst['name'] + '_p2d'
+                chip_sig["width"] = sig_inst['width']
+
+                inter_pd_ports.append(port_mod)
+                inter_pd_ports.append(port_pinm)
+                chiplevel_sigs.append(chip_sig)
+
+    # Bring signame_chip into the expected dict format
+    for p in inter_pd_ports:
+        signame_chip = {}
+        for tgt in top["targets"]:
+            signame_chip[tgt["name"]] = p["netname"]
+        p["signame_chip"] = signame_chip
+
+    pinmux.setdefault("inter_pd", defaultdict())
+    pinmux["inter_pd"]["ports"] = inter_pd_ports
+    pinmux["inter_pd"]["definitions"] = chiplevel_sigs
+
     for sig in pinmux['signals']:
         # Get the signal information from the IP block type of this instance/
         mod_name = sig['instance']
@@ -1649,6 +1768,8 @@ def amend_pinmux_io(top: ConfigT,
 
         if m is None:
             raise SystemExit("Module {} is not searchable.".format(mod_name))
+
+        pd_mod = m.get("phys_pd", pd_default)
 
         block = name_to_block.get(m['type'])
         if block is None and allow_missing_blocks:
@@ -1685,6 +1806,7 @@ def amend_pinmux_io(top: ConfigT,
                 'desc': sig['desc']
             })
             sig_inst['name'] = mod_name + '_' + sig_inst['name']
+            sig_inst['phys_pd'] = pd_mod
             append_io_signal(temp, sig_inst)
 
         # Otherwise the name is a wildcard for selecting all available IO
@@ -1708,6 +1830,7 @@ def amend_pinmux_io(top: ConfigT,
                         })
                         sig_inst_copy['name'] = sig[
                             'instance'] + '_' + sig_inst_copy['name']
+                        sig_inst_copy['phys_pd'] = pd_mod
                         append_io_signal(temp, sig_inst_copy)
                 else:
                     sig_inst.update({
@@ -1718,6 +1841,7 @@ def amend_pinmux_io(top: ConfigT,
                         'desc': sig['desc']
                     })
                     sig_inst['name'] = sig['instance'] + '_' + sig_inst['name']
+                    sig_inst['phys_pd'] = pd_mod
                     append_io_signal(temp, sig_inst)
 
     # Now that we've collected all input and output signals,

@@ -25,6 +25,9 @@ module top_earlgrey_pd_aon #(
   output tlul_pkg::tl_d2h_t       uart1_tl_rsp_o,
   input  tlul_pkg::tl_h2d_t       aon_timer_aon_tl_req_i,
   output tlul_pkg::tl_d2h_t       aon_timer_aon_tl_rsp_o,
+  input  logic       cio_uart1_rx_p2d_i,
+  output logic       cio_uart1_tx_d2p_o,
+  output logic       cio_uart1_tx_en_d2p_o,
 
   output logic [10:0] intr_vector_o,
 
@@ -47,12 +50,6 @@ module top_earlgrey_pd_aon #(
   // Local Parameters
 
   // Signals
-  // uart1
-  logic        cio_uart1_rx_p2d;
-  logic        cio_uart1_tx_d2p;
-  logic        cio_uart1_tx_en_d2p;
-  // aon_timer_aon
-
 
   // Interrupt source list
   logic intr_uart1_tx_watermark;
@@ -67,7 +64,6 @@ module top_earlgrey_pd_aon #(
   logic intr_aon_timer_aon_wkup_timer_expired;
   logic intr_aon_timer_aon_wdog_timer_bark;
 
-
   // Peripheral Instantiation
 
   uart #(
@@ -76,11 +72,11 @@ module top_earlgrey_pd_aon #(
   ) u_uart1 (
 
     // Input
-    .cio_rx_i    (cio_uart1_rx_p2d),
+    .cio_rx_i   (cio_uart1_rx_p2d_i),
 
     // Output
-    .cio_tx_o    (cio_uart1_tx_d2p),
-    .cio_tx_en_o (cio_uart1_tx_en_d2p),
+    .cio_tx_o   (cio_uart1_tx_d2p_o),
+    .cio_tx_en_o(cio_uart1_tx_en_d2p_o),
 
     // Interrupt
     .intr_tx_watermark_o (intr_uart1_tx_watermark),

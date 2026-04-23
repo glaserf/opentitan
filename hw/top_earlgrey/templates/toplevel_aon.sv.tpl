@@ -12,6 +12,11 @@ from topgen.merge import (is_unmanaged_reset, get_alerts_with_unique_lpg_idx,
 
 ## TODO
 max_sigwidth = 2
+
+if lib.find_module(top["module"], "pinmux").get("phys_pd") == "aon":
+  cio_suffix_o, cio_suffix_i = ("", "")
+else:
+  cio_suffix_o, cio_suffix_i = ("_o", "_i")
 %>\
 
 module top_${top["name"]}_pd_aon #(
@@ -102,6 +107,15 @@ module top_${top["name"]}_pd_aon #(
 % endfor
 
   // Signals
+% if lib.find_module(top["module"], "pinmux").get("phys_pd") == "aon":
+  // Comportable IO (CIO)
+  logic [${num_mio_inputs - 1}:0] mio_p2d;
+  logic [${num_mio_outputs - 1}:0] mio_d2p;
+  logic [${num_mio_outputs - 1}:0] mio_en_d2p;
+  logic [${num_dio_total - 1}:0] dio_p2d;
+  logic [${num_dio_total - 1}:0] dio_d2p;
+  logic [${num_dio_total - 1}:0] dio_en_d2p;
+
 % for m in lib.get_all_modules(top, phys_pd="aon"):
   % if not lib.is_inst(m):
 <% continue %>
@@ -119,9 +133,10 @@ module top_${top["name"]}_pd_aon #(
   logic ${lib.bitarray(p_out.bits.width(), max_sigwidth)} cio_${m["name"]}_${p_out.name}_en_d2p;
   % endfor
 % endfor
+% endif\
 
 <%include file="/toplevel_interrupts.tpl" args="lib=lib,top=top,name_to_block=name_to_block,plic_info=plic_info,phys_pd='aon'" />\
-
+\
 ## Inter-module Definitions
 % if len(lib.get_intermodule_list(top, "aon")) >= 1:
   // Define inter-module signals
@@ -167,15 +182,15 @@ has_params, param_items = lib.get_params(top, m)
 
     // Input
     % endif
-    .${lib.ljust("cio_"+p_in.name+"_i",max_sigwidth+9)} (cio_${m["name"]}_${p_in.name}_p2d),
+    .${lib.ljust("cio_"+p_in.name+"_i",max_sigwidth+9)}(cio_${m["name"]}_${p_in.name}_p2d${cio_suffix_i}),
   % endfor
   % for p_out in outputs + inouts:
     % if loop.first:
 
     // Output
     % endif
-    .${lib.ljust("cio_"+p_out.name+"_o",   max_sigwidth+9)} (cio_${m["name"]}_${p_out.name}_d2p),
-    .${lib.ljust("cio_"+p_out.name+"_en_o",max_sigwidth+9)} (cio_${m["name"]}_${p_out.name}_en_d2p),
+    .${lib.ljust("cio_"+p_out.name+"_o",   max_sigwidth+9)}(cio_${m["name"]}_${p_out.name}_d2p${cio_suffix_o}),
+    .${lib.ljust("cio_"+p_out.name+"_en_o",max_sigwidth+9)}(cio_${m["name"]}_${p_out.name}_en_d2p${cio_suffix_o}),
   % endfor
   % for intr in block.interrupts:
     % if loop.first:
