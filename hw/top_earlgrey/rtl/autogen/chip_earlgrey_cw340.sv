@@ -1030,8 +1030,8 @@ module chip_earlgrey_cw340 #(
 
   // Inter-Power Domain signals
   logic [10:0] intr_vector_pd_aon;
-  logic [1:0] alert_tx_pd_aon;
-  logic [1:0] alert_rx_pd_aon;
+  logic [2:0] alert_tx_pd_aon;
+  logic [2:0] alert_rx_pd_aon;
   logic       aon_timer_aon_nmi_wdog_timer_bark;
   logic       pwrmgr_aon_low_power;
   lc_ctrl_pkg::lc_tx_t       lc_ctrl_lc_escalate_en;
@@ -1039,11 +1039,15 @@ module chip_earlgrey_cw340 #(
   logic       pwrmgr_aon_rstreqs;
   tlul_pkg::tl_h2d_t       uart1_tl_req;
   tlul_pkg::tl_d2h_t       uart1_tl_rsp;
+  tlul_pkg::tl_h2d_t       pwm_aon_tl_req;
+  tlul_pkg::tl_d2h_t       pwm_aon_tl_rsp;
   tlul_pkg::tl_h2d_t       aon_timer_aon_tl_req;
   tlul_pkg::tl_d2h_t       aon_timer_aon_tl_rsp;
   logic       cio_uart1_rx_p2d;
   logic       cio_uart1_tx_d2p;
   logic       cio_uart1_tx_en_d2p;
+  logic [5:0] cio_pwm_aon_pwm_d2p;
+  logic [5:0] cio_pwm_aon_pwm_en_d2p;
 
   //////////////////////
   // Top-level design //
@@ -1091,11 +1095,15 @@ module chip_earlgrey_cw340 #(
     .pwrmgr_aon_rstreqs_i               (pwrmgr_aon_rstreqs    ),
     .uart1_tl_req_o                     (uart1_tl_req          ),
     .uart1_tl_rsp_i                     (uart1_tl_rsp          ),
+    .pwm_aon_tl_req_o                   (pwm_aon_tl_req        ),
+    .pwm_aon_tl_rsp_i                   (pwm_aon_tl_rsp        ),
     .aon_timer_aon_tl_req_o             (aon_timer_aon_tl_req  ),
     .aon_timer_aon_tl_rsp_i             (aon_timer_aon_tl_rsp  ),
     .cio_uart1_rx_p2d_o                 (cio_uart1_rx_p2d      ),
     .cio_uart1_tx_d2p_i                 (cio_uart1_tx_d2p      ),
     .cio_uart1_tx_en_d2p_i              (cio_uart1_tx_en_d2p   ),
+    .cio_pwm_aon_pwm_d2p_i              (cio_pwm_aon_pwm_d2p   ),
+    .cio_pwm_aon_pwm_en_d2p_i           (cio_pwm_aon_pwm_en_d2p),
 
     // Special inter-power domain signals
     .intr_vector_pd_aon_i(intr_vector_pd_aon),
@@ -1196,11 +1204,15 @@ module chip_earlgrey_cw340 #(
     .pwrmgr_aon_rstreqs_o               (pwrmgr_aon_rstreqs    ),
     .uart1_tl_req_i                     (uart1_tl_req          ),
     .uart1_tl_rsp_o                     (uart1_tl_rsp          ),
+    .pwm_aon_tl_req_i                   (pwm_aon_tl_req        ),
+    .pwm_aon_tl_rsp_o                   (pwm_aon_tl_rsp        ),
     .aon_timer_aon_tl_req_i             (aon_timer_aon_tl_req  ),
     .aon_timer_aon_tl_rsp_o             (aon_timer_aon_tl_rsp  ),
     .cio_uart1_rx_p2d_i                 (cio_uart1_rx_p2d      ),
     .cio_uart1_tx_d2p_o                 (cio_uart1_tx_d2p      ),
     .cio_uart1_tx_en_d2p_o              (cio_uart1_tx_en_d2p   ),
+    .cio_pwm_aon_pwm_d2p_o              (cio_pwm_aon_pwm_d2p   ),
+    .cio_pwm_aon_pwm_en_d2p_o           (cio_pwm_aon_pwm_en_d2p),
 
     // Special inter-power domain signals
     .intr_vector_o(intr_vector_pd_aon),

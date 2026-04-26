@@ -4973,6 +4973,7 @@
       [
         Aon
       ]
+      phys_pd: aon
       attr: ipgen
       clock_connections:
       {
@@ -5023,6 +5024,8 @@
           top_type: one-to-one
           top_signame: pwm_aon_tl
           index: -1
+          external: true
+          conn_type: false
         }
       ]
       base_addrs:
@@ -5033,7 +5036,6 @@
         }
       }
       generate_dif: true
-      phys_pd: main
     }
     {
       name: pinmux_aon
@@ -12735,6 +12737,8 @@
           phys_pd: main
           top_signame: pwm_aon_tl
           index: -1
+          external: true
+          conn_type: false
         }
         {
           name: tl_gpio
@@ -15107,7 +15111,7 @@
         attr: ""
         connection: muxed
         desc: ""
-        phys_pd: main
+        phys_pd: aon
         glob_idx: 62
       }
       {
@@ -15119,7 +15123,7 @@
         attr: ""
         connection: muxed
         desc: ""
-        phys_pd: main
+        phys_pd: aon
         glob_idx: 63
       }
       {
@@ -15131,7 +15135,7 @@
         attr: ""
         connection: muxed
         desc: ""
-        phys_pd: main
+        phys_pd: aon
         glob_idx: 64
       }
       {
@@ -15143,7 +15147,7 @@
         attr: ""
         connection: muxed
         desc: ""
-        phys_pd: main
+        phys_pd: aon
         glob_idx: 65
       }
       {
@@ -15155,7 +15159,7 @@
         attr: ""
         connection: muxed
         desc: ""
-        phys_pd: main
+        phys_pd: aon
         glob_idx: 66
       }
       {
@@ -15167,7 +15171,7 @@
         attr: ""
         connection: muxed
         desc: ""
-        phys_pd: main
+        phys_pd: aon
         glob_idx: 67
       }
       {
@@ -18813,7 +18817,7 @@
         struct: logic
         phys_pd: chip
         signame: alert_tx_pd_aon
-        width: 2
+        width: 3
         type: uni
         special: alert
         end_idx: -1
@@ -18826,7 +18830,7 @@
         struct: logic
         phys_pd: chip
         signame: alert_rx_pd_aon
-        width: 2
+        width: 3
         type: uni
         special: alert
         end_idx: -1
@@ -18922,6 +18926,30 @@
         package: tlul_pkg
         struct: tl_h2d
         phys_pd: chip
+        signame: pwm_aon_tl_req
+        width: 1
+        type: req_rsp
+        end_idx: -1
+        act: rsp
+        suffix: req
+        default: tlul_pkg::TL_H2D_DEFAULT
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        phys_pd: chip
+        signame: pwm_aon_tl_rsp
+        width: 1
+        type: req_rsp
+        end_idx: -1
+        act: rsp
+        suffix: rsp
+        default: tlul_pkg::TL_D2H_DEFAULT
+      }
+      {
+        package: tlul_pkg
+        struct: tl_h2d
+        phys_pd: chip
         signame: aon_timer_aon_tl_req
         width: 1
         type: req_rsp
@@ -18972,6 +19000,30 @@
         phys_pd: chip
         signame: cio_uart1_tx_en_d2p
         width: 1
+        type: uni
+        end_idx: -1
+        act: ""
+        suffix: ""
+        default: "'0"
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: chip
+        signame: cio_pwm_aon_pwm_d2p
+        width: 6
+        type: uni
+        end_idx: -1
+        act: ""
+        suffix: ""
+        default: "'0"
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: chip
+        signame: cio_pwm_aon_pwm_en_d2p
+        width: 6
         type: uni
         end_idx: -1
         act: ""
@@ -19246,9 +19298,9 @@
     }
     module_pwm_aon:
     {
-      tx_expr: alert_tx[29]
-      rx_expr: alert_rx[29]
-      async_expr: alert_handler_reg_pkg::AsyncOn[29]
+      tx_expr: alert_tx_o[1]
+      rx_expr: alert_rx_i[1]
+      async_expr: alert_handler_reg_pkg::AsyncOn[1]
       comments:
       [
         alert_handler[29]: fatal_fault
@@ -19266,9 +19318,9 @@
     }
     module_aon_timer_aon:
     {
-      tx_expr: alert_tx_o[1]
-      rx_expr: alert_rx_i[1]
-      async_expr: alert_handler_reg_pkg::AsyncOn[1]
+      tx_expr: alert_tx_o[2]
+      rx_expr: alert_rx_i[2]
+      async_expr: alert_handler_reg_pkg::AsyncOn[2]
       comments:
       [
         alert_handler[31]: fatal_fault
@@ -19469,8 +19521,8 @@
       count_tot: 65
       count_pd:
       {
-        main: 63
-        aon: 2
+        main: 62
+        aon: 3
       }
       connect_pd:
       {
@@ -19479,10 +19531,15 @@
           src_pd: aon
           idx: 0
         }
-        31:
+        29:
         {
           src_pd: aon
           idx: 1
+        }
+        31:
+        {
+          src_pd: aon
+          idx: 2
         }
       }
     }
@@ -23016,6 +23073,8 @@
         top_type: one-to-one
         top_signame: pwm_aon_tl
         index: -1
+        external: true
+        conn_type: false
       }
       {
         name: lc_hw_debug_clr
@@ -26492,6 +26551,8 @@
         phys_pd: main
         top_signame: pwm_aon_tl
         index: -1
+        external: true
+        conn_type: false
       }
       {
         name: tl_gpio
@@ -27122,6 +27183,86 @@
         conn_type: false
         index: -1
         netname: uart1_tl_d2h
+      }
+      {
+        package: tlul_pkg
+        struct: tl_h2d
+        phys_pd: aon
+        inter_pd: true
+        signame: pwm_aon_tl_req_i
+        signame_chip:
+        {
+          asic: pwm_aon_tl_req
+          cw310: pwm_aon_tl_req
+          cw340: pwm_aon_tl_req
+        }
+        width: 1
+        type: req_rsp
+        default: ""
+        direction: in
+        conn_type: false
+        index: -1
+        netname: pwm_aon_tl_h2d
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        phys_pd: aon
+        inter_pd: true
+        signame: pwm_aon_tl_rsp_o
+        signame_chip:
+        {
+          asic: pwm_aon_tl_rsp
+          cw310: pwm_aon_tl_rsp
+          cw340: pwm_aon_tl_rsp
+        }
+        width: 1
+        type: req_rsp
+        default: ""
+        direction: out
+        conn_type: false
+        index: -1
+        netname: pwm_aon_tl_d2h
+      }
+      {
+        package: tlul_pkg
+        struct: tl_h2d
+        phys_pd: main
+        inter_pd: true
+        signame: pwm_aon_tl_req_o
+        signame_chip:
+        {
+          asic: pwm_aon_tl_req
+          cw310: pwm_aon_tl_req
+          cw340: pwm_aon_tl_req
+        }
+        width: 1
+        type: req_rsp
+        default: ""
+        direction: out
+        conn_type: false
+        index: -1
+        netname: pwm_aon_tl_h2d
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        phys_pd: main
+        inter_pd: true
+        signame: pwm_aon_tl_rsp_i
+        signame_chip:
+        {
+          asic: pwm_aon_tl_rsp
+          cw310: pwm_aon_tl_rsp
+          cw340: pwm_aon_tl_rsp
+        }
+        width: 1
+        type: req_rsp
+        default: ""
+        direction: in
+        conn_type: false
+        index: -1
+        netname: pwm_aon_tl_d2h
       }
       {
         package: tlul_pkg
@@ -28517,6 +28658,86 @@
         conn_type: false
         index: -1
         netname: cio_uart1_tx_en_d2p
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: aon
+        inter_pd: true
+        signame: cio_pwm_aon_pwm_d2p_o
+        signame_chip:
+        {
+          asic: cio_pwm_aon_pwm_d2p
+          cw310: cio_pwm_aon_pwm_d2p
+          cw340: cio_pwm_aon_pwm_d2p
+        }
+        width: 6
+        type: uni
+        default: "'0"
+        direction: out
+        conn_type: false
+        index: -1
+        netname: cio_pwm_aon_pwm_d2p
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: main
+        inter_pd: true
+        signame: cio_pwm_aon_pwm_d2p_i
+        signame_chip:
+        {
+          asic: cio_pwm_aon_pwm_d2p
+          cw310: cio_pwm_aon_pwm_d2p
+          cw340: cio_pwm_aon_pwm_d2p
+        }
+        width: 6
+        type: uni
+        default: "'0"
+        direction: in
+        conn_type: false
+        index: -1
+        netname: cio_pwm_aon_pwm_d2p
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: aon
+        inter_pd: true
+        signame: cio_pwm_aon_pwm_en_d2p_o
+        signame_chip:
+        {
+          asic: cio_pwm_aon_pwm_en_d2p
+          cw310: cio_pwm_aon_pwm_en_d2p
+          cw340: cio_pwm_aon_pwm_en_d2p
+        }
+        width: 6
+        type: uni
+        default: "'0"
+        direction: out
+        conn_type: false
+        index: -1
+        netname: cio_pwm_aon_pwm_en_d2p
+      }
+      {
+        package: ""
+        struct: logic
+        phys_pd: main
+        inter_pd: true
+        signame: cio_pwm_aon_pwm_en_d2p_i
+        signame_chip:
+        {
+          asic: cio_pwm_aon_pwm_en_d2p
+          cw310: cio_pwm_aon_pwm_en_d2p
+          cw340: cio_pwm_aon_pwm_en_d2p
+        }
+        width: 6
+        type: uni
+        default: "'0"
+        direction: in
+        conn_type: false
+        index: -1
+        netname: cio_pwm_aon_pwm_en_d2p
       }
     ]
     definitions:
@@ -30566,30 +30787,6 @@
         struct: tl_d2h
         phys_pd: main
         signame: pattgen_tl_rsp
-        width: 1
-        type: req_rsp
-        end_idx: -1
-        act: rsp
-        suffix: rsp
-        default: ""
-      }
-      {
-        package: tlul_pkg
-        struct: tl_h2d
-        phys_pd: main
-        signame: pwm_aon_tl_req
-        width: 1
-        type: req_rsp
-        end_idx: -1
-        act: rsp
-        suffix: req
-        default: tlul_pkg::TL_H2D_DEFAULT
-      }
-      {
-        package: tlul_pkg
-        struct: tl_d2h
-        phys_pd: main
-        signame: pwm_aon_tl_rsp
         width: 1
         type: req_rsp
         end_idx: -1

@@ -12,6 +12,7 @@
 module top_earlgrey_pd_aon #(
   // Auto-inferred parameters
   // parameters for uart1
+  // parameters for pwm_aon
   // parameters for aon_timer_aon
 ) (
 
@@ -23,16 +24,20 @@ module top_earlgrey_pd_aon #(
   output logic       pwrmgr_aon_rstreqs_o,
   input  tlul_pkg::tl_h2d_t       uart1_tl_req_i,
   output tlul_pkg::tl_d2h_t       uart1_tl_rsp_o,
+  input  tlul_pkg::tl_h2d_t       pwm_aon_tl_req_i,
+  output tlul_pkg::tl_d2h_t       pwm_aon_tl_rsp_o,
   input  tlul_pkg::tl_h2d_t       aon_timer_aon_tl_req_i,
   output tlul_pkg::tl_d2h_t       aon_timer_aon_tl_rsp_o,
   input  logic       cio_uart1_rx_p2d_i,
   output logic       cio_uart1_tx_d2p_o,
   output logic       cio_uart1_tx_en_d2p_o,
+  output logic [5:0] cio_pwm_aon_pwm_d2p_o,
+  output logic [5:0] cio_pwm_aon_pwm_en_d2p_o,
 
   output logic [10:0] intr_vector_o,
 
-  output logic [1:0] alert_tx_o,
-  input  logic [1:0] alert_rx_i,
+  output logic [2:0] alert_tx_o,
+  input  logic [2:0] alert_rx_i,
 
   // Manual DFT signals 
   input                        scan_rst_ni, // reset used for test mode
@@ -105,8 +110,34 @@ module top_earlgrey_pd_aon #(
     .rst_ni (rstmgr_aon_resets.rst_lc_io_div4_n[rstmgr_pkg::Domain0Sel])
   );
 
-  aon_timer #(
+  pwm #(
     .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[1]),
+    .AlertSkewCycles(top_pkg::AlertSkewCycles)
+  ) u_pwm_aon (
+
+    // Output
+    .cio_pwm_o   (cio_pwm_aon_pwm_d2p_o),
+    .cio_pwm_en_o(cio_pwm_aon_pwm_en_d2p_o),
+
+    // alert_handler[29]: fatal_fault
+    .alert_tx_o(alert_tx_o[1]),
+    .alert_rx_i(alert_rx_i[1]),
+
+    // Inter-module signals
+    .racl_policies_i(top_racl_pkg::RACL_POLICY_VEC_DEFAULT),
+    .racl_error_o(),
+    .tl_i(pwm_aon_tl_req_i),
+    .tl_o(pwm_aon_tl_rsp_o),
+
+    // Clock and reset connections
+    .clk_i (clkmgr_aon_clocks.clk_io_div4_peri),
+    .clk_core_i (clkmgr_aon_clocks.clk_aon_peri),
+    .rst_ni (rstmgr_aon_resets.rst_lc_io_div4_n[rstmgr_pkg::DomainAonSel]),
+    .rst_core_ni (rstmgr_aon_resets.rst_lc_aon_n[rstmgr_pkg::DomainAonSel])
+  );
+
+  aon_timer #(
+    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[2]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
   ) u_aon_timer_aon (
 
@@ -115,8 +146,8 @@ module top_earlgrey_pd_aon #(
     .intr_wdog_timer_bark_o   (intr_aon_timer_aon_wdog_timer_bark),
 
     // alert_handler[31]: fatal_fault
-    .alert_tx_o(alert_tx_o[1]),
-    .alert_rx_i(alert_rx_i[1]),
+    .alert_tx_o(alert_tx_o[2]),
+    .alert_rx_i(alert_rx_i[2]),
 
     // Inter-module signals
     .nmi_wdog_timer_bark_o(aon_timer_aon_nmi_wdog_timer_bark_o),

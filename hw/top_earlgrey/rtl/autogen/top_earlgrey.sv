@@ -51,7 +51,6 @@ module top_earlgrey #(
   // parameters for clkmgr_aon
   // parameters for sysrst_ctrl_aon
   // parameters for adc_ctrl_aon
-  // parameters for pwm_aon
   // parameters for pinmux_aon
   parameter bit SecPinmuxAonVolatileRawUnlockEn = top_pkg::SecVolatileRawUnlockEn,
   parameter pinmux_pkg::target_cfg_t PinmuxAonTargetCfg = pinmux_pkg::DefaultTargetCfg,
@@ -170,6 +169,8 @@ module top_earlgrey #(
   input  logic       pwrmgr_aon_rstreqs_i,
   output tlul_pkg::tl_h2d_t       uart1_tl_req_o,
   input  tlul_pkg::tl_d2h_t       uart1_tl_rsp_i,
+  output tlul_pkg::tl_h2d_t       pwm_aon_tl_req_o,
+  input  tlul_pkg::tl_d2h_t       pwm_aon_tl_rsp_i,
   output tlul_pkg::tl_h2d_t       aon_timer_aon_tl_req_o,
   input  tlul_pkg::tl_d2h_t       aon_timer_aon_tl_rsp_i,
   output ast_pkg::adc_ast_req_t       adc_req_o,
@@ -233,11 +234,13 @@ module top_earlgrey #(
   output logic       cio_uart1_rx_p2d_o,
   input  logic       cio_uart1_tx_d2p_i,
   input  logic       cio_uart1_tx_en_d2p_i,
+  input  logic [5:0] cio_pwm_aon_pwm_d2p_i,
+  input  logic [5:0] cio_pwm_aon_pwm_en_d2p_i,
 
   input  logic [10:0] intr_vector_pd_aon_i,
 
-  input  logic [1:0] alert_tx_pd_aon_i,
-  output logic [1:0] alert_rx_pd_aon_o,
+  input  logic [2:0] alert_tx_pd_aon_i,
+  output logic [2:0] alert_rx_pd_aon_o,
 
   // All externally supplied clocks
   input clk_main_i,
@@ -406,9 +409,6 @@ module top_earlgrey #(
   logic        cio_sysrst_ctrl_aon_flash_wp_l_d2p;
   logic        cio_sysrst_ctrl_aon_flash_wp_l_en_d2p;
   // adc_ctrl_aon
-  // pwm_aon
-  logic [5:0]  cio_pwm_aon_pwm_d2p;
-  logic [5:0]  cio_pwm_aon_pwm_en_d2p;
   // pinmux_aon
   // sensor_ctrl_aon
   logic [8:0]  cio_sensor_ctrl_aon_ast_debug_out_d2p;
@@ -752,8 +752,6 @@ module top_earlgrey #(
   tlul_pkg::tl_d2h_t       i2c2_tl_rsp;
   tlul_pkg::tl_h2d_t       pattgen_tl_req;
   tlul_pkg::tl_d2h_t       pattgen_tl_rsp;
-  tlul_pkg::tl_h2d_t       pwm_aon_tl_req;
-  tlul_pkg::tl_d2h_t       pwm_aon_tl_rsp;
   tlul_pkg::tl_h2d_t       gpio_tl_req;
   tlul_pkg::tl_d2h_t       gpio_tl_rsp;
   tlul_pkg::tl_h2d_t       spi_device_tl_req;
@@ -2066,32 +2064,6 @@ module top_earlgrey #(
     .rst_aon_ni (rstmgr_aon_resets.rst_lc_aon_n[rstmgr_pkg::DomainAonSel])
   );
 
-  pwm #(
-    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[29]),
-    .AlertSkewCycles(top_pkg::AlertSkewCycles)
-  ) u_pwm_aon (
-
-    // Output
-    .cio_pwm_o   (cio_pwm_aon_pwm_d2p),
-    .cio_pwm_en_o(cio_pwm_aon_pwm_en_d2p),
-
-    // alert_handler[29]: fatal_fault
-    .alert_tx_o(alert_tx[29]),
-    .alert_rx_i(alert_rx[29]),
-
-    // Inter-module signals
-    .racl_policies_i(top_racl_pkg::RACL_POLICY_VEC_DEFAULT),
-    .racl_error_o(),
-    .tl_i(pwm_aon_tl_req),
-    .tl_o(pwm_aon_tl_rsp),
-
-    // Clock and reset connections
-    .clk_i (clkmgr_aon_clocks.clk_io_div4_peri),
-    .clk_core_i (clkmgr_aon_clocks.clk_aon_peri),
-    .rst_ni (rstmgr_aon_resets.rst_lc_io_div4_n[rstmgr_pkg::DomainAonSel]),
-    .rst_core_ni (rstmgr_aon_resets.rst_lc_aon_n[rstmgr_pkg::DomainAonSel])
-  );
-
   pinmux #(
     .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[30]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles),
@@ -2920,9 +2892,11 @@ module top_earlgrey #(
 
   // External connections for alert_handler
   assign alert_tx[1] = alert_tx_pd_aon_i[0];
-  assign alert_tx[31] = alert_tx_pd_aon_i[1];
+  assign alert_tx[29] = alert_tx_pd_aon_i[1];
+  assign alert_tx[31] = alert_tx_pd_aon_i[2];
   assign alert_rx_pd_aon_o[0] = alert_rx[1];
-  assign alert_rx_pd_aon_o[1] = alert_rx[31];
+  assign alert_rx_pd_aon_o[1] = alert_rx[29];
+  assign alert_rx_pd_aon_o[2] = alert_rx[31];
 
   // Interrupt assignments
   assign intr_vector = {
@@ -3248,8 +3222,8 @@ module top_earlgrey #(
     .tl_pattgen_i(pattgen_tl_rsp),
 
     // port: tl_pwm_aon
-    .tl_pwm_aon_o(pwm_aon_tl_req),
-    .tl_pwm_aon_i(pwm_aon_tl_rsp),
+    .tl_pwm_aon_o(pwm_aon_tl_req_o),
+    .tl_pwm_aon_i(pwm_aon_tl_rsp_i),
 
     // port: tl_gpio
     .tl_gpio_o(gpio_tl_req),
@@ -3450,12 +3424,12 @@ module top_earlgrey #(
   assign mio_d2p[MioOutSensorCtrlAonAstDebugOut6] = cio_sensor_ctrl_aon_ast_debug_out_d2p[6];
   assign mio_d2p[MioOutSensorCtrlAonAstDebugOut7] = cio_sensor_ctrl_aon_ast_debug_out_d2p[7];
   assign mio_d2p[MioOutSensorCtrlAonAstDebugOut8] = cio_sensor_ctrl_aon_ast_debug_out_d2p[8];
-  assign mio_d2p[MioOutPwmAonPwm0] = cio_pwm_aon_pwm_d2p[0];
-  assign mio_d2p[MioOutPwmAonPwm1] = cio_pwm_aon_pwm_d2p[1];
-  assign mio_d2p[MioOutPwmAonPwm2] = cio_pwm_aon_pwm_d2p[2];
-  assign mio_d2p[MioOutPwmAonPwm3] = cio_pwm_aon_pwm_d2p[3];
-  assign mio_d2p[MioOutPwmAonPwm4] = cio_pwm_aon_pwm_d2p[4];
-  assign mio_d2p[MioOutPwmAonPwm5] = cio_pwm_aon_pwm_d2p[5];
+  assign mio_d2p[MioOutPwmAonPwm0] = cio_pwm_aon_pwm_d2p_i[0];
+  assign mio_d2p[MioOutPwmAonPwm1] = cio_pwm_aon_pwm_d2p_i[1];
+  assign mio_d2p[MioOutPwmAonPwm2] = cio_pwm_aon_pwm_d2p_i[2];
+  assign mio_d2p[MioOutPwmAonPwm3] = cio_pwm_aon_pwm_d2p_i[3];
+  assign mio_d2p[MioOutPwmAonPwm4] = cio_pwm_aon_pwm_d2p_i[4];
+  assign mio_d2p[MioOutPwmAonPwm5] = cio_pwm_aon_pwm_d2p_i[5];
   assign mio_d2p[MioOutOtpMacroTest0] = cio_otp_macro_test_d2p[0];
   assign mio_d2p[MioOutSysrstCtrlAonBatDisable] = cio_sysrst_ctrl_aon_bat_disable_d2p;
   assign mio_d2p[MioOutSysrstCtrlAonKey0Out] = cio_sysrst_ctrl_aon_key0_out_d2p;
@@ -3527,12 +3501,12 @@ module top_earlgrey #(
   assign mio_en_d2p[MioOutSensorCtrlAonAstDebugOut6] = cio_sensor_ctrl_aon_ast_debug_out_en_d2p[6];
   assign mio_en_d2p[MioOutSensorCtrlAonAstDebugOut7] = cio_sensor_ctrl_aon_ast_debug_out_en_d2p[7];
   assign mio_en_d2p[MioOutSensorCtrlAonAstDebugOut8] = cio_sensor_ctrl_aon_ast_debug_out_en_d2p[8];
-  assign mio_en_d2p[MioOutPwmAonPwm0] = cio_pwm_aon_pwm_en_d2p[0];
-  assign mio_en_d2p[MioOutPwmAonPwm1] = cio_pwm_aon_pwm_en_d2p[1];
-  assign mio_en_d2p[MioOutPwmAonPwm2] = cio_pwm_aon_pwm_en_d2p[2];
-  assign mio_en_d2p[MioOutPwmAonPwm3] = cio_pwm_aon_pwm_en_d2p[3];
-  assign mio_en_d2p[MioOutPwmAonPwm4] = cio_pwm_aon_pwm_en_d2p[4];
-  assign mio_en_d2p[MioOutPwmAonPwm5] = cio_pwm_aon_pwm_en_d2p[5];
+  assign mio_en_d2p[MioOutPwmAonPwm0] = cio_pwm_aon_pwm_en_d2p_i[0];
+  assign mio_en_d2p[MioOutPwmAonPwm1] = cio_pwm_aon_pwm_en_d2p_i[1];
+  assign mio_en_d2p[MioOutPwmAonPwm2] = cio_pwm_aon_pwm_en_d2p_i[2];
+  assign mio_en_d2p[MioOutPwmAonPwm3] = cio_pwm_aon_pwm_en_d2p_i[3];
+  assign mio_en_d2p[MioOutPwmAonPwm4] = cio_pwm_aon_pwm_en_d2p_i[4];
+  assign mio_en_d2p[MioOutPwmAonPwm5] = cio_pwm_aon_pwm_en_d2p_i[5];
   assign mio_en_d2p[MioOutOtpMacroTest0] = cio_otp_macro_test_en_d2p[0];
   assign mio_en_d2p[MioOutSysrstCtrlAonBatDisable] = cio_sysrst_ctrl_aon_bat_disable_en_d2p;
   assign mio_en_d2p[MioOutSysrstCtrlAonKey0Out] = cio_sysrst_ctrl_aon_key0_out_en_d2p;

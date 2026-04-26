@@ -786,6 +786,8 @@
       phys_pd: main
       top_signame: pwm_aon_tl
       index: -1
+      external: true
+      conn_type: false
     }
     {
       name: tl_gpio
