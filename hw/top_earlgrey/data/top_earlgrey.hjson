@@ -100,16 +100,8 @@
   // unmanaged_resets: []
 
   // This is the reset data structure of the design.
-  // The hier path refers to the reset reference path (struct / port)
-  //   - The top/ext designation follows the same scheme as inter-module
   // The node key represents all the known resets in the design
   resets: {
-
-    hier_paths: {
-      top: "rstmgr_aon_resets.", // top level is a struct
-      ext: "",                   // ext is a port of the clock name
-      lpg: "rstmgr_aon_rst_en.", // top level struct for alert lpg reset enables
-    },
 
     // Reset node attributes
     // name: name of reset.
