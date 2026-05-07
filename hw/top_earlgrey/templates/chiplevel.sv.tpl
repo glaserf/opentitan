@@ -5,25 +5,16 @@ ${gencmd}
 <%
 import re
 import topgen.lib as lib
+from reggen.params import Parameter
+
 from copy import deepcopy
 
 # Provide shortcuts for some commonly used variables
 pinmux = top['pinmux']
 pinout = top['pinout']
 
-num_mio_inputs = pinmux['io_counts']['muxed']['inouts'] + \
-                 pinmux['io_counts']['muxed']['inputs']
-num_mio_outputs = pinmux['io_counts']['muxed']['inouts'] + \
-                  pinmux['io_counts']['muxed']['outputs']
-num_mio_pads = pinmux['io_counts']['muxed']['pads']
-
-num_dio_inputs = pinmux['io_counts']['dedicated']['inouts'] + \
-                 pinmux['io_counts']['dedicated']['inputs']
-num_dio_outputs = pinmux['io_counts']['dedicated']['inouts'] + \
-                  pinmux['io_counts']['dedicated']['outputs']
-num_dio_total = pinmux['io_counts']['dedicated']['inouts'] + \
-                pinmux['io_counts']['dedicated']['inputs'] + \
-                pinmux['io_counts']['dedicated']['outputs']
+feature_info = {}
+cio_info = {}
 
 def get_dio_sig(pinmux: {}, pad: {}):
   '''Get DIO signal associated with this pad or return None'''
@@ -57,6 +48,7 @@ for pad in target["pinout"]["add_pads"]:
   dedicated_pads.append(pad)
   k += 1
 %>\
+<%include file="/toplevel_snippets/info_dicts.tpl" args="top=top, feature_info=feature_info, cio_info=cio_info" />\
 
 % if target["name"] != "asic":
 module chip_${top["name"]}_${target["name"]} #(
@@ -513,9 +505,11 @@ module chip_${top["name"]}_${target["name"]} #(
   tlul_pkg::tl_h2d_t ast_tl_req;
   tlul_pkg::tl_d2h_t ast_tl_rsp;
 
-  // synchronization clocks / rests
-  clkmgr_pkg::clkmgr_out_t clkmgr_aon_clocks;
-  rstmgr_pkg::rstmgr_out_t rstmgr_aon_resets;
+  // Generated clocks, resets, and enable signals
+  clkmgr_pkg::clkmgr_out_t    clkmgr_aon_clocks;
+  clkmgr_pkg::clkmgr_cg_en_t  clkmgr_aon_cg_en;
+  rstmgr_pkg::rstmgr_out_t    rstmgr_aon_resets;
+  rstmgr_pkg::rstmgr_rst_en_t rstmgr_aon_rst_en;
 
   // external clock
   logic ext_clk;
@@ -576,11 +570,6 @@ module chip_${top["name"]}_${target["name"]} #(
 
   // Jitter enable for main clock
   prim_mubi_pkg::mubi4_t clk_main_jitter_en;
-
-  // reset domain connections
-  import rstmgr_pkg::PowerDomains;
-  import rstmgr_pkg::DomainAonSel;
-  import rstmgr_pkg::DomainMainSel;
 
   // Memory configuration connections
   ast_pkg::spm_rm_t ast_ram_1p_cfg;
@@ -790,8 +779,8 @@ module chip_${top["name"]}_${target["name"]} #(
     // init done indication
     .ast_init_done_o       ( ast_init_done ),
     // buffered clocks & resets
-    % for port, clk in ast["clock_connections"].items():
-    .${port} (${clk}),
+    % for port, clk in ast["clock_srcs"].items():
+    .${port} (${lib.get_clock_prefixes(top)["top"]}clk_${clk["clock"]}_${clk["group"]}),
     % endfor
     % for port, reset in ast["reset_connections"].items():
     .${port} (${lib.get_reset_path(top, reset)}),
@@ -1007,6 +996,15 @@ module chip_${top["name"]}_${target["name"]} #(
   prim_mubi_pkg::mubi4_t lc_clk_bypass;   // TODO Tim
 % endif
 
+  // Inter-Power Domain signals
+% for sig in top["inter_pd"]["definitions"]:
+  % if isinstance(sig["width"], Parameter):
+  ${lib.im_defname(sig)} [${sig["width"].name_top}-1:0] ${sig["signame"]};
+  % else:
+  ${lib.im_defname(sig)} ${lib.bitarray(sig["width"],1)} ${sig["signame"]};
+  % endif
+% endfor
+
   //////////////////////
   // Top-level design //
   //////////////////////
@@ -1066,21 +1064,13 @@ module chip_${top["name"]}_${target["name"]} #(
     .PinmuxAonTargetCfg(PinmuxTargetCfg)
 % endif
   ) top_${top["name"]} (
-    // AST clock and reset signals
-    .clk_main_i(ast_base_clks.clk_sys),
-    .clk_io_i  (ast_base_clks.clk_io ),
-    .clk_usb_i (ast_base_clks.clk_usb),
-    .clk_aon_i (ast_base_clks.clk_aon),
-    .clks_ast_o(clkmgr_aon_clocks    ),
-    .rsts_ast_o(rstmgr_aon_resets    ),
-
     // Manual DFT signals
     .scan_en_i  (scan_en   ),
     .scan_rst_ni(scan_rst_n),
     .scanmode_i (scanmode  ),
 
 <%
-port_list = top["inter_signal"]["external"]
+port_list = lib.get_intermodule_ports(top, "Main", inter_pd = True)
 max_portwidth = max(len(x["signame"]) for x in port_list) if port_list else 0
 if port_list:
   filtered_port_list = [p for p in port_list if len(p["signame_chip"][target["name"]]) <= 25]
@@ -1088,7 +1078,24 @@ if port_list:
 else:
   max_sigwidth = 0
 %>\
-    // Auto-generated port map
+    // Ports to and from other power domains (auto-generated)
+    % for sig in port_list:
+    .${lib.ljust(sig["signame"], max_portwidth)}(${lib.ljust(sig["signame_chip"][target["name"]], max_sigwidth)}),
+    % endfor
+
+    // Special inter-power domain signals
+<%include file="/chiplevel_snippets/special_signals_portmap.tpl" args="top=top, feature_info=feature_info, domain='Main'" />\
+
+<%
+port_list = lib.get_intermodule_ports(top, "Main", inter_pd = False)
+max_portwidth = max(len(x["signame"]) for x in port_list) if port_list else 0
+if port_list:
+  filtered_port_list = [p for p in port_list if len(p["signame_chip"][target["name"]]) <= 25]
+  max_sigwidth = max(len(p["signame_chip"][target["name"]]) for p in filtered_port_list)
+else:
+  max_sigwidth = 0
+%>\
+    // Regular ports (auto-generated)
     % for sig in port_list:
     .${lib.ljust(sig["signame"], max_portwidth)}(${lib.ljust(sig["signame_chip"][target["name"]], max_sigwidth)}),
     % endfor
@@ -1106,6 +1113,48 @@ else:
     // Pad attributes
     .mio_attr_o(mio_attr),
     .dio_attr_o(dio_attr)
+  );
+
+
+  //////////////////////
+  // Always-on Domain //
+  //////////////////////
+  top_${top["name"]}_pd_aon top_${top["name"]}_pd_aon (
+    // Manual DFT signals
+    .scan_en_i  (scan_en   ),
+    .scan_rst_ni(scan_rst_n),
+    .scanmode_i (scanmode  ),
+
+<%
+port_list = lib.get_intermodule_ports(top, "Aon", inter_pd = True)
+max_portwidth = max(len(x["signame"]) for x in port_list) if port_list else 0
+if port_list:
+  filtered_port_list = [p for p in port_list if len(p["signame_chip"][target["name"]]) <= 25]
+  max_sigwidth = max(len(p["signame_chip"][target["name"]]) for p in filtered_port_list)
+else:
+  max_sigwidth = 0
+%>\
+    // Ports to and from other power domains (auto-generated)
+    % for sig in port_list:
+    .${lib.ljust(sig["signame"], max_portwidth)}(${lib.ljust(sig["signame_chip"][target["name"]], max_sigwidth)}),
+    % endfor
+
+    // Special inter-power domain signals
+<%include file="/chiplevel_snippets/special_signals_portmap.tpl" args="top=top, feature_info=feature_info, domain='Aon'" />\
+
+<%
+port_list = lib.get_intermodule_ports(top, "Aon", inter_pd = False)
+max_portwidth = max(len(x["signame"]) for x in port_list) if port_list else 0
+if port_list:
+  filtered_port_list = [p for p in port_list if len(p["signame_chip"][target["name"]]) <= 25]
+  max_sigwidth = max(len(p["signame_chip"][target["name"]]) for p in filtered_port_list)
+else:
+  max_sigwidth = 0
+%>\
+    // Regular ports (auto-generated)
+    % for sig in port_list:
+    .${lib.ljust(sig["signame"], max_portwidth)}(${lib.ljust(sig["signame_chip"][target["name"]], max_sigwidth)})${"," if not loop.last else ""}
+    % endfor
   );
 
 ###################################################################

@@ -4,11 +4,12 @@
 <%import topgen.lib as lib%>\
 <%from topgen.clocks import Clocks%>\
 <%from topgen.resets import Resets%>\
-<%page args="top, feature_info"/>\
+<%page args="top, feature_info, domain"/>\
+% if feature_info["has_alert_handler"]:
+% if lib.find_module(top["module"], "alert_handler").get("domain") == domain:
   // Wire up alert handler LPGs
   prim_mubi_pkg::mubi4_t [alert_handler_pkg::NLpg-1:0] lpg_cg_en;
   prim_mubi_pkg::mubi4_t [alert_handler_pkg::NLpg-1:0] lpg_rst_en;
-
 <%
 # get all known typed clocks and add them to a dict
 # this is used to generate the tie-off assignments further below
@@ -17,7 +18,7 @@ assert isinstance(clocks, Clocks)
 typed_clocks = clocks.typed_clocks()
 known_clocks = {}
 for clk in typed_clocks.all_clocks():
-  known_clocks.update({lib.get_clock_lpg_path(top, clk): 1})
+  known_clocks.update({lib.get_clock_lpg_path(top, clk, domain): 1})
 
 # get all known resets and add them to a dict
 # this is used to generate the tie-off assignments further below
@@ -28,11 +29,11 @@ known_resets = {}
 for rst in output_rsts:
   for dom in top['power']['domains']:
     if rst.shadowed:
-      path = lib.get_reset_lpg_path(top, resets.get_reset_by_name(rst.name)._asdict(), True, dom)
+      path = lib.get_reset_lpg_path(top, resets.get_reset_by_name(rst.name)._asdict(), domain, True, dom)
       known_resets.update({
         path: 1
       })
-    path = lib.get_reset_lpg_path(top, resets.get_reset_by_name(rst.name)._asdict(), False, dom)
+    path = lib.get_reset_lpg_path(top, resets.get_reset_by_name(rst.name)._asdict(), domain, False, dom)
     known_resets.update({
       path: 1
     })
@@ -42,8 +43,8 @@ for rst in output_rsts:
 % for lpg in top['alert_lpgs']:
   // ${lpg['name']}
 <%
-  cg_en = lib.get_clock_lpg_path(top, lpg['clock_connection'], lpg['unmanaged_clock'])
-  rst_en = lib.get_reset_lpg_path(top, lpg['reset_connection'], False, None, lpg['unmanaged_reset'])
+  cg_en = lib.get_clock_lpg_path(top, lpg['clock_connection'], domain, lpg['unmanaged_clock'])
+  rst_en = lib.get_reset_lpg_path(top, lpg['reset_connection'], domain, False, None, lpg['unmanaged_reset'])
   known_clocks[cg_en] = 0
   known_resets[rst_en] = 0
 %>\
@@ -64,8 +65,8 @@ for rst in output_rsts:
   % for k, lpg in enumerate(lpgs):
   // ${lpg['name']}
 <%
-    cg_en = lib.get_clock_lpg_path(top, lpg['clock_connection'], lpg['unmanaged_clock'])
-    rst_en = lib.get_reset_lpg_path(top, lpg['reset_connection'], False, None, lpg['unmanaged_reset'])
+    cg_en = lib.get_clock_lpg_path(top, lpg['clock_connection'], domain, lpg['unmanaged_clock'])
+    rst_en = lib.get_reset_lpg_path(top, lpg['reset_connection'], domain, False, None, lpg['unmanaged_reset'])
     known_clocks[cg_en] = 0
     known_resets[rst_en] = 0
 %>\
@@ -93,3 +94,5 @@ for rst in output_rsts:
 % endfor
 //VCS coverage on
 // pragma coverage on
+% endif
+% endif\

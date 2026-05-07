@@ -28,7 +28,7 @@
 % for name, plic in top["plic_info"].items():
 <% prefix = "_" + name if len(top["plic_info"]) > 1 else "" %>\
 % if plic["domain"] == domain:
-  % for pd in top["power"]["physical"]:
+  % for pd in top["power"]["domains"]:
 <% if pd == domain: continue %>\
     % if plic["count_pd"][pd] > 0:
 <% chiplevel_sig = f"intr_vector{prefix}_pd_{pd.lower()}" %>\
