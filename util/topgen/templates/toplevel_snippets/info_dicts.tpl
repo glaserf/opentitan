@@ -10,6 +10,7 @@ feature_info['has_alert_handler'] = lib.find_module(top['module'], 'alert_handle
 feature_info['has_ast']           = lib.find_module(top['module'], 'ast') is not None
 feature_info['has_rstmgr']        = lib.find_module(top['module'], 'rstmgr') is not None
 feature_info['has_gpio']          = lib.find_module(top['module'], 'gpio') is not None
+feature_info['has_usb']           = lib.find_module(top['module'], 'usbdev') is not None
 feature_info['has_scan_en'] = False
 for m in top['module']:
   if not lib.is_inst(m):
