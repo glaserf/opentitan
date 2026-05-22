@@ -26,6 +26,12 @@ port_list = inputs + outputs + inouts
 max_sigwidth = max(len(x.name) for x in port_list) if port_list else 0
 max_intrwidth = (max(len(x.name) for x in block.interrupts)
                  if block.interrupts else 0)
+
+max_im_portwidth = 0
+max_im_netwidth = 0
+for sig in m.get('inter_signal_list', []):
+  max_im_portwidth = max(max_im_portwidth, lib.len_im_portname(sig))
+
 alert_info = top["alert_connections"].get("module_" + m["name"], {})
 has_params, param_items = lib.get_params(top, m)
 
@@ -134,12 +140,12 @@ else:
 %>\
     ## TODO: handle below condition in lib.py
     % if sig['type'] == "req_rsp":
-    .${lib.im_portname(sig,"req")}(${lib.im_netname(sig, "req")}),
-    .${lib.im_portname(sig,"rsp")}(${lib.im_netname(sig, "rsp")})${term}
+    .${lib.ljust(lib.im_portname(sig,"req"),max_im_portwidth)}(${lib.im_netname(sig, "req")}),
+    .${lib.ljust(lib.im_portname(sig,"rsp"),max_im_portwidth)}(${lib.im_netname(sig, "rsp")})${term}
     % elif sig['type'] == "io":
-    .${lib.im_portname(sig,"io")}(${lib.im_netname(sig, "io")})${term}
+    .${lib.ljust(lib.im_portname(sig),max_im_portwidth)}(${lib.im_netname(sig, "io")})${term}
     % elif sig['type'] == "uni":
-    .${lib.im_portname(sig)}(${lib.im_netname(sig)})${term}
+    .${lib.ljust(lib.im_portname(sig),max_im_portwidth)}(${lib.im_netname(sig)})${term}
     % endif
   % endfor
 % endif\

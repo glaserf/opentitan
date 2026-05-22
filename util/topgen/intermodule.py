@@ -1340,7 +1340,7 @@ def im_netname(sig: OrderedDict, suffix: str = "", default_name=False) -> str:
         index=lib.index(obj))
 
 
-def im_portname(obj: OrderedDict, suffix: str = "") -> str:
+def im_portname(obj: OrderedDict, reqrsp: str = "req") -> str:
     """return IP's port name
 
     e.g signame_o for requester req signal
@@ -1348,17 +1348,25 @@ def im_portname(obj: OrderedDict, suffix: str = "") -> str:
 
     act = obj['act']
     name = obj['name']
+    type = obj['type']
 
-    if suffix == "":
-        suffix_s = "_o" if act == "req" else "_i"
-    elif suffix == "req":
-        suffix_s = "_o" if act == "req" else "_i"
-    elif suffix == "io":
-        suffix_s = "_io"
+    if type == "io":
+        suffix = "_io"
+    elif type == "uni":
+        suffix = "_o" if act == "req" else "_i"
+    elif type == "req_rsp":
+        suffix = "_o" if act == reqrsp else "_i"
     else:
-        suffix_s = "_o" if act == "rsp" else "_i"
+        assert 0, "Invalid signal type"
 
-    return name + suffix_s
+    return name + suffix
+
+
+def len_im_portname(sig: OrderedDict):
+    if sig['type'] == 'io':
+        return len(sig['name']) + 3
+    else:
+        return len(sig['name']) + 2
 
 
 def get_dangling_im_def(objs: OrderedDict) -> str:
