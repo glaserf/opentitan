@@ -24,6 +24,11 @@ module top_${top["name"]} #(
   // Compile-time random constants
   import top_${top["name"]}_rnd_cnst_pkg::*;
 
+  // Index into reset array for each power domain
+% for dom in top["power"]["domains"]:
+  import rstmgr_pkg::Domain${dom.capitalize()}Sel;
+% endfor
+
 <%include file="/toplevel_snippets/localparams.tpl" args="top=top, domain=domain" />\
 
 <%include file="/toplevel_snippets/cio_signals.tpl" args="top=top, feature_info=feature_info, cio_info=cio_info, domain=domain" />\

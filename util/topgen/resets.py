@@ -144,7 +144,7 @@ class Resets:
             path = prefixes['top'] + reset.path
 
         if domain:
-            path += f'[rstmgr_pkg::Domain{domain}Sel]'
+            path += f'[Domain{domain}Sel]'
 
         return path
 
@@ -170,7 +170,7 @@ class Resets:
             path = prefixes['lpg'] + reset.lpg_path
 
         if domain:
-            path += f'[rstmgr_pkg::Domain{domain}Sel]'
+            path += f'[Domain{domain}Sel]'
 
         return path
 
@@ -186,11 +186,11 @@ class Resets:
             for dom in domains:
                 if dom not in reset.domains:
                     ret[f'rst_{reset.name}_n[{domains.index(dom)}]'] = \
-                        f'{reset.path}[rstmgr_pkg::Domain{dom}Sel]'
+                        f'{reset.path}[Domain{dom}Sel]'
 
                     if reset.shadowed:
                         ret[f'rst_{reset.name}_shadowed_n[{domains.index(dom)}]'] = \
-                            f'{reset.shadow_path}[rstmgr_pkg::Domain{dom}Sel]'
+                            f'{reset.shadow_path}[Domain{dom}Sel]'
 
         return ret
 
