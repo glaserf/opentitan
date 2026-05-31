@@ -54,29 +54,40 @@
 ## Mixed connection to port
 ## Index greater than 0 means a port is assigned to an inter-module array
 ## whereas an index of 0 means a port is directly driven by a module
+<%
+  port_pairs = []
+  for port in lib.get_intermodule_ports(top, domain):
+    if port['conn_type'] and isinstance(port['index'], list):
+      for idx_port, idx in enumerate(port['index']):
+        if port['direction'] == 'in':
+          port_pairs.append(
+            ("{}[{}]".format(port['netname'], idx),
+             "{}[{}]".format(port['signame'], idx_port)))
+        else:
+          port_pairs.append(
+            ("{}[{}]".format(port['signame'], idx_port),
+             "{}[{}]".format(port['netname'], idx)))
+    elif port['conn_type'] and port['index'] != -1:
+      if port['direction'] == 'in':
+        port_pairs.append(
+          ("{}[{}]".format(port['netname'], port['index']),
+           port['signame']))
+      else:
+        port_pairs.append(
+          (port['signame'],
+           "{}[{}]".format(port['netname'], port['index'])))
+    elif port['conn_type']:
+      if port['direction'] == 'in':
+        port_pairs.append((port['netname'], port['signame']))
+      else:
+        port_pairs.append((port['signame'], port['netname']))
+  w_lhs = max((len(lhs) for lhs, rhs in port_pairs), default=0)
+%>\
+% if port_pairs:
   // Create mixed connections to ports
-% for port in lib.get_intermodule_ports(top, domain):
-  % if port['conn_type'] and isinstance(port['index'], list):
-    % for idx_port, idx in enumerate(port['index']):
-    % if port['direction'] == 'in':
-  assign ${port['netname']}[${idx}] = ${port['signame']}[${idx_port}];
-    % else:
-  assign ${port['signame']}[${idx_port}] = ${port['netname']}[${idx}];
-    % endif
-    % endfor
-  % elif port['conn_type'] and port['index'] != -1:
-    % if port['direction'] == 'in':
-  assign ${port['netname']}[${port['index']}] = ${port['signame']};
-    % else:
-  assign ${port['signame']} = ${port['netname']}[${port['index']}];
-    % endif
-  % elif port['conn_type']:
-    % if port['direction'] == 'in':
-  assign ${port['netname']} = ${port['signame']};
-    % else:
-  assign ${port['signame']} = ${port['netname']};
-    % endif
-  % endif
+% endif
+% for lhs, rhs in port_pairs:
+  assign ${lhs.ljust(w_lhs)} = ${rhs};
 % endfor
 
 ## Partial inter-module definition tie-off
