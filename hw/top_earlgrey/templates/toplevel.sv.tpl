@@ -39,8 +39,6 @@ module top_${top["name"]} #(
 
 <%include file="/toplevel_snippets/intermodule_signals.tpl" args="top=top, domain=domain" />\
 
-% for m in lib.get_all_modules(top, domain=domain):
-  % if m.get("template_type") == "otp_ctrl":
   // OTP HW_CFG* Broadcast signals.
   // TODO(#6713): The actual struct breakout and mapping currently needs to
   // be performed by hand.
@@ -64,8 +62,6 @@ module top_${top["name"]} #(
     otp_ctrl_otp_broadcast.hw_cfg1_data.hw_cfg1_digest,
     otp_ctrl_otp_broadcast.hw_cfg1_data.unallocated
   };
-  % endif
-% endfor
 
   // Ibex-specific assignments
   // TODO: This should be further automated in the future.
