@@ -385,7 +385,8 @@ def handle_multi_pd_intersig(topcfg, definitions, package,
                               ('end_idx', lhs_struct["end_idx"]),
                               ('act', lhs_struct["act"]),
                               ('suffix', ""),
-                              ('default', default)])
+                              ('default', default),
+                              ('inst_name', lhs_struct["inst_name"])])
 
     # "Main" chiplevel signal
     # Determine cumulative width of all rhs signals
@@ -722,7 +723,8 @@ def elab_intermodule(topcfg: OrderedDict):
                              ('end_idx', req_struct["end_idx"]),
                              ('act', req_struct["act"]),
                              ('suffix', "req"),
-                             ('default', req_default)]))
+                             ('default', req_default),
+                             ('inst_name', req_struct["inst_name"])]))
             definitions.append(
                 OrderedDict([('package', package),
                              ('struct', req_struct["struct"] + rsp_suffix),
@@ -733,7 +735,8 @@ def elab_intermodule(topcfg: OrderedDict):
                              ('end_idx', req_struct["end_idx"]),
                              ('act', req_struct["act"]),
                              ('suffix', "rsp"),
-                             ('default', rsp_default)]))
+                             ('default', rsp_default),
+                             ('inst_name', req_struct["inst_name"])]))
         else:
             # unidirection
             default = _get_default_name(req_struct, "")
@@ -747,7 +750,8 @@ def elab_intermodule(topcfg: OrderedDict):
                              ('end_idx', req_struct["end_idx"]),
                              ('act', req_struct["act"]),
                              ('suffix', ""),
-                             ('default', default)]))
+                             ('default', default),
+                             ('inst_name', req_struct["inst_name"])]))
 
         for i, rsp in enumerate(rsps):
             # Split index
@@ -796,7 +800,8 @@ def elab_intermodule(topcfg: OrderedDict):
                              ('signame', sig_name + "_req"),
                              ('width', sig["width"]), ('type', sig["type"]),
                              ('end_idx', -1),
-                             ('default', sig["default"])]))
+                             ('default', sig["default"]),
+                             ('inst_name', sig_m)]))
             definitions.append(
                 OrderedDict([('package', sig["package"]),
                              ('struct', sig["struct"] + rsp_suffix),
@@ -804,7 +809,8 @@ def elab_intermodule(topcfg: OrderedDict):
                              ('signame', sig_name + "_rsp"),
                              ('width', sig["width"]), ('type', sig["type"]),
                              ('end_idx', -1),
-                             ('default', sig["default"])]))
+                             ('default', sig["default"]),
+                             ('inst_name', sig_m)]))
         else:  # if sig["type"] == "uni":
             definitions.append(
                 OrderedDict([('package', sig["package"]),
@@ -812,7 +818,8 @@ def elab_intermodule(topcfg: OrderedDict):
                              ('domain', domain),
                              ('width', sig["width"]), ('type', sig["type"]),
                              ('end_idx', -1),
-                             ('default', sig["default"])]))
+                             ('default', sig["default"]),
+                             ('inst_name', sig_m)]))
 
     topcfg["inter_module"].setdefault('external', [])
     topcfg["inter_signal"].setdefault('external', [])

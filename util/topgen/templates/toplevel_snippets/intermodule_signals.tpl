@@ -10,15 +10,45 @@
     [d for d in top["inter_signal"]["definitions"] if d["domain"] == domain])
 %>\
 ## Inter-module Definitions
-% if lib.get_intermodule_list(top, domain):
+<%
+  im_list = lib.get_intermodule_list(top, domain)
+  im_groups = {}
+  for sig in im_list:
+    m = sig.get('inst_name', '')
+    if m not in im_groups:
+      im_groups[m] = []
+    im_groups[m].append(sig)
+%>\
+% if im_list:
   // Define inter-module signals
 % endif
-% for sig in lib.get_intermodule_list(top, domain):
-  % if isinstance(sig["width"], Parameter):
-  ${lib.im_defname(sig)} [${sig["width"].name_top}-1:0] ${sig["signame"]};
-  % else:
-  ${lib.im_defname(sig)} ${lib.bitarray(sig["width"],1)} ${sig["signame"]};
+% for i, (mod, group) in enumerate(im_groups.items()):
+  % if i > 0:
+
   % endif
+<%
+  col_type  = [lib.im_defname(s) for s in group]
+  col_width = []
+  for s in group:
+    if isinstance(s["width"], Parameter):
+      col_width.append("[{}-1:0]".format(s["width"].name_top))
+    elif s["width"] > 1:
+      col_width.append("[{}:0]".format(s["width"] - 1))
+    else:
+      col_width.append("")
+  w_type  = max(len(t) for t in col_type)
+  w_width = max(len(w) for w in col_width)
+  formatted = []
+  for t, w, s in zip(col_type, col_width, group):
+    if w_width > 0:
+      formatted.append("{} {} {};".format(
+        t.ljust(w_type), w.rjust(w_width), s["signame"]))
+    else:
+      formatted.append("{} {};".format(t.ljust(w_type), s["signame"]))
+%>\
+  % for line in formatted:
+  ${line}
+  % endfor
 % endfor
 
 ## Mixed connection to port
