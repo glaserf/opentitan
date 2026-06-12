@@ -1113,10 +1113,10 @@ module chip_earlgrey_cw310 #(
   logic [8:0] cio_sensor_ctrl_aon_ast_debug_out_d2p;
   logic [8:0] cio_sensor_ctrl_aon_ast_debug_out_en_d2p;
 
-  //////////////////////
-  // Top-level design //
-  //////////////////////
-  top_earlgrey #(
+  ///////////////////////////
+  // Top-level Main Domain //
+  ///////////////////////////
+  earlgrey_pd_main #(
     .EntropySrcStub(1'b1), // Stub ENTROPY_SRC to reduce resource usage on CW310. See #30062.
     .OtbnStub(1'b1), // Stub OTBN to reduce resource usage on CW310. See #30062.
     .UsbdevStub(1'b1), // Stub USBDEV to reduce resource usage on CW310. See #30062.
@@ -1147,7 +1147,7 @@ module chip_earlgrey_cw310 #(
     .RvCoreIbexRegFile(ibex_pkg::RegFileFPGA),
     .SramCtrlMainInstrExec(1),
     .PinmuxAonTargetCfg(PinmuxTargetCfg)
-  ) top_earlgrey (
+  ) earlgrey_pd_main (
     // Clocks and clock gating control from clkmgr_aon
     .clkmgr_aon_clocks_i(clkmgr_aon_clocks),
     .clkmgr_aon_cg_en_i (clkmgr_aon_cg_en),
@@ -1294,10 +1294,10 @@ module chip_earlgrey_cw310 #(
   );
 
 
-  //////////////////////
-  // Always-on Domain //
-  //////////////////////
-  top_earlgrey_pd_aon #(
+  ////////////////////////////////
+  // Top-level Always-On domain //
+  ////////////////////////////////
+  earlgrey_pd_aon #(
     .SramCtrlRetAonInstrExec(0)
   ) top_earlgrey_pd_aon (
     // All externally supplied clocks
