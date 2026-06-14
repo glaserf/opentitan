@@ -10,14 +10,14 @@
 `define __AST_PKG_SV
 
 `define PAD2AST_WIRES     \
-{ mio_in_raw[MioPadIoc3], \
-  mio_in_raw[MioPadIoc2], \
-  mio_in_raw[MioPadIoc1], \
-  mio_in_raw[MioPadIob2], \
-  mio_in_raw[MioPadIob1], \
-  mio_in_raw[MioPadIob0], \
-  mio_in_raw[MioPadIoa5], \
-  mio_in_raw[MioPadIoa4] }
+{ mio_in_raw_i[MioPadIoc3], \
+  mio_in_raw_i[MioPadIoc2], \
+  mio_in_raw_i[MioPadIoc1], \
+  mio_in_raw_i[MioPadIob2], \
+  mio_in_raw_i[MioPadIob1], \
+  mio_in_raw_i[MioPadIob0], \
+  mio_in_raw_i[MioPadIoa5], \
+  mio_in_raw_i[MioPadIoa4] }
 
 package ast_pkg;
 

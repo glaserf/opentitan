@@ -51,6 +51,8 @@ for pad in target["pinout"]["add_pads"]:
 # Bkdr loader targets
 bkdr_loader_targets = ["cw340"]
 gen_bkdr_loader = target["name"] in bkdr_loader_targets
+
+removed_port_names = []
 %>\
 <%include file="/toplevel_snippets/info_dicts.tpl" args="top=top, feature_info=feature_info, cio_info=cio_info" />\
 
@@ -60,9 +62,6 @@ module chip_${top["name"]}_${target["name"]} (
   input clk_i,
   input rst_ni
 );
-<%
-  removed_port_names = []
-%>\
 % else:
 %   if target["name"] != "asic":
 %     if gen_bkdr_loader:
@@ -91,9 +90,6 @@ module chip_${top["name"]}_${target["name"]} #(
   parameter bit SecRomCtrlDisableScrambling = 1'b0
 ) (
 %   endif
-<%
-  removed_port_names = []
-%>\
   // Dedicated Pads
 % for pad in dedicated_pads:
 <%
@@ -223,25 +219,20 @@ module chip_${top["name"]}_${target["name"]} #(
   wire ${port};
   % endfor
 
-  logic [3:0] mux_iob_sel;
-% if gen_bkdr_loader:
-
-  pad_attr_t [pinmux_reg_pkg::NMioPads-1:0] mio_bkdr_attr;
-  logic [pinmux_reg_pkg::NMioPads-1:0]      mio_bkdr_out;
-  logic [pinmux_reg_pkg::NMioPads-1:0]      mio_bkdr_oe;
-  logic [pinmux_reg_pkg::NMioPads-1:0]      mio_bkdr_in;
-% endif
-
   pad_attr_t [pinmux_reg_pkg::NMioPads-1:0] mio_attr;
   pad_attr_t [pinmux_reg_pkg::NDioPads-1:0] dio_attr;
+
   logic [pinmux_reg_pkg::NMioPads-1:0] mio_out;
   logic [pinmux_reg_pkg::NMioPads-1:0] mio_oe;
   logic [pinmux_reg_pkg::NMioPads-1:0] mio_in;
-  logic [pinmux_reg_pkg::NMioPads-1:0] mio_in_raw;
-  logic [${len(dedicated_pads)}-1:0]                       dio_in_raw;
   logic [pinmux_reg_pkg::NDioPads-1:0] dio_out;
   logic [pinmux_reg_pkg::NDioPads-1:0] dio_oe;
   logic [pinmux_reg_pkg::NDioPads-1:0] dio_in;
+
+% if target["name"] != "verilator":
+  logic                          [3:0] mux_iob_sel;
+  logic [pinmux_reg_pkg::NMioPads-1:0] mio_in_raw;
+  logic                         [${len(dedicated_pads)-1}:0] dio_in_raw;
 
   logic unused_mio_in_raw;
   logic unused_dio_in_raw;
@@ -249,7 +240,6 @@ module chip_${top["name"]}_${target["name"]} #(
   assign unused_dio_in_raw = ^dio_in_raw;
 
   // Manual pads
-% if target["name"] != "verilator":
 % for pad in dedicated_pads:
 <%
   pad_prefix = pad["name"].lower()
@@ -298,57 +288,17 @@ module chip_${top["name"]}_${target["name"]} #(
     % endif
   % endif
 % endfor
-%endif
+%endif\
 
   //////////////////////
   // Padring Instance //
   //////////////////////
 
+% if target["name"] != "verilator":
+  // AST control signals needed in the padring, driven by top_${top["name"]}
   ast_pkg::ast_clks_t ast_base_clks;
-
-% if target["name"] in ["asic", "verilator"]:
-  // AST signals needed in padring
-  logic scan_rst_n;
   prim_mubi_pkg::mubi4_t scanmode;
-% endif
 
-% if target["name"] == "verilator":
-  // Padring substitute for the Verilator simulation top. The flat
-  // per-peripheral cio_* signals live inside padring_verilator and
-  // are driven and observed by the testbench DPI models through
-  // hierarchical references (XMR).
-
-  // USB signals routed directly to/from top_${top["name"]} (not via mio/dio)
-  logic usb_dp_pullup_en;
-  logic usb_dn_pullup_en;
-  logic usb_rx_d;
-  logic usb_tx_d;
-  logic usb_tx_se0;
-  logic usb_tx_use_d_se0;
-  logic usb_rx_enable;
-
-  logic unused_mux_iob_sel;
-  assign unused_mux_iob_sel = ^mux_iob_sel;
-
-  padring_verilator u_padring (
-    .mio_in_o  (mio_in ),
-    .mio_out_i (mio_out),
-    .mio_oe_i  (mio_oe ),
-    .mio_attr_i(mio_attr),
-
-    .dio_in_o (dio_in ),
-    .dio_out_i(dio_out),
-    .dio_oe_i (dio_oe ),
-
-    .usb_rx_d_o        (usb_rx_d        ),
-    .usb_tx_d_i        (usb_tx_d        ),
-    .usb_tx_se0_i      (usb_tx_se0      ),
-    .usb_tx_use_d_se0_i(usb_tx_use_d_se0),
-    .usb_rx_enable_i   (usb_rx_enable   ),
-    .usb_dp_pullup_en_i(usb_dp_pullup_en),
-    .usb_dn_pullup_en_i(usb_dn_pullup_en)
-  );
-% else:
   padring #(
     // Padring specific counts may differ from pinmux config due
     // to custom, stubbed or added pads.
@@ -402,11 +352,7 @@ module chip_${top["name"]}_${target["name"]} #(
     })
   ) u_padring (
     // This is only used for scan and DFT purposes
-% if target["name"] == "asic":
     .clk_scan_i(ast_base_clks.clk_sys),
-% else:
-    .clk_scan_i(1'b0    ),
-% endif
     .scanmode_i(scanmode),
 
     .mux_iob_sel_i(mux_iob_sel),
@@ -465,13 +411,12 @@ module chip_${top["name"]}_${target["name"]} #(
     .mio_${port} (${lib.make_bit_concatenation(sig_name, indices, 6)})${"" if loop.last else ","}
 % endfor
   );
-% endif
+% else:
+  // Padring substitute for the Verilator simulation top.
+  // Per-peripheral cio_* pad signals live inside padring_verilator and are driven and observed
+  // by the testbench DPI models through hierarchical references.
 
-
-###################################################################
-## USB for CW305                                                 ##
-###################################################################
-% if target["name"] == "cw305":
+  // USB signals routed directly to/from top_${top["name"]} (not via mio/dio)
   logic usb_dp_pullup_en;
   logic usb_dn_pullup_en;
   logic usb_rx_d;
@@ -479,6 +424,34 @@ module chip_${top["name"]}_${target["name"]} #(
   logic usb_tx_se0;
   logic usb_tx_use_d_se0;
   logic usb_rx_enable;
+
+  padring_verilator u_padring (
+    .mio_in_o  (mio_in ),
+    .mio_out_i (mio_out),
+    .mio_oe_i  (mio_oe ),
+    .mio_attr_i(mio_attr),
+    .dio_attr_i(dio_attr),
+
+    .dio_in_o (dio_in ),
+    .dio_out_i(dio_out),
+    .dio_oe_i (dio_oe ),
+
+    .usb_rx_d_o        (usb_rx_d        ),
+    .usb_tx_d_i        (usb_tx_d        ),
+    .usb_tx_se0_i      (usb_tx_se0      ),
+    .usb_tx_use_d_se0_i(usb_tx_use_d_se0),
+    .usb_rx_enable_i   (usb_rx_enable   ),
+    .usb_dp_pullup_en_i(usb_dp_pullup_en),
+    .usb_dn_pullup_en_i(usb_dn_pullup_en)
+  );
+% endif\
+
+###################################################################
+## USB for CW305                                                 ##
+###################################################################
+% if target["name"] == "cw305":
+  logic usb_dp_pullup_en;
+  logic usb_dn_pullup_en;
 
   // Connect the DP pad
   assign dio_in[DioUsbdevUsbDp] = manual_in_usb_p;
@@ -502,12 +475,9 @@ module chip_${top["name"]}_${target["name"]} #(
   assign manual_oe_io_usb_dppullup0 = 1'b1;
   assign manual_attr_io_dppullup0 = '0;
 
-  // Tie-off unused signals
-  assign usb_rx_d = 1'b0;
-
 % endif
 ###################################################################
-## USB for CW310                                                 ##
+## USB for CW310 and CW340                                       ##
 ###################################################################
 % if target["name"] in ["cw310", "cw340"]:
   // TODO: generalize this USB mux code and align with other tops.
@@ -564,484 +534,6 @@ module chip_${top["name"]}_${target["name"]} #(
     dio_attr[DioUsbdevUsbDn]
   };
 % endif
-
-###################################################################
-## AST For all targets                                           ##
-###################################################################
-  //////////////////////////////////
-  // AST - Common for all targets //
-  //////////////////////////////////
-
-  // pwrmgr interface
-  pwrmgr_pkg::pwr_ast_req_t pwrmgr_ast_req;
-  pwrmgr_pkg::pwr_ast_rsp_t pwrmgr_ast_rsp;
-
-  // assorted ast status
-  ast_pkg::ast_pwst_t ast_pwst;
-  ast_pkg::ast_pwst_t ast_pwst_h;
-
-  // TLUL interface
-  tlul_pkg::tl_h2d_t ast_tl_req;
-  tlul_pkg::tl_d2h_t ast_tl_rsp;
-
-  // Generated clocks, resets, and enable signals
-  clkmgr_pkg::clkmgr_out_t    clkmgr_aon_clocks;
-  clkmgr_pkg::clkmgr_cg_en_t  clkmgr_aon_cg_en;
-  rstmgr_pkg::rstmgr_out_t    rstmgr_aon_resets;
-  rstmgr_pkg::rstmgr_rst_en_t rstmgr_aon_rst_en;
-
-  // external clock
-  logic ext_clk;
-
-  // monitored clock
-  logic sck_monitor;
-
-  // observe interface
-  logic [7:0] flash_obs;
-  logic [7:0] otp_obs;
-  ast_pkg::ast_obs_ctrl_t obs_ctrl;
-
-  // otp power sequence
-  otp_macro_pkg::otp_ast_req_t otp_macro_pwr_seq;
-  otp_macro_pkg::otp_ast_rsp_t otp_macro_pwr_seq_h;
-
-  logic usb_ref_pulse;
-  logic usb_ref_val;
-
-  // adc
-  ast_pkg::adc_ast_req_t adc_req;
-  ast_pkg::adc_ast_rsp_t adc_rsp;
-
-  // entropy source interface
-  logic es_rng_enable, es_rng_valid;
-  logic [ast_pkg::EntropyStreams-1:0] es_rng_bit;
-  logic es_rng_fips;
-
-  // entropy distribution network
-  edn_pkg::edn_req_t ast_edn_req;
-  edn_pkg::edn_rsp_t ast_edn_rsp;
-
-  // alerts interface
-  ast_pkg::ast_alert_rsp_t ast_alert_rsp;
-  ast_pkg::ast_alert_req_t ast_alert_req;
-
-  // Flash connections
-  prim_mubi_pkg::mubi4_t flash_bist_enable;
-  logic flash_power_down_h;
-  logic flash_power_ready_h;
-
-  // clock bypass req/ack
-  prim_mubi_pkg::mubi4_t io_clk_byp_req;
-  prim_mubi_pkg::mubi4_t io_clk_byp_ack;
-  prim_mubi_pkg::mubi4_t all_clk_byp_req;
-  prim_mubi_pkg::mubi4_t all_clk_byp_ack;
-  prim_mubi_pkg::mubi4_t hi_speed_sel;
-  prim_mubi_pkg::mubi4_t div_step_down_req;
-
-  // DFT connections
-  logic scan_en;
-  lc_ctrl_pkg::lc_tx_t lc_dft_en;
-  pinmux_pkg::dft_strap_test_req_t dft_strap_test;
-
-  // Debug connections
-  logic [ast_pkg::Ast2PadOutWidth-1:0] ast2pinmux;
-  logic [ast_pkg::Pad2AstInWidth-1:0] pad2ast;
-
-  // Jitter enable for main clock
-  prim_mubi_pkg::mubi4_t clk_main_jitter_en;
-
-  // Memory configuration connections
-  ast_pkg::spm_rm_t ast_ram_1p_cfg;
-  ast_pkg::spm_rm_t ast_rf_cfg;
-  ast_pkg::spm_rm_t ast_rom_cfg;
-  ast_pkg::dpm_rm_t ast_ram_2p_fcfg;
-  ast_pkg::dpm_rm_t ast_ram_2p_lcfg;
-
-  prim_ram_1p_pkg::ram_1p_cfg_t ram_1p_cfg;
-  prim_ram_2p_pkg::ram_2p_cfg_t spi_ram_2p_cfg;
-  prim_ram_1p_pkg::ram_1p_cfg_t usb_ram_1p_cfg;
-  prim_rom_pkg::rom_cfg_t rom_cfg;
-
-  // conversion from ast structure to memory centric structures
-  assign ram_1p_cfg = '{
-    ram_cfg: '{
-                test:   ast_ram_1p_cfg.test,
-                cfg_en: ast_ram_1p_cfg.marg_en,
-                cfg:    ast_ram_1p_cfg.marg
-              },
-    rf_cfg:  '{
-                test:   ast_rf_cfg.test,
-                cfg_en: ast_rf_cfg.marg_en,
-                cfg:    ast_rf_cfg.marg
-              }
-  };
-
-  assign usb_ram_1p_cfg = '{
-    ram_cfg: '{
-                test:   ast_ram_1p_cfg.test,
-                cfg_en: ast_ram_1p_cfg.marg_en,
-                cfg:    ast_ram_1p_cfg.marg
-              },
-    rf_cfg:  '{
-                test:   ast_rf_cfg.test,
-                cfg_en: ast_rf_cfg.marg_en,
-                cfg:    ast_rf_cfg.marg
-              }
-  };
-
-  // this maps as follows:
-  // assign spi_ram_2p_cfg = {10'h000, ram_2p_cfg_i.a_ram_lcfg, ram_2p_cfg_i.b_ram_lcfg};
-  assign spi_ram_2p_cfg = '{
-    a_ram_lcfg: '{
-                   test:   ast_ram_2p_lcfg.test_a,
-                   cfg_en: ast_ram_2p_lcfg.marg_en_a,
-                   cfg:    ast_ram_2p_lcfg.marg_a
-                 },
-    b_ram_lcfg: '{
-                   test:   ast_ram_2p_lcfg.test_b,
-                   cfg_en: ast_ram_2p_lcfg.marg_en_b,
-                   cfg:    ast_ram_2p_lcfg.marg_b
-                 },
-    default: '0
-  };
-
-  assign rom_cfg = '{
-    test:   ast_rom_cfg.test,
-    cfg_en: ast_rom_cfg.marg_en,
-    cfg:    ast_rom_cfg.marg
-  };
-
-  // unused cfg bits
-  logic unused_ram_cfg;
-  assign unused_ram_cfg = ^ast_ram_2p_fcfg;
-
-  //////////////////////////////////
-  // AST - Custom for targets     //
-  //////////////////////////////////
-
-<%
-  ast = [m for m in top["module"] if m["name"] == "ast"]
-  assert(len(ast) == 1)
-  ast = ast[0]
-%>\
-
-  assign pwrmgr_ast_rsp.main_pok = ast_pwst.main_pok;
-
-  logic [rstmgr_pkg::PowerDomains-1:0] por_n;
-  assign por_n = {ast_pwst.main_pok, ast_pwst.aon_pok};
-
-% if target["name"] == "asic":
-
-  logic [ast_pkg::UsbCalibWidth-1:0] usb_io_pu_cal;
-
-  // external clock comes in at a fixed position
-  assign ext_clk = mio_in_raw[MioPadIoc6];
-
-  assign pad2ast = `PAD2AST_WIRES ;
-
-  // AST does not use all clocks / resets forwarded to it
-  logic unused_slow_clk_en;
-  assign unused_slow_clk_en = pwrmgr_ast_req.slow_clk_en;
-
-  logic unused_pwr_clamp;
-  assign unused_pwr_clamp = pwrmgr_ast_req.pwr_clamp;
-
-  logic usb_diff_rx_obs;
-
-% elif target["name"] in ["cw305", "cw310"] and not gen_bkdr_loader:
-  // TODO: Hook this up when FPGA pads are updated
-  assign ext_clk = '0;
-  assign pad2ast = '0;
-
-  logic clk_main, clk_usb_48mhz, clk_aon, rst_n, srst_n;
-  clkgen_xil7series # (
-    .AddClkBuf(0)
-  ) clkgen (
-    .clk_i(manual_in_io_clk),
-    .rst_ni(manual_in_por_n),
-    .srst_ni(srst_n),
-    .clk_main_o(clk_main),
-    .clk_48MHz_o(clk_usb_48mhz),
-    .clk_aon_o(clk_aon),
-    .rst_no(rst_n)
-  );
-
-  logic [31:0] fpga_info;
-  usr_access_xil7series u_info (
-    .info_o(fpga_info)
-  );
-
-  ast_pkg::clks_osc_byp_t clks_osc_byp;
-  assign clks_osc_byp = '{
-    usb: clk_usb_48mhz,
-    sys: clk_main,
-    io:  clk_main,
-    aon: clk_aon
-  };
-
-% elif target["name"] in ["cw305", "cw310"] and gen_bkdr_loader:
-  // TODO: Hook this up when FPGA pads are updated
-  assign ext_clk = '0;
-  assign pad2ast = '0;
-
-  logic bkdr_rst_n;
-  logic clk_main, clk_usb_48mhz, clk_aon, rst_n, srst_n;
-  clkgen_xil7series # (
-    .AddClkBuf(0)
-  ) clkgen (
-    .clk_i(manual_in_io_clk),
-    .rst_ni(manual_in_por_n),
-    .srst_ni(srst_n),
-    .clk_main_o(clk_main),
-    .clk_48MHz_o(clk_usb_48mhz),
-    .clk_aon_o(clk_aon),
-    .rst_no(bkdr_rst_n)
-  );
-
-  logic [31:0] fpga_info;
-  usr_access_xil7series u_info (
-    .info_o(fpga_info)
-  );
-
-  ast_pkg::clks_osc_byp_t clks_osc_byp;
-  assign clks_osc_byp = '{
-    usb: clk_usb_48mhz,
-    sys: clk_main,
-    io:  clk_main,
-    aon: clk_aon
-  };
-
-% elif target["name"] == "verilator":
-  assign ext_clk = '0;
-  assign pad2ast = '0;
-
-  // AON clock divider. Reset is not used because verilator uses only sync
-  // resets (and does not model 'x'); if the divider below were reset, clk_aon
-  // would be silenced and the clk_aon logic inside top_${top["name"]} would not
-  // get reset.
-  logic clk_aon;
-  prim_clock_div #(
-    .Divisor(4)
-  ) u_aon_div (
-    .clk_i,
-    .rst_ni(1'b1),
-    .step_down_req_i('0),
-    .step_down_ack_o(),
-    .test_en_i('0),
-    .clk_o(clk_aon)
-  );
-
-  // POR for the AST comes directly from the reset input.
-  logic rst_n;
-  assign rst_n = rst_ni;
-
-  ast_pkg::clks_osc_byp_t clks_osc_byp;
-  assign clks_osc_byp = '{
-    usb: clk_i,
-    sys: clk_i,
-    io:  clk_i,
-    aon: clk_aon
-  };
-
-  // Target (Verilator) specific supply manipulation to create a synthetic POR condition.
-  logic [3:0] cnt;
-  logic vcc_supp;
-  // keep incrementing until saturation
-  always_ff @(posedge clk_aon) begin
-    if (cnt < 4'hf) begin
-      cnt <= cnt + 1'b1;
-    end
-  end
-  assign vcc_supp = cnt < 4'h4 ? 1'b0 :
-                    cnt < 4'h8 ? 1'b1 :
-                    cnt < 4'hc ? 1'b0 : 1'b1;
-
-  // AST does not use all clocks / resets forwarded to it
-  logic unused_slow_clk_en;
-  assign unused_slow_clk_en = pwrmgr_ast_req.slow_clk_en;
-
-  logic unused_pwr_clamp;
-  assign unused_pwr_clamp = pwrmgr_ast_req.pwr_clamp;
-
-% else:
-  // TODO: Hook this up when FPGA pads are updated
-  assign ext_clk = '0;
-  assign pad2ast = '0;
-
-  logic bkdr_rst_n;
-  logic clk_main, clk_io, clk_usb_48mhz, clk_aon, rst_n;
-  clkgen_xil_ultrascale # (
-    .AddClkBuf(0)
-  ) clkgen (
-    .clk_i(manual_in_io_clk),
-    .rst_ni(manual_in_por_n),
-    .clk_main_o(clk_main),
-    .clk_io_o(clk_io),
-    .clk_48MHz_o(clk_usb_48mhz),
-    .clk_aon_o(clk_aon),
-    .rst_no(bkdr_rst_n)
-  );
-
-  logic [31:0] fpga_info;
-  usr_access_xil7series u_info (
-    .info_o(fpga_info)
-  );
-
-  ast_pkg::clks_osc_byp_t clks_osc_byp;
-  assign clks_osc_byp = '{
-    usb: clk_usb_48mhz,
-    sys: clk_main,
-    io:  clk_io,
-    aon: clk_aon
-  };
-
-% endif
-
-  prim_mubi_pkg::mubi4_t ast_init_done;
-
-  ast u_ast (
-% if target["name"] == "asic":
-    // external POR
-    .por_ni                ( manual_in_por_n ),
-
-    // USB IO Pull-up Calibration Setting
-    .usb_io_pu_cal_o       ( usb_io_pu_cal ),
-
-    // adc
-    .adc_a0_ai             ( CC1 ),
-    .adc_a1_ai             ( CC2 ),
-
-    // Direct short to PAD
-    .ast2pad_t0_ao         ( IOA2 ),
-    .ast2pad_t1_ao         ( IOA3 ),
-% else:
-    // external POR
-    .por_ni                ( rst_n ),
-
-    // USB IO Pull-up Calibration Setting
-    .usb_io_pu_cal_o       ( ),
-
-    // clocks' oscillator bypass for FPGA
-    .clk_osc_byp_i         ( clks_osc_byp ),
-
-    // adc
-    .adc_a0_ai             ( '0 ),
-    .adc_a1_ai             ( '0 ),
-
-    // Direct short to PAD
-    .ast2pad_t0_ao         (  ),
-    .ast2pad_t1_ao         (  ),
-
-% endif
-    // clocks and resets supplied for detection
-    .sns_clks_i            ( clkmgr_aon_clocks    ),
-    .sns_rsts_i            ( rstmgr_aon_resets    ),
-    .sns_spi_ext_clk_i     ( sck_monitor          ),
-    // tlul
-    .tl_i                  ( ast_tl_req ),
-    .tl_o                  ( ast_tl_rsp ),
-    // init done indication
-    .ast_init_done_o       ( ast_init_done ),
-    // buffered clocks & resets
-    % for port, clk in ast["clock_srcs"].items():
-    .${port} (${lib.get_clock_prefixes(top)["top"]}clk_${clk["clock"]}_${clk["group"]}),
-    % endfor
-    % for port, reset in ast["reset_connections"].items():
-    .${port} (${lib.get_reset_path(top, reset)}),
-    % endfor
-    .clk_ast_ext_i         ( ext_clk ),
-
-    // pok test for FPGA
-% if target["name"] == "verilator":
-    .vcc_supp_i            ( vcc_supp ),
-% else:
-    .vcc_supp_i            ( 1'b1 ),
-% endif
-    .vcaon_supp_i          ( 1'b1 ),
-    .vcmain_supp_i         ( 1'b1 ),
-    .vioa_supp_i           ( 1'b1 ),
-    .viob_supp_i           ( 1'b1 ),
-    // pok
-    .ast_pwst_o            ( ast_pwst ),
-    .ast_pwst_h_o          ( ast_pwst_h ),
-    // main regulator
-    .main_env_iso_en_i     ( pwrmgr_ast_req.pwr_clamp_env ),
-    .main_pd_ni            ( pwrmgr_ast_req.main_pd_n ),
-    // pdm control (flash)/otp
-    .flash_power_down_h_o  ( flash_power_down_h ),
-    .flash_power_ready_h_o ( flash_power_ready_h ),
-    .otp_power_seq_i       ( otp_macro_pwr_seq ),
-    .otp_power_seq_h_o     ( otp_macro_pwr_seq_h ),
-    // system source clock
-    .clk_src_sys_en_i      ( pwrmgr_ast_req.core_clk_en ),
-    // need to add function in clkmgr
-    .clk_src_sys_jen_i     ( clk_main_jitter_en ),
-    .clk_src_sys_o         ( ast_base_clks.clk_sys  ),
-    .clk_src_sys_val_o     ( pwrmgr_ast_rsp.core_clk_val ),
-    // aon source clock
-    .clk_src_aon_o         ( ast_base_clks.clk_aon ),
-    .clk_src_aon_val_o     ( pwrmgr_ast_rsp.slow_clk_val ),
-    // io source clock
-    .clk_src_io_en_i       ( pwrmgr_ast_req.io_clk_en ),
-    .clk_src_io_o          ( ast_base_clks.clk_io ),
-    .clk_src_io_val_o      ( pwrmgr_ast_rsp.io_clk_val ),
-    .clk_src_io_48m_o      ( div_step_down_req ),
-    // usb source clock
-    .usb_ref_pulse_i       ( usb_ref_pulse ),
-    .usb_ref_val_i         ( usb_ref_val ),
-    .clk_src_usb_en_i      ( pwrmgr_ast_req.usb_clk_en ),
-    .clk_src_usb_o         ( ast_base_clks.clk_usb ),
-    .clk_src_usb_val_o     ( pwrmgr_ast_rsp.usb_clk_val ),
-    // adc
-    .adc_pd_i              ( adc_req.pd ),
-    .adc_chnsel_i          ( adc_req.channel_sel ),
-    .adc_d_o               ( adc_rsp.data ),
-    .adc_d_val_o           ( adc_rsp.data_valid ),
-    // rng
-    .rng_en_i              ( es_rng_enable ),
-    .rng_fips_i            ( es_rng_fips ),
-    .rng_val_o             ( es_rng_valid ),
-    .rng_b_o               ( es_rng_bit ),
-    // entropy
-    .entropy_rsp_i         ( ast_edn_rsp ),
-    .entropy_req_o         ( ast_edn_req ),
-    // alerts
-    .alert_rsp_i           ( ast_alert_rsp  ),
-    .alert_req_o           ( ast_alert_req  ),
-    // dft
-    .dft_strap_test_i      ( dft_strap_test   ),
-    .lc_dft_en_i           ( lc_dft_en        ),
-    .fla_obs_i             ( flash_obs ),
-    .otp_obs_i             ( otp_obs ),
-    .otm_obs_i             ( '0 ),
-% if target["name"] == "asic":
-    .usb_obs_i             ( usb_diff_rx_obs ),
-% else:
-    .usb_obs_i             ( 1'b0 ),
-% endif
-    .obs_ctrl_o            ( obs_ctrl ),
-    // pinmux related
-    .padmux2ast_i          ( pad2ast    ),
-    .ast2padmux_o          ( ast2pinmux ),
-    .mux_iob_sel_o         ( mux_iob_sel ),
-    .ext_freq_is_96m_i     ( hi_speed_sel ),
-    .all_clk_byp_req_i     ( all_clk_byp_req  ),
-    .all_clk_byp_ack_o     ( all_clk_byp_ack  ),
-    .io_clk_byp_req_i      ( io_clk_byp_req   ),
-    .io_clk_byp_ack_o      ( io_clk_byp_ack   ),
-    .flash_bist_en_o       ( flash_bist_enable ),
-    // Memory configuration connections
-    .dpram_rmf_o           ( ast_ram_2p_fcfg ),
-    .dpram_rml_o           ( ast_ram_2p_lcfg ),
-    .spram_rm_o            ( ast_ram_1p_cfg  ),
-    .sprgf_rm_o            ( ast_rf_cfg      ),
-    .sprom_rm_o            ( ast_rom_cfg     ),
-    // scan
-    .dft_scan_md_o         ( scanmode ),
-    .scan_shift_en_o       ( scan_en ),
-    .scan_reset_no         ( scan_rst_n )
-  );
-
 
 ###################################################################
 ## ASIC                                                          ##
@@ -1116,6 +608,11 @@ module chip_${top["name"]}_${target["name"]} #(
 
   logic usb_rx_d;
 
+  // Signals sourced by the AST inside top_${top["name"]}
+  ast_pkg::ast_pwst_t                ast_pwst_h;
+  logic [ast_pkg::UsbCalibWidth-1:0] usb_io_pu_cal;
+  logic                              usb_diff_rx_obs;
+
   // Pullups and differential receiver enable
   logic usb_dp_pullup_en, usb_dn_pullup_en;
   logic usb_rx_enable;
@@ -1123,108 +620,21 @@ module chip_${top["name"]}_${target["name"]} #(
   prim_usb_diff_rx #(
     .CalibW(ast_pkg::UsbCalibWidth)
   ) u_prim_usb_diff_rx (
-    .input_pi          ( USB_P                 ),
-    .input_ni          ( USB_N                 ),
-    .input_en_i        ( usb_rx_enable         ),
-    .core_pok_h_i      ( ast_pwst_h.aon_pok    ),
-    .pullup_p_en_i     ( usb_dp_pullup_en      ),
-    .pullup_n_en_i     ( usb_dn_pullup_en      ),
-    .calibration_i     ( usb_io_pu_cal         ),
-    .usb_diff_rx_obs_o ( usb_diff_rx_obs       ),
-    .input_o           ( usb_rx_d              )
+    .input_pi         (USB_P             ),
+    .input_ni         (USB_N             ),
+    .input_en_i       (usb_rx_enable     ),
+    .core_pok_h_i     (ast_pwst_h.aon_pok),
+    .pullup_p_en_i    (usb_dp_pullup_en  ),
+    .pullup_n_en_i    (usb_dn_pullup_en  ),
+    .calibration_i    (usb_io_pu_cal     ),
+    .usb_diff_rx_obs_o(usb_diff_rx_obs   ),
+    .input_o          (usb_rx_d          )
   );
 
 ###################################################################
 ## FPGA shared                                                   ##
 ###################################################################
-% elif target["name"] != "verilator":
-% if gen_bkdr_loader:
-  /////////////////////
-  // Memory Backdoor //
-  /////////////////////
-
-  if (BkdrLoaderEn) begin : gen_bkdr
-
-    // Get TAP strap signals from pad frame
-    logic tap_strap0;
-    logic tap_strap1;
-    logic bkdr_ena;
-
-    // Main JTAG port
-    jtag_pkg::jtag_req_t jtag_req_i;
-    jtag_pkg::jtag_rsp_t jtag_rsp_o;
-
-    // D/S JTAG port
-    jtag_pkg::jtag_req_t jtag_req_o;
-    jtag_pkg::jtag_rsp_t jtag_rsp_i;
-
-    // Backdoor ports
-    bkdr_loader_pkg::bkdr_req_t [bkdr_loader_reg_pkg::NumBkdrTgts-1:0] bkdr_req;
-    bkdr_loader_pkg::bkdr_rsp_t [bkdr_loader_reg_pkg::NumBkdrTgts-1:0] bkdr_rsp;
-
-    bkdr_loader i_bkdr_loader (
-      .clk_i      (clk_main),
-      .rst_ni     (bkdr_rst_n),
-      .bkdr_ena_i (bkdr_ena),
-      .jtag_req_i (jtag_req_i),
-      .jtag_rsp_o (jtag_rsp_o),
-      .jtag_req_o (jtag_req_o),
-      .jtag_rsp_i (jtag_rsp_i),
-      .fpga_info_i(fpga_info),
-      .bkdr_req_o (bkdr_req),
-      .bkdr_rsp_i (bkdr_rsp),
-      .rst_no     (rst_n)
-    );
-
-    // Connect requests
-    `BKDR_LOADER_CONNECT_REQS
-
-    // Connect responses
-    `BKDR_LOADER_CONNECT_RSPS
-
-    always_comb begin : proc_conn_bkdr
-
-      // Through-connection
-      mio_attr    = mio_bkdr_attr;
-      mio_out     = mio_bkdr_out;
-      mio_oe      = mio_bkdr_oe;
-      mio_bkdr_in = mio_in;
-
-      // Connect backdoor JTAG input
-      jtag_req_i.tck      = mio_in[TckPadIdx];
-      jtag_req_i.tms      = mio_in[TmsPadIdx];
-      jtag_req_i.trst_n   = mio_in[TrstNPadIdx];
-      jtag_req_i.tdi      = mio_in[TdiPadIdx];
-      mio_out[TdoPadIdx]  = jtag_rsp_o.tdo;
-      mio_oe[TdoPadIdx]   = jtag_rsp_o.tdo_oe;
-      mio_attr[TdoPadIdx] = '0;
-
-      // Connect backdoor JTAG output
-      mio_bkdr_in[TckPadIdx]   = jtag_req_o.tck;
-      mio_bkdr_in[TmsPadIdx]   = jtag_req_o.tms;
-      mio_bkdr_in[TrstNPadIdx] = jtag_req_o.trst_n;
-      mio_bkdr_in[TdiPadIdx]   = jtag_req_o.tdi;
-      jtag_rsp_i.tdo           = mio_bkdr_out[TdoPadIdx];
-      jtag_rsp_i.tdo_oe        = mio_bkdr_oe[TdoPadIdx];
-    end
-
-    // Connect TAP strap signals to pad frame
-    assign tap_strap0 = mio_in[Tap0PadIdx];
-    assign tap_strap1 = mio_in[Tap1PadIdx];
-
-    // Bkdr loader is activated if both tap_strap signals are set to 1'b1.
-    assign bkdr_ena = tap_strap0 && tap_strap1;
-
-
-  end else begin : gen_no_bkdr
-    assign mio_attr    = mio_bkdr_attr;
-    assign mio_out     = mio_bkdr_out;
-    assign mio_oe      = mio_bkdr_oe;
-    assign mio_bkdr_in = mio_in;
-    assign bkdr_rst_n  = manual_in_por_n;
-  end
-
-% endif
+% elif target["name"] in ["cw305", "cw310", "cw340"]:
   //////////////////
   // PLL for FPGA //
   //////////////////
@@ -1240,7 +650,6 @@ module chip_${top["name"]}_${target["name"]} #(
   assign manual_out_por_button_n = 1'b0;
   assign manual_oe_por_button_n = 1'b0;
 
-  assign srst_n = manual_in_por_button_n;
   % endif
 
   % if target["name"] == "cw305":
@@ -1249,123 +658,101 @@ module chip_${top["name"]}_${target["name"]} #(
   assign otp_obs_o = '0;
   % endif
 
-  // the rst_ni pin only goes to AST
-  // the rest of the logic generates reset based on the 'pok' signal.
-  // for verilator purposes, make these two the same.
-  prim_mubi_pkg::mubi4_t lc_clk_bypass;   // TODO Tim
 % endif
 
-  // Inter-Power Domain signals
-% for sig in top["inter_pd"]["definitions"]:
-  % if isinstance(sig["width"], Parameter):
-  ${lib.im_defname(sig)} [${sig["width"].name_top}-1:0] ${sig["signame"]};
-  % else:
-  ${lib.im_defname(sig)} ${lib.bitarray(sig["width"],1)} ${sig["signame"]};
-  % endif
-% endfor
-
-  ///////////////////////////
-  // Top-level Main Domain //
-  ///////////////////////////
-  ${top["name"]}_pd_main #(
-% if target["name"] == "cw310":
-    .EntropySrcStub(1'b1), // Stub ENTROPY_SRC to reduce resource usage on CW310. See #30062.
-    .OtbnStub(1'b1), // Stub OTBN to reduce resource usage on CW310. See #30062.
-    .UsbdevStub(1'b1), // Stub USBDEV to reduce resource usage on CW310. See #30062.
-    .SecAesMasking(1'b0), // Disable AES masking on the CW310, where we are constrained by area.
-    .SecAesSBoxImpl(aes_pkg::SBoxImplLut),
-    .RvCoreIbexPMPEnable(1'b0),
-    .RvCoreIbexRV32B(ibex_pkg::RV32BNone),
-    .RvCoreIbexRV32ZC(ibex_pkg::RV32Zca),
-    .RvCoreIbexBranchTargetALU(1'b0),
-    .RvCoreIbexWritebackStage(1'b0),
-    .RvCoreIbexICache(1'b0),
-% elif target["name"]  == "cw340":
-    .SecAesMasking(1'b1),
-    .SecAesSBoxImpl(aes_pkg::SBoxImplDom),
-% endif
-% if target["name"] in ["cw310", "cw340"]:
-    .SecAesStartTriggerDelay(0),
-    .SecAesAllowForcingMasks(1'b1),
-    .CsrngSBoxImpl(aes_pkg::SBoxImplLut),
-    .OtbnRegFile(otbn_pkg::RegFileFPGA),
-    .SecOtbnMuteUrnd(1'b0),
-    .SecOtbnSkipUrndReseedAtStart(1'b0),
-    .OtpMacroMemInitFile(OtpMacroMemInitFile),
-    .RvCoreIbexPipeLine(1),
-    .UsbdevRcvrWakeTimeUs(10000),
-% elif target["name"] == "cw305":
-    .RvCoreIbexPipeLine(0),
-    .SecAesMasking(1'b1),
-    .SecAesSBoxImpl(aes_pkg::SBoxImplDom),
-    .SecAesStartTriggerDelay(320),
-    .SecAesAllowForcingMasks(1'b1),
-    .SecAesSkipPRNGReseeding(1'b1),
-    .UsbdevStub(1'b1),
-    .RvCoreIbexSecureIbex(0),
-% endif
-% if target["name"] == "cw340":
-    .KmacEnMasking(1),
-    .KmacSwKeyMasked(1),
-    .KeymgrKmacEnMasking(1),
-    .RvCoreIbexSecureIbex(1),
-% elif target["name"] == "cw310":
-    .KmacEnMasking(0),
-    .KmacSwKeyMasked(1),
-    .KeymgrKmacEnMasking(0),
-    .SecKmacCmdDelay(0),
-    .SecKmacIdleAcceptSwMsg(1'b0),
-    .RvCoreIbexSecureIbex(0),
+  /////////////////////////////////////////////
+  // top_${top["name"]}: power domains + AST //
+  /////////////////////////////////////////////
+  top_${top["name"]}_${target["name"]} #(
+% if gen_bkdr_loader:
+    .BkdrLoaderEn(BkdrLoaderEn),
 % endif
 % if target["name"] == "asic":
-    .I2c0InputDelayCycles(1),
-    .I2c1InputDelayCycles(1),
-    .I2c2InputDelayCycles(1),
-    .SecAesAllowForcingMasks(1'b1),
     .SecRomCtrlDisableScrambling(SecRomCtrlDisableScrambling),
-    .PinmuxAonTargetCfg(PinmuxTargetCfg)
-% elif target["name"] == "verilator":
-%   if top["name"] == "englishbreakfast":
-    .SecAesMasking(1'b1),
-    .SecAesSBoxImpl(aes_pkg::SBoxImplDom),
-    .SecAesStartTriggerDelay(320),
-    .SecAesSkipPRNGReseeding(1'b1),
-    .UsbdevStub(1'b1),
-    .RvCoreIbexICache(0),
-%   endif
-    .SecAesAllowForcingMasks(1'b1),
-    .SramCtrlMainInstrExec(1),
-    .PinmuxAonTargetCfg(PinmuxTargetCfg)
-% else:
-    .RomCtrlBootRomInitFile(BootRomInitFile),
-    .RvCoreIbexRegFile(ibex_pkg::RegFileFPGA),
-    .SramCtrlMainInstrExec(1),
-    .PinmuxAonTargetCfg(PinmuxTargetCfg)
+% elif target["name"] != "verilator":
+    .BootRomInitFile(BootRomInitFile),
+    .OtpMacroMemInitFile(OtpMacroMemInitFile),
 % endif
-  ) ${top["name"]}_pd_main (
-<%include file="/chiplevel_snippets/special_signals_portmap.tpl" args="top=top, feature_info=feature_info, cio_info=cio_info, gen_bkdr_loader=gen_bkdr_loader, domain='Main'" />\
+    .PinmuxAonTargetCfg(PinmuxTargetCfg)
+  ) top_${top["name"]} (
+% if target["name"] == "verilator":
+    // Clock and reset
+    .clk_i,
+    .rst_ni,
 
-<%include file="/chiplevel_snippets/intermodule_portmap.tpl" args="top=top, target=target, domain='Main', inter_pd=True, last_snippet=False" />\
+% endif
+    // Multiplexed I/O to/from padring
+    .mio_in_i  (mio_in  ),
+    .mio_out_o (mio_out ),
+    .mio_oe_o  (mio_oe  ),
+    .dio_in_i  (dio_in  ),
+    .dio_out_o (dio_out ),
+    .dio_oe_o  (dio_oe  ),
+    .mio_attr_o(mio_attr),
+    .dio_attr_o(dio_attr),
 
-<%include file="/chiplevel_snippets/intermodule_portmap.tpl" args="top=top, target=target, domain='Main', inter_pd=False, last_snippet=True" />\
-  );
+% if target["name"] != "verilator":
+    // AST control signals consumed by the padring
+    .ast_base_clks_o(ast_base_clks),
+    .scanmode_o     (scanmode     ),
+    .mux_iob_sel_o  (mux_iob_sel  ),
 
+% endif
+% if target["name"] == "asic":
+    .mio_in_raw_i(mio_in_raw),
 
-  ////////////////////////////////
-  // Top-level Always-On domain //
-  ////////////////////////////////
-  % if target["name"] in ["cw310", "cw340"] or (target["name"] == "verilator" and top["name"] != "englishbreakfast"):
-  ${top["name"]}_pd_aon #(
-    .SramCtrlRetAonInstrExec(0)
-  ) top_${top["name"]}_pd_aon (
-  % else:
-  ${top["name"]}_pd_aon ${top["name"]}_pd_aon (
-  % endif
-<%include file="/chiplevel_snippets/special_signals_portmap.tpl" args="top=top, feature_info=feature_info, cio_info=cio_info, gen_bkdr_loader=gen_bkdr_loader, domain='Aon'" />\
+    // Differential USB receiver interface
+    .ast_pwst_h_o      (ast_pwst_h      ),
+    .usb_io_pu_cal_o   (usb_io_pu_cal   ),
+    .usb_diff_rx_obs_i (usb_diff_rx_obs ),
+    .usb_dp_pullup_en_o(usb_dp_pullup_en),
+    .usb_dn_pullup_en_o(usb_dn_pullup_en),
+    .usb_rx_d_i        (usb_rx_d        ),
+    .usb_rx_enable_o   (usb_rx_enable   ),
 
-<%include file="/chiplevel_snippets/intermodule_portmap.tpl" args="top=top, target=target, domain='Aon', inter_pd=True, last_snippet=False" />\
+    // External POR
+    .manual_in_por_n_i(manual_in_por_n),
 
-<%include file="/chiplevel_snippets/intermodule_portmap.tpl" args="top=top, target=target, domain='Aon', inter_pd=False, last_snippet=True" />\
+    // Manual pad attributes from sensor_ctrl
+    .sensor_ctrl_manual_pad_attr_o(sensor_ctrl_manual_pad_attr),
+
+    // Direct connections to the chip pads
+    .CC1             (CC1             ),
+    .CC2             (CC2             ),
+    .IOA2            (IOA2            ),
+    .IOA3            (IOA3            ),
+    .FLASH_TEST_MODE0(FLASH_TEST_MODE0),
+    .FLASH_TEST_MODE1(FLASH_TEST_MODE1),
+    .FLASH_TEST_VOLT (FLASH_TEST_VOLT ),
+    .OTP_EXT_VOLT    (OTP_EXT_VOLT    )\
+% else:
+    // USB connections to USB mux glue
+    .usb_dp_pullup_en_o(usb_dp_pullup_en),
+%   if target["name"] == "verilator":
+    .usb_dn_pullup_en_o(usb_dn_pullup_en),
+    .usb_rx_d_i        (usb_rx_d        ),
+    .usb_rx_enable_o   (usb_rx_enable   ),
+    .usb_tx_d_o        (usb_tx_d        ),
+    .usb_tx_se0_o      (usb_tx_se0      ),
+    .usb_tx_use_d_se0_o(usb_tx_use_d_se0)\
+%   elif target["name"] in ["cw310", "cw340"]:
+    .usb_rx_d_i        (usb_rx_d        ),
+    .usb_rx_enable_o   (usb_rx_enable   )\
+%   endif
+% endif
+% if target["name"] in ["cw305", "cw310", "cw340"]:
+,
+
+    // POR and clock inputs feeding the FPGA clock generator
+    .manual_in_por_n_i (manual_in_por_n ),
+    .manual_in_io_clk_i(manual_in_io_clk)\
+%   if target["name"] in ["cw305", "cw310"]:
+,
+
+    .manual_in_por_button_n_i(manual_in_por_button_n)
+%   endif
+% endif
+
   );
 
 ###################################################################
@@ -1407,7 +794,7 @@ module chip_${top["name"]}_${target["name"]} #(
   prim_mubi_pkg::mubi4_t clk_trans_idle, manual_in_io_clk_idle;
 
   % if target["name"] == "cw305":
-  assign clk_trans_idle = top_${top["name"]}_pd_aon.u_clkmgr_aon.idle_i;
+  assign clk_trans_idle = top_${top["name"]}.${top["name"]}_pd_aon.u_clkmgr_aon.idle_i;
   % else:
   clkmgr_pkg::hint_names_e trigger_sel;
   always_comb begin : trigger_sel_mux
@@ -1419,7 +806,7 @@ module chip_${top["name"]}_${target["name"]} #(
       default: trigger_sel = clkmgr_pkg::HintMainAes;
     endcase;
   end
-  assign clk_trans_idle = top_${top["name"]}_pd_aon.u_clkmgr_aon.idle_i[trigger_sel];
+  assign clk_trans_idle = top_${top["name"]}.${top["name"]}_pd_aon.u_clkmgr_aon.idle_i[trigger_sel];
   % endif
 
   logic clk_io_div4_trigger_hw_en, manual_in_io_clk_trigger_hw_en;
@@ -1456,6 +843,6 @@ module chip_${top["name"]}_${target["name"]} #(
   assign manual_out_io_trigger =
       manual_in_io_clk_trigger_sw_en | (manual_in_io_clk_trigger_hw_en &
           prim_mubi_pkg::mubi4_test_false_strict(manual_in_io_clk_idle));
-% endif
+% endif\
 
-endmodule : chip_${top["name"]}_${target["name"]}
+endmodule

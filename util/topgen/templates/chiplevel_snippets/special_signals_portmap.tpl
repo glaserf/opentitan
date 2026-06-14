@@ -48,26 +48,26 @@
     .mio_oe_o (mio_bkdr_oe ),
 % else:
     // Multiplexed I/O
-    .mio_in_i (mio_in ),
-    .mio_out_o(mio_out),
-    .mio_oe_o (mio_oe ),
+    .mio_in_i (mio_in_i ),
+    .mio_out_o(mio_out_o),
+    .mio_oe_o (mio_oe_o ),
 % endif
 
 % endif
 % if cio_info["num_dio_total"] != 0:
     // Dedicated I/O
-    .dio_in_i (dio_in ),
-    .dio_out_o(dio_out),
-    .dio_oe_o (dio_oe ),
+    .dio_in_i (dio_in_i ),
+    .dio_out_o(dio_out_o),
+    .dio_oe_o (dio_oe_o ),
 
 % endif
     // Pad attributes
 % if gen_bkdr_loader:
     .mio_attr_o(mio_bkdr_attr),
 % else:
-    .mio_attr_o(mio_attr),
+    .mio_attr_o(mio_attr_o),
 % endif
-    .dio_attr_o(dio_attr),
+    .dio_attr_o(dio_attr_o),
 
 % endif
 % endif\
