@@ -1850,9 +1850,17 @@ def main():
                             out_path / "rtl" / "autogen" / f"{topname}_pd_{domain.lower()}.sv",
                             gencmd=gencmd_sv)
 
-        # Multiple chip-levels (ASIC, FPGA, Verilator, etc)
+        # Target-specific (ASIC, FPGA, Verilator, etc) chip-levels and top-level wrappers
         for target in completecfg["targets"]:
             target_name = target["name"]
+            # Per-target wrapper bundling the power domains and the AST. This is
+            # instantiated by the chip-level below.
+            if os.path.exists(top_template_path / f"top_{topname}.sv.tpl"):
+                render_template(top_template_path / f"top_{topname}.sv.tpl",
+                                out_path /
+                                f"rtl/autogen/top_{topname}_{target_name}.sv",
+                                gencmd=gencmd_sv,
+                                target=target)
             render_template(top_template_path / "chiplevel.sv.tpl",
                             out_path /
                             f"rtl/autogen/chip_{topname}_{target_name}.sv",
