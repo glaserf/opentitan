@@ -19,6 +19,7 @@ filesets:
     files:
       - rtl/clkgen_xil7series.sv
       - rtl/usr_access_xil7series.sv
+      - rtl/autogen/top_earlgrey_cw310.sv
       - rtl/autogen/chip_earlgrey_cw310.sv
     file_type: systemVerilogSource
 
