@@ -14952,10 +14952,12 @@
           usbdev.usb_rx_d:
           {
             signal: usb_rx_d
+            feedthrough: true
           }
           usbdev.usb_rx_enable:
           {
             signal: usb_rx_enable
+            feedthrough: true
           }
           usbdev.usb_tx_d:
           {
@@ -14977,6 +14979,10 @@
           {
             signal: usb_ref_pulse
           }
+          sensor_ctrl_aon.manual_pad_attr:
+          {
+            feedthrough: true
+          }
           rv_core_ibex.fpga_info:
           {
             unused: true
@@ -14984,6 +14990,16 @@
           pinmux_aon.dft_hold_tap_sel:
           {
             unused: true
+          }
+          pinmux_aon.usb_dppullup_en:
+          {
+            signal: usb_dp_pullup_en
+            feedthrough: true
+          }
+          pinmux_aon.usb_dnpullup_en:
+          {
+            signal: usb_dn_pullup_en
+            feedthrough: true
           }
         }
       }
@@ -15106,22 +15122,27 @@
           usbdev.usb_rx_d:
           {
             signal: usb_rx_d
+            feedthrough: true
           }
           usbdev.usb_rx_enable:
           {
             signal: usb_rx_enable
+            feedthrough: true
           }
           usbdev.usb_tx_d:
           {
             signal: usb_tx_d
+            feedthrough: true
           }
           usbdev.usb_tx_se0:
           {
             signal: usb_tx_se0
+            feedthrough: true
           }
           usbdev.usb_tx_use_d_se0:
           {
             signal: usb_tx_use_d_se0
+            feedthrough: true
           }
           usbdev.usb_ref_val:
           {
@@ -15138,6 +15159,16 @@
           pinmux_aon.dft_hold_tap_sel:
           {
             unused: true
+          }
+          pinmux_aon.usb_dppullup_en:
+          {
+            signal: usb_dp_pullup_en
+            feedthrough: true
+          }
+          pinmux_aon.usb_dnpullup_en:
+          {
+            signal: usb_dn_pullup_en
+            feedthrough: true
           }
         }
       }
@@ -15250,6 +15281,11 @@
           {
             unused: true
           }
+          pinmux_aon.usb_dppullup_en:
+          {
+            signal: usb_dp_pullup_en
+            feedthrough: true
+          }
           pinmux_aon.usb_dnpullup_en:
           {
             unused: true
@@ -15273,10 +15309,12 @@
           usbdev.usb_rx_d:
           {
             signal: usb_rx_d
+            feedthrough: true
           }
           usbdev.usb_rx_enable:
           {
             signal: usb_rx_enable
+            feedthrough: true
           }
           usbdev.usb_ref_val:
           {
@@ -29549,9 +29587,9 @@
         signame: usb_dp_pullup_en_o
         signame_chip:
         {
-          asic: usb_dp_pullup_en
-          verilator: usb_dp_pullup_en
-          cw340: usb_dp_pullup_en
+          asic: usb_dp_pullup_en_o
+          verilator: usb_dp_pullup_en_o
+          cw340: usb_dp_pullup_en_o
         }
         width: 1
         type: uni
@@ -29569,8 +29607,8 @@
         signame: usb_dn_pullup_en_o
         signame_chip:
         {
-          asic: usb_dn_pullup_en
-          verilator: usb_dn_pullup_en
+          asic: usb_dn_pullup_en_o
+          verilator: usb_dn_pullup_en_o
           cw340: ""
         }
         width: 1
@@ -29889,7 +29927,7 @@
         signame: sensor_ctrl_manual_pad_attr_o
         signame_chip:
         {
-          asic: sensor_ctrl_manual_pad_attr
+          asic: sensor_ctrl_manual_pad_attr_o
           verilator: ""
           cw340: ""
         }
@@ -29929,9 +29967,9 @@
         signame: usbdev_usb_rx_d_i
         signame_chip:
         {
-          asic: usb_rx_d
-          verilator: usb_rx_d
-          cw340: usb_rx_d
+          asic: usb_rx_d_i
+          verilator: usb_rx_d_i
+          cw340: usb_rx_d_i
         }
         width: 1
         type: uni
@@ -29950,7 +29988,7 @@
         signame_chip:
         {
           asic: ""
-          verilator: usb_tx_d
+          verilator: usb_tx_d_o
           cw340: ""
         }
         width: 1
@@ -29970,7 +30008,7 @@
         signame_chip:
         {
           asic: ""
-          verilator: usb_tx_se0
+          verilator: usb_tx_se0_o
           cw340: ""
         }
         width: 1
@@ -29990,7 +30028,7 @@
         signame_chip:
         {
           asic: ""
-          verilator: usb_tx_use_d_se0
+          verilator: usb_tx_use_d_se0_o
           cw340: ""
         }
         width: 1
@@ -30009,9 +30047,9 @@
         signame: usbdev_usb_rx_enable_o
         signame_chip:
         {
-          asic: usb_rx_enable
-          verilator: usb_rx_enable
-          cw340: usb_rx_enable
+          asic: usb_rx_enable_o
+          verilator: usb_rx_enable_o
+          cw340: usb_rx_enable_o
         }
         width: 1
         type: uni
