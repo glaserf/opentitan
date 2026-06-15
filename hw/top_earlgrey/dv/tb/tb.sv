@@ -79,19 +79,21 @@ module tb;
   assign dut.POR_N = xbar_mode ? rst_n : 1'bz;
 
   // TODO: Absorb this functionality into chip_if.
-  bind dut ast_supply_if ast_supply_if (
-    .clk(ast_base_clks.clk_aon),
+  // These interfaces are bound into the top_earlgrey wrapper, so their internal
+  // hierarchical references (u_ast, the power domains, ...) are relative to the wrapper hierarchy.
+  bind dut.top_earlgrey ast_supply_if ast_supply_if (
+    .clk(ast_base_clks_o.clk_aon),
 `ifdef GATE_LEVEL
     .core_sleeping_trigger(0),
     .low_power_trigger(0)
 `else
     .core_sleeping_trigger(rv_core_ibex_pwrmgr.core_sleeping),
-    .low_power_trigger(`PWRMGR_HIER.pwr_rst_o.reset_cause == pwrmgr_pkg::LowPwrEntry)
+    .low_power_trigger(earlgrey_pd_aon.u_pwrmgr_aon.pwr_rst_o.reset_cause == pwrmgr_pkg::LowPwrEntry)
 `endif
   );
 
   // TODO: Absorb this functionality into chip_if.
-  bind dut ast_ext_clk_if ast_ext_clk_if ();
+  bind dut.top_earlgrey ast_ext_clk_if ast_ext_clk_if ();
 
   // TODO: Absorb this functionality into chip_if.
   alert_esc_if alert_if[NUM_ALERTS](.clk  (`ALERT_HANDLER_HIER.clk_i),
@@ -261,11 +263,11 @@ module tb;
   // The gpiodpi module allows the host to directly control gpio when enabled.
   gpiodpi u_gpiodpi(
 `ifdef GATE_LEVEL
-    .clk_i(dut.top_earlgrey_pd_aon.u_clkmgr_aon.clocks_o_clk_io_div4_peri),
-    .rst_ni(dut.top_earlgrey_pd_aon.u_rstmgr_aon.resets_o_rst_lc_io_div4_n_1_),
+    .clk_i(dut.top_earlgrey.earlgrey_pd_aon.u_clkmgr_aon.clocks_o_clk_io_div4_peri),
+    .rst_ni(dut.top_earlgrey.earlgrey_pd_aon.u_rstmgr_aon.resets_o_rst_lc_io_div4_n_1_),
 `else
-    .clk_i(dut.top_earlgrey_pd_aon.u_clkmgr_aon.clocks_o.clk_io_div4_peri),
-    .rst_ni(dut.top_earlgrey_pd_aon.u_rstmgr_aon.resets_o.rst_lc_io_div4_n[rstmgr_pkg::DomainMainSel]),
+    .clk_i(dut.top_earlgrey.earlgrey_pd_aon.u_clkmgr_aon.clocks_o.clk_io_div4_peri),
+    .rst_ni(dut.top_earlgrey.earlgrey_pd_aon.u_rstmgr_aon.resets_o.rst_lc_io_div4_n[rstmgr_pkg::DomainMainSel]),
 `endif
     .active(u_tb_dpi_if.enable_gpiodpi),
     .gpio_p2d(gpiodpi_p2d),
@@ -353,11 +355,11 @@ module tb;
     .FREQ('d24_000_000)
   ) u_uartdpi0(
 `ifdef GATE_LEVEL
-   .clk_i(dut.top_earlgrey_pd_aon.u_clkmgr_aon.clocks_o_clk_io_div4_peri),
-   .rst_ni(dut.top_earlgrey_pd_aon.u_rstmgr_aon.resets_o_rst_lc_io_div4_n_1_),
+   .clk_i(dut.top_earlgrey.earlgrey_pd_aon.u_clkmgr_aon.clocks_o_clk_io_div4_peri),
+   .rst_ni(dut.top_earlgrey.earlgrey_pd_aon.u_rstmgr_aon.resets_o_rst_lc_io_div4_n_1_),
 `else
-   .clk_i(dut.top_earlgrey_pd_aon.u_clkmgr_aon.clocks_o.clk_io_div4_peri),
-   .rst_ni(dut.top_earlgrey_pd_aon.u_rstmgr_aon.resets_o.rst_lc_io_div4_n[rstmgr_pkg::DomainMainSel]),
+   .clk_i(dut.top_earlgrey.earlgrey_pd_aon.u_clkmgr_aon.clocks_o.clk_io_div4_peri),
+   .rst_ni(dut.top_earlgrey.earlgrey_pd_aon.u_rstmgr_aon.resets_o.rst_lc_io_div4_n[rstmgr_pkg::DomainMainSel]),
 `endif
     .active(u_tb_dpi_if.enable_uartdpi),
     .tx_o(uartdpi_tx),
@@ -427,11 +429,11 @@ module tb;
 
     // AST supply interface.
     uvm_config_db#(virtual ast_supply_if)::set(
-        null, "*.env", "ast_supply_vif", dut.ast_supply_if);
+        null, "*.env", "ast_supply_vif", dut.top_earlgrey.ast_supply_if);
 
     // AST io clk blocker interface.
     uvm_config_db#(virtual ast_ext_clk_if)::set(
-        null, "*.env", "ast_ext_clk_vif", dut.ast_ext_clk_if);
+        null, "*.env", "ast_ext_clk_vif", dut.top_earlgrey.ast_ext_clk_if);
 
     // USB DPI interface.
     uvm_config_db#(virtual usb20_if)::set(
@@ -671,45 +673,45 @@ module tb;
       // See chip_padctrl_attributes_vseq for more details.
       forever @dut.chip_if.chip_padctrl_attributes_test_sva_disable begin
         if (dut.chip_if.chip_padctrl_attributes_test_sva_disable) begin
-          $assertoff(0, dut.top_earlgrey.u_flash_ctrl);
-          $assertoff(0, dut.top_earlgrey.u_gpio);
-          $assertoff(0, dut.top_earlgrey.u_i2c0);
-          $assertoff(0, dut.top_earlgrey.u_i2c1);
-          $assertoff(0, dut.top_earlgrey.u_i2c2);
-          $assertoff(0, dut.top_earlgrey.u_pinmux_aon);
-          $assertoff(0, dut.top_earlgrey.u_spi_device);
-          $assertoff(0, dut.top_earlgrey.u_spi_host0);
-          $assertoff(0, dut.top_earlgrey.u_spi_host1);
-          $assertoff(0, dut.top_earlgrey_pd_aon.u_sysrst_ctrl_aon);
-          $assertoff(0, dut.top_earlgrey.u_uart0);
-          $assertoff(0, dut.top_earlgrey.u_uart1);
-          $assertoff(0, dut.top_earlgrey.u_uart2);
-          $assertoff(0, dut.top_earlgrey.u_uart3);
-          $assertoff(0, dut.top_earlgrey.u_usbdev);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_flash_ctrl);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_gpio);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_i2c0);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_i2c1);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_i2c2);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_pinmux_aon);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_spi_device);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_spi_host0);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_spi_host1);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_aon.u_sysrst_ctrl_aon);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_uart0);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_uart1);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_uart2);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_uart3);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_usbdev);
         end else begin
-          $asserton(0, dut.top_earlgrey.u_flash_ctrl);
-          $asserton(0, dut.top_earlgrey.u_gpio);
-          $asserton(0, dut.top_earlgrey.u_i2c0);
-          $asserton(0, dut.top_earlgrey.u_i2c1);
-          $asserton(0, dut.top_earlgrey.u_i2c2);
-          $asserton(0, dut.top_earlgrey.u_pinmux_aon);
-          $asserton(0, dut.top_earlgrey.u_spi_device);
-          $asserton(0, dut.top_earlgrey.u_spi_host0);
-          $asserton(0, dut.top_earlgrey.u_spi_host1);
-          $asserton(0, dut.top_earlgrey_pd_aon.u_sysrst_ctrl_aon);
-          $asserton(0, dut.top_earlgrey.u_uart0);
-          $asserton(0, dut.top_earlgrey.u_uart1);
-          $asserton(0, dut.top_earlgrey.u_uart2);
-          $asserton(0, dut.top_earlgrey.u_uart3);
-          $asserton(0, dut.top_earlgrey.u_usbdev);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_flash_ctrl);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_gpio);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_i2c0);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_i2c1);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_i2c2);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_pinmux_aon);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_spi_device);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_spi_host0);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_spi_host1);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_aon.u_sysrst_ctrl_aon);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_uart0);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_uart1);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_uart2);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_uart3);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_usbdev);
         end
       end
       // See chip_sw_sleep_pin_mio_dio_val_vseq for more details.
       forever @dut.chip_if.chip_sw_sleep_pin_mio_dio_val_sva_disable begin
         if (dut.chip_if.chip_sw_sleep_pin_mio_dio_val_sva_disable) begin
-          $assertoff(0, dut.top_earlgrey.u_spi_device);
+          $assertoff(0, dut.top_earlgrey.earlgrey_pd_main.u_spi_device);
         end else begin
-          $asserton(0, dut.top_earlgrey.u_spi_device);
+          $asserton(0, dut.top_earlgrey.earlgrey_pd_main.u_spi_device);
         end
       end
     join
