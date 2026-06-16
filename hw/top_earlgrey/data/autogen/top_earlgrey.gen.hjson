@@ -15037,6 +15037,160 @@
       }
     }
     {
+      name: verilator
+      chiplevel:
+      {
+        port_overrides:
+        {
+          ast.lc_dft_en:
+          {
+            signal: lc_dft_en
+          }
+          sram_ctrl_main.cfg:
+          {
+            signal: "'{ram_1p_cfg}"
+          }
+          sram_ctrl_ret_aon.cfg:
+          {
+            signal: "'{ram_1p_cfg}"
+          }
+          clkmgr_aon.calib_rdy:
+          {
+            signal: ast_init_done
+          }
+          flash_ctrl.flash_test_mode_a:
+          {
+            unused: true
+            tie_value: ""
+          }
+          flash_ctrl.flash_test_voltage_h:
+          {
+            unused: true
+            tie_value: ""
+          }
+          otp_macro.ext_voltage_h:
+          {
+            unused: true
+            tie_value: ""
+          }
+          sensor_ctrl_aon.ast_alert:
+          {
+            signal: ast_alert
+          }
+          sensor_ctrl_aon.ast_status:
+          {
+            signal: ast_pwst.io_pok
+          }
+          sensor_ctrl_aon.manual_pad_attr:
+          {
+            unused: true
+          }
+          usbdev.usb_rx_d:
+          {
+            signal: usb_rx_d
+          }
+          usbdev.usb_rx_enable:
+          {
+            signal: usb_rx_enable
+          }
+          usbdev.usb_tx_d:
+          {
+            signal: usb_tx_d
+          }
+          usbdev.usb_tx_se0:
+          {
+            signal: usb_tx_se0
+          }
+          usbdev.usb_tx_use_d_se0:
+          {
+            signal: usb_tx_use_d_se0
+          }
+          usbdev.usb_ref_val:
+          {
+            signal: usb_ref_val
+          }
+          usbdev.usb_ref_pulse:
+          {
+            signal: usb_ref_pulse
+          }
+          rv_core_ibex.fpga_info:
+          {
+            unused: true
+          }
+          pinmux_aon.dft_hold_tap_sel:
+          {
+            unused: true
+          }
+        }
+      }
+      pinout:
+      {
+        remove_ports: []
+        remove_pads: []
+        add_pads: []
+      }
+      pinmux:
+      {
+        special_signals:
+        [
+          {
+            name: tap0
+            pad: IOC8
+            desc: TAP strap signal.
+            idx: 30
+          }
+          {
+            name: tap1
+            pad: IOC5
+            desc: TAP strap signal.
+            idx: 27
+          }
+          {
+            name: dft0
+            pad: IOR5
+            desc: DFT strap signal.
+            idx: 40
+          }
+          {
+            name: dft1
+            pad: IOR7
+            desc: DFT strap signal.
+            idx: 42
+          }
+          {
+            name: tck
+            pad: IOR3
+            desc: JTAG tck signal.
+            idx: 38
+          }
+          {
+            name: tms
+            pad: IOR0
+            desc: JTAG tms signal.
+            idx: 35
+          }
+          {
+            name: trst_n
+            pad: IOR4
+            desc: JTAG trst_n signal.
+            idx: 39
+          }
+          {
+            name: tdi
+            pad: IOR2
+            desc: JTAG tdi signal.
+            idx: 37
+          }
+          {
+            name: tdo
+            pad: IOR1
+            desc: JTAG tdo signal.
+            idx: 36
+          }
+        ]
+      }
+    }
+    {
       name: cw310
       chiplevel:
       {
@@ -27177,6 +27331,7 @@
         signame_chip:
         {
           asic: alert_handler_crashdump
+          verilator: alert_handler_crashdump
           cw310: alert_handler_crashdump
           cw340: alert_handler_crashdump
         }
@@ -27197,6 +27352,7 @@
         signame_chip:
         {
           asic: alert_handler_crashdump
+          verilator: alert_handler_crashdump
           cw310: alert_handler_crashdump
           cw340: alert_handler_crashdump
         }
@@ -27217,6 +27373,7 @@
         signame_chip:
         {
           asic: alert_handler_esc_rx
+          verilator: alert_handler_esc_rx
           cw310: alert_handler_esc_rx
           cw340: alert_handler_esc_rx
         }
@@ -27237,6 +27394,7 @@
         signame_chip:
         {
           asic: alert_handler_esc_rx
+          verilator: alert_handler_esc_rx
           cw310: alert_handler_esc_rx
           cw340: alert_handler_esc_rx
         }
@@ -27257,6 +27415,7 @@
         signame_chip:
         {
           asic: alert_handler_esc_tx
+          verilator: alert_handler_esc_tx
           cw310: alert_handler_esc_tx
           cw340: alert_handler_esc_tx
         }
@@ -27277,6 +27436,7 @@
         signame_chip:
         {
           asic: alert_handler_esc_tx
+          verilator: alert_handler_esc_tx
           cw310: alert_handler_esc_tx
           cw340: alert_handler_esc_tx
         }
@@ -27297,6 +27457,7 @@
         signame_chip:
         {
           asic: aon_timer_aon_nmi_wdog_timer_bark
+          verilator: aon_timer_aon_nmi_wdog_timer_bark
           cw310: aon_timer_aon_nmi_wdog_timer_bark
           cw340: aon_timer_aon_nmi_wdog_timer_bark
         }
@@ -27317,6 +27478,7 @@
         signame_chip:
         {
           asic: aon_timer_aon_nmi_wdog_timer_bark
+          verilator: aon_timer_aon_nmi_wdog_timer_bark
           cw310: aon_timer_aon_nmi_wdog_timer_bark
           cw340: aon_timer_aon_nmi_wdog_timer_bark
         }
@@ -27337,6 +27499,7 @@
         signame_chip:
         {
           asic: otp_ctrl_sram_otp_key_req
+          verilator: otp_ctrl_sram_otp_key_req
           cw310: otp_ctrl_sram_otp_key_req
           cw340: otp_ctrl_sram_otp_key_req
         }
@@ -27357,6 +27520,7 @@
         signame_chip:
         {
           asic: otp_ctrl_sram_otp_key_rsp
+          verilator: otp_ctrl_sram_otp_key_rsp
           cw310: otp_ctrl_sram_otp_key_rsp
           cw340: otp_ctrl_sram_otp_key_rsp
         }
@@ -27377,6 +27541,7 @@
         signame_chip:
         {
           asic: otp_ctrl_sram_otp_key_req
+          verilator: otp_ctrl_sram_otp_key_req
           cw310: otp_ctrl_sram_otp_key_req
           cw340: otp_ctrl_sram_otp_key_req
         }
@@ -27397,6 +27562,7 @@
         signame_chip:
         {
           asic: otp_ctrl_sram_otp_key_rsp
+          verilator: otp_ctrl_sram_otp_key_rsp
           cw310: otp_ctrl_sram_otp_key_rsp
           cw340: otp_ctrl_sram_otp_key_rsp
         }
@@ -27417,6 +27583,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_pwr_nvm
+          verilator: pwrmgr_aon_pwr_nvm
           cw310: pwrmgr_aon_pwr_nvm
           cw340: pwrmgr_aon_pwr_nvm
         }
@@ -27437,6 +27604,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_pwr_nvm
+          verilator: pwrmgr_aon_pwr_nvm
           cw310: pwrmgr_aon_pwr_nvm
           cw340: pwrmgr_aon_pwr_nvm
         }
@@ -27457,6 +27625,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_pwr_otp_req
+          verilator: pwrmgr_aon_pwr_otp_req
           cw310: pwrmgr_aon_pwr_otp_req
           cw340: pwrmgr_aon_pwr_otp_req
         }
@@ -27477,6 +27646,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_pwr_otp_rsp
+          verilator: pwrmgr_aon_pwr_otp_rsp
           cw310: pwrmgr_aon_pwr_otp_rsp
           cw340: pwrmgr_aon_pwr_otp_rsp
         }
@@ -27497,6 +27667,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_pwr_otp_req
+          verilator: pwrmgr_aon_pwr_otp_req
           cw310: pwrmgr_aon_pwr_otp_req
           cw340: pwrmgr_aon_pwr_otp_req
         }
@@ -27517,6 +27688,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_pwr_otp_rsp
+          verilator: pwrmgr_aon_pwr_otp_rsp
           cw310: pwrmgr_aon_pwr_otp_rsp
           cw340: pwrmgr_aon_pwr_otp_rsp
         }
@@ -27537,6 +27709,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_pwr_lc_req
+          verilator: pwrmgr_aon_pwr_lc_req
           cw310: pwrmgr_aon_pwr_lc_req
           cw340: pwrmgr_aon_pwr_lc_req
         }
@@ -27557,6 +27730,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_pwr_lc_rsp
+          verilator: pwrmgr_aon_pwr_lc_rsp
           cw310: pwrmgr_aon_pwr_lc_rsp
           cw340: pwrmgr_aon_pwr_lc_rsp
         }
@@ -27577,6 +27751,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_pwr_lc_req
+          verilator: pwrmgr_aon_pwr_lc_req
           cw310: pwrmgr_aon_pwr_lc_req
           cw340: pwrmgr_aon_pwr_lc_req
         }
@@ -27597,6 +27772,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_pwr_lc_rsp
+          verilator: pwrmgr_aon_pwr_lc_rsp
           cw310: pwrmgr_aon_pwr_lc_rsp
           cw340: pwrmgr_aon_pwr_lc_rsp
         }
@@ -27617,6 +27793,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_strap
+          verilator: pwrmgr_aon_strap
           cw310: pwrmgr_aon_strap
           cw340: pwrmgr_aon_strap
         }
@@ -27637,6 +27814,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_strap
+          verilator: pwrmgr_aon_strap
           cw310: pwrmgr_aon_strap
           cw340: pwrmgr_aon_strap
         }
@@ -27657,6 +27835,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_low_power
+          verilator: pwrmgr_aon_low_power
           cw310: pwrmgr_aon_low_power
           cw340: pwrmgr_aon_low_power
         }
@@ -27677,6 +27856,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_low_power
+          verilator: pwrmgr_aon_low_power
           cw310: pwrmgr_aon_low_power
           cw340: pwrmgr_aon_low_power
         }
@@ -27697,6 +27877,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_fetch_en
+          verilator: pwrmgr_aon_fetch_en
           cw310: pwrmgr_aon_fetch_en
           cw340: pwrmgr_aon_fetch_en
         }
@@ -27717,6 +27898,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_fetch_en
+          verilator: pwrmgr_aon_fetch_en
           cw310: pwrmgr_aon_fetch_en
           cw340: pwrmgr_aon_fetch_en
         }
@@ -27737,6 +27919,7 @@
         signame_chip:
         {
           asic: rom_ctrl_pwrmgr_data
+          verilator: rom_ctrl_pwrmgr_data
           cw310: rom_ctrl_pwrmgr_data
           cw340: rom_ctrl_pwrmgr_data
         }
@@ -27757,6 +27940,7 @@
         signame_chip:
         {
           asic: rom_ctrl_pwrmgr_data
+          verilator: rom_ctrl_pwrmgr_data
           cw310: rom_ctrl_pwrmgr_data
           cw340: rom_ctrl_pwrmgr_data
         }
@@ -27777,6 +27961,7 @@
         signame_chip:
         {
           asic: clkmgr_aon_idle
+          verilator: clkmgr_aon_idle
           cw310: clkmgr_aon_idle
           cw340: clkmgr_aon_idle
         }
@@ -27797,6 +27982,7 @@
         signame_chip:
         {
           asic: clkmgr_aon_idle
+          verilator: clkmgr_aon_idle
           cw310: clkmgr_aon_idle
           cw340: clkmgr_aon_idle
         }
@@ -27817,6 +28003,7 @@
         signame_chip:
         {
           asic: lc_ctrl_lc_dft_en
+          verilator: lc_ctrl_lc_dft_en
           cw310: lc_ctrl_lc_dft_en
           cw340: lc_ctrl_lc_dft_en
         }
@@ -27837,6 +28024,7 @@
         signame_chip:
         {
           asic: lc_ctrl_lc_dft_en
+          verilator: lc_ctrl_lc_dft_en
           cw310: lc_ctrl_lc_dft_en
           cw340: lc_ctrl_lc_dft_en
         }
@@ -27857,6 +28045,7 @@
         signame_chip:
         {
           asic: lc_ctrl_lc_hw_debug_en
+          verilator: lc_ctrl_lc_hw_debug_en
           cw310: lc_ctrl_lc_hw_debug_en
           cw340: lc_ctrl_lc_hw_debug_en
         }
@@ -27877,6 +28066,7 @@
         signame_chip:
         {
           asic: lc_ctrl_lc_hw_debug_en
+          verilator: lc_ctrl_lc_hw_debug_en
           cw310: lc_ctrl_lc_hw_debug_en
           cw340: lc_ctrl_lc_hw_debug_en
         }
@@ -27897,6 +28087,7 @@
         signame_chip:
         {
           asic: lc_ctrl_lc_escalate_en
+          verilator: lc_ctrl_lc_escalate_en
           cw310: lc_ctrl_lc_escalate_en
           cw340: lc_ctrl_lc_escalate_en
         }
@@ -27917,6 +28108,7 @@
         signame_chip:
         {
           asic: lc_ctrl_lc_escalate_en
+          verilator: lc_ctrl_lc_escalate_en
           cw310: lc_ctrl_lc_escalate_en
           cw340: lc_ctrl_lc_escalate_en
         }
@@ -27937,6 +28129,7 @@
         signame_chip:
         {
           asic: lc_ctrl_lc_clk_byp_req
+          verilator: lc_ctrl_lc_clk_byp_req
           cw310: lc_ctrl_lc_clk_byp_req
           cw340: lc_ctrl_lc_clk_byp_req
         }
@@ -27957,6 +28150,7 @@
         signame_chip:
         {
           asic: lc_ctrl_lc_clk_byp_req
+          verilator: lc_ctrl_lc_clk_byp_req
           cw310: lc_ctrl_lc_clk_byp_req
           cw340: lc_ctrl_lc_clk_byp_req
         }
@@ -27977,6 +28171,7 @@
         signame_chip:
         {
           asic: lc_ctrl_lc_clk_byp_ack
+          verilator: lc_ctrl_lc_clk_byp_ack
           cw310: lc_ctrl_lc_clk_byp_ack
           cw340: lc_ctrl_lc_clk_byp_ack
         }
@@ -27997,6 +28192,7 @@
         signame_chip:
         {
           asic: lc_ctrl_lc_clk_byp_ack
+          verilator: lc_ctrl_lc_clk_byp_ack
           cw310: lc_ctrl_lc_clk_byp_ack
           cw340: lc_ctrl_lc_clk_byp_ack
         }
@@ -28017,6 +28213,7 @@
         signame_chip:
         {
           asic: rv_core_ibex_crash_dump
+          verilator: rv_core_ibex_crash_dump
           cw310: rv_core_ibex_crash_dump
           cw340: rv_core_ibex_crash_dump
         }
@@ -28037,6 +28234,7 @@
         signame_chip:
         {
           asic: rv_core_ibex_crash_dump
+          verilator: rv_core_ibex_crash_dump
           cw310: rv_core_ibex_crash_dump
           cw340: rv_core_ibex_crash_dump
         }
@@ -28057,6 +28255,7 @@
         signame_chip:
         {
           asic: rv_core_ibex_pwrmgr
+          verilator: rv_core_ibex_pwrmgr
           cw310: rv_core_ibex_pwrmgr
           cw340: rv_core_ibex_pwrmgr
         }
@@ -28077,6 +28276,7 @@
         signame_chip:
         {
           asic: rv_core_ibex_pwrmgr
+          verilator: rv_core_ibex_pwrmgr
           cw310: rv_core_ibex_pwrmgr
           cw340: rv_core_ibex_pwrmgr
         }
@@ -28097,6 +28297,7 @@
         signame_chip:
         {
           asic: rv_dm_ndmreset_req
+          verilator: rv_dm_ndmreset_req
           cw310: rv_dm_ndmreset_req
           cw340: rv_dm_ndmreset_req
         }
@@ -28117,6 +28318,7 @@
         signame_chip:
         {
           asic: rv_dm_ndmreset_req
+          verilator: rv_dm_ndmreset_req
           cw310: rv_dm_ndmreset_req
           cw340: rv_dm_ndmreset_req
         }
@@ -28137,6 +28339,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_wakeups
+          verilator: pwrmgr_aon_wakeups
           cw310: pwrmgr_aon_wakeups
           cw340: pwrmgr_aon_wakeups
         }
@@ -28161,6 +28364,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_wakeups
+          verilator: pwrmgr_aon_wakeups
           cw310: pwrmgr_aon_wakeups
           cw340: pwrmgr_aon_wakeups
         }
@@ -28185,6 +28389,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_tl_req
+          verilator: pwrmgr_aon_tl_req
           cw310: pwrmgr_aon_tl_req
           cw340: pwrmgr_aon_tl_req
         }
@@ -28205,6 +28410,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_tl_rsp
+          verilator: pwrmgr_aon_tl_rsp
           cw310: pwrmgr_aon_tl_rsp
           cw340: pwrmgr_aon_tl_rsp
         }
@@ -28225,6 +28431,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_tl_req
+          verilator: pwrmgr_aon_tl_req
           cw310: pwrmgr_aon_tl_req
           cw340: pwrmgr_aon_tl_req
         }
@@ -28245,6 +28452,7 @@
         signame_chip:
         {
           asic: pwrmgr_aon_tl_rsp
+          verilator: pwrmgr_aon_tl_rsp
           cw310: pwrmgr_aon_tl_rsp
           cw340: pwrmgr_aon_tl_rsp
         }
@@ -28265,6 +28473,7 @@
         signame_chip:
         {
           asic: rstmgr_aon_tl_req
+          verilator: rstmgr_aon_tl_req
           cw310: rstmgr_aon_tl_req
           cw340: rstmgr_aon_tl_req
         }
@@ -28285,6 +28494,7 @@
         signame_chip:
         {
           asic: rstmgr_aon_tl_rsp
+          verilator: rstmgr_aon_tl_rsp
           cw310: rstmgr_aon_tl_rsp
           cw340: rstmgr_aon_tl_rsp
         }
@@ -28305,6 +28515,7 @@
         signame_chip:
         {
           asic: rstmgr_aon_tl_req
+          verilator: rstmgr_aon_tl_req
           cw310: rstmgr_aon_tl_req
           cw340: rstmgr_aon_tl_req
         }
@@ -28325,6 +28536,7 @@
         signame_chip:
         {
           asic: rstmgr_aon_tl_rsp
+          verilator: rstmgr_aon_tl_rsp
           cw310: rstmgr_aon_tl_rsp
           cw340: rstmgr_aon_tl_rsp
         }
@@ -28345,6 +28557,7 @@
         signame_chip:
         {
           asic: clkmgr_aon_tl_req
+          verilator: clkmgr_aon_tl_req
           cw310: clkmgr_aon_tl_req
           cw340: clkmgr_aon_tl_req
         }
@@ -28365,6 +28578,7 @@
         signame_chip:
         {
           asic: clkmgr_aon_tl_rsp
+          verilator: clkmgr_aon_tl_rsp
           cw310: clkmgr_aon_tl_rsp
           cw340: clkmgr_aon_tl_rsp
         }
@@ -28385,6 +28599,7 @@
         signame_chip:
         {
           asic: clkmgr_aon_tl_req
+          verilator: clkmgr_aon_tl_req
           cw310: clkmgr_aon_tl_req
           cw340: clkmgr_aon_tl_req
         }
@@ -28405,6 +28620,7 @@
         signame_chip:
         {
           asic: clkmgr_aon_tl_rsp
+          verilator: clkmgr_aon_tl_rsp
           cw310: clkmgr_aon_tl_rsp
           cw340: clkmgr_aon_tl_rsp
         }
@@ -28425,6 +28641,7 @@
         signame_chip:
         {
           asic: sensor_ctrl_aon_tl_req
+          verilator: sensor_ctrl_aon_tl_req
           cw310: sensor_ctrl_aon_tl_req
           cw340: sensor_ctrl_aon_tl_req
         }
@@ -28445,6 +28662,7 @@
         signame_chip:
         {
           asic: sensor_ctrl_aon_tl_rsp
+          verilator: sensor_ctrl_aon_tl_rsp
           cw310: sensor_ctrl_aon_tl_rsp
           cw340: sensor_ctrl_aon_tl_rsp
         }
@@ -28465,6 +28683,7 @@
         signame_chip:
         {
           asic: sensor_ctrl_aon_tl_req
+          verilator: sensor_ctrl_aon_tl_req
           cw310: sensor_ctrl_aon_tl_req
           cw340: sensor_ctrl_aon_tl_req
         }
@@ -28485,6 +28704,7 @@
         signame_chip:
         {
           asic: sensor_ctrl_aon_tl_rsp
+          verilator: sensor_ctrl_aon_tl_rsp
           cw310: sensor_ctrl_aon_tl_rsp
           cw340: sensor_ctrl_aon_tl_rsp
         }
@@ -28505,6 +28725,7 @@
         signame_chip:
         {
           asic: sram_ctrl_ret_aon_regs_tl_req
+          verilator: sram_ctrl_ret_aon_regs_tl_req
           cw310: sram_ctrl_ret_aon_regs_tl_req
           cw340: sram_ctrl_ret_aon_regs_tl_req
         }
@@ -28525,6 +28746,7 @@
         signame_chip:
         {
           asic: sram_ctrl_ret_aon_regs_tl_rsp
+          verilator: sram_ctrl_ret_aon_regs_tl_rsp
           cw310: sram_ctrl_ret_aon_regs_tl_rsp
           cw340: sram_ctrl_ret_aon_regs_tl_rsp
         }
@@ -28545,6 +28767,7 @@
         signame_chip:
         {
           asic: sram_ctrl_ret_aon_regs_tl_req
+          verilator: sram_ctrl_ret_aon_regs_tl_req
           cw310: sram_ctrl_ret_aon_regs_tl_req
           cw340: sram_ctrl_ret_aon_regs_tl_req
         }
@@ -28565,6 +28788,7 @@
         signame_chip:
         {
           asic: sram_ctrl_ret_aon_regs_tl_rsp
+          verilator: sram_ctrl_ret_aon_regs_tl_rsp
           cw310: sram_ctrl_ret_aon_regs_tl_rsp
           cw340: sram_ctrl_ret_aon_regs_tl_rsp
         }
@@ -28585,6 +28809,7 @@
         signame_chip:
         {
           asic: sram_ctrl_ret_aon_ram_tl_req
+          verilator: sram_ctrl_ret_aon_ram_tl_req
           cw310: sram_ctrl_ret_aon_ram_tl_req
           cw340: sram_ctrl_ret_aon_ram_tl_req
         }
@@ -28605,6 +28830,7 @@
         signame_chip:
         {
           asic: sram_ctrl_ret_aon_ram_tl_rsp
+          verilator: sram_ctrl_ret_aon_ram_tl_rsp
           cw310: sram_ctrl_ret_aon_ram_tl_rsp
           cw340: sram_ctrl_ret_aon_ram_tl_rsp
         }
@@ -28625,6 +28851,7 @@
         signame_chip:
         {
           asic: sram_ctrl_ret_aon_ram_tl_req
+          verilator: sram_ctrl_ret_aon_ram_tl_req
           cw310: sram_ctrl_ret_aon_ram_tl_req
           cw340: sram_ctrl_ret_aon_ram_tl_req
         }
@@ -28645,6 +28872,7 @@
         signame_chip:
         {
           asic: sram_ctrl_ret_aon_ram_tl_rsp
+          verilator: sram_ctrl_ret_aon_ram_tl_rsp
           cw310: sram_ctrl_ret_aon_ram_tl_rsp
           cw340: sram_ctrl_ret_aon_ram_tl_rsp
         }
@@ -28665,6 +28893,7 @@
         signame_chip:
         {
           asic: aon_timer_aon_tl_req
+          verilator: aon_timer_aon_tl_req
           cw310: aon_timer_aon_tl_req
           cw340: aon_timer_aon_tl_req
         }
@@ -28685,6 +28914,7 @@
         signame_chip:
         {
           asic: aon_timer_aon_tl_rsp
+          verilator: aon_timer_aon_tl_rsp
           cw310: aon_timer_aon_tl_rsp
           cw340: aon_timer_aon_tl_rsp
         }
@@ -28705,6 +28935,7 @@
         signame_chip:
         {
           asic: aon_timer_aon_tl_req
+          verilator: aon_timer_aon_tl_req
           cw310: aon_timer_aon_tl_req
           cw340: aon_timer_aon_tl_req
         }
@@ -28725,6 +28956,7 @@
         signame_chip:
         {
           asic: aon_timer_aon_tl_rsp
+          verilator: aon_timer_aon_tl_rsp
           cw310: aon_timer_aon_tl_rsp
           cw340: aon_timer_aon_tl_rsp
         }
@@ -28745,6 +28977,7 @@
         signame_chip:
         {
           asic: sysrst_ctrl_aon_tl_req
+          verilator: sysrst_ctrl_aon_tl_req
           cw310: sysrst_ctrl_aon_tl_req
           cw340: sysrst_ctrl_aon_tl_req
         }
@@ -28765,6 +28998,7 @@
         signame_chip:
         {
           asic: sysrst_ctrl_aon_tl_rsp
+          verilator: sysrst_ctrl_aon_tl_rsp
           cw310: sysrst_ctrl_aon_tl_rsp
           cw340: sysrst_ctrl_aon_tl_rsp
         }
@@ -28785,6 +29019,7 @@
         signame_chip:
         {
           asic: sysrst_ctrl_aon_tl_req
+          verilator: sysrst_ctrl_aon_tl_req
           cw310: sysrst_ctrl_aon_tl_req
           cw340: sysrst_ctrl_aon_tl_req
         }
@@ -28805,6 +29040,7 @@
         signame_chip:
         {
           asic: sysrst_ctrl_aon_tl_rsp
+          verilator: sysrst_ctrl_aon_tl_rsp
           cw310: sysrst_ctrl_aon_tl_rsp
           cw340: sysrst_ctrl_aon_tl_rsp
         }
@@ -28825,6 +29061,7 @@
         signame_chip:
         {
           asic: adc_ctrl_aon_tl_req
+          verilator: adc_ctrl_aon_tl_req
           cw310: adc_ctrl_aon_tl_req
           cw340: adc_ctrl_aon_tl_req
         }
@@ -28845,6 +29082,7 @@
         signame_chip:
         {
           asic: adc_ctrl_aon_tl_rsp
+          verilator: adc_ctrl_aon_tl_rsp
           cw310: adc_ctrl_aon_tl_rsp
           cw340: adc_ctrl_aon_tl_rsp
         }
@@ -28865,6 +29103,7 @@
         signame_chip:
         {
           asic: adc_ctrl_aon_tl_req
+          verilator: adc_ctrl_aon_tl_req
           cw310: adc_ctrl_aon_tl_req
           cw340: adc_ctrl_aon_tl_req
         }
@@ -28885,6 +29124,7 @@
         signame_chip:
         {
           asic: adc_ctrl_aon_tl_rsp
+          verilator: adc_ctrl_aon_tl_rsp
           cw310: adc_ctrl_aon_tl_rsp
           cw340: adc_ctrl_aon_tl_rsp
         }
@@ -28905,6 +29145,7 @@
         signame_chip:
         {
           asic: adc_req
+          verilator: adc_req
           cw310: adc_req
           cw340: adc_req
         }
@@ -28925,6 +29166,7 @@
         signame_chip:
         {
           asic: adc_rsp
+          verilator: adc_rsp
           cw310: adc_rsp
           cw340: adc_rsp
         }
@@ -28945,6 +29187,7 @@
         signame_chip:
         {
           asic: ast_edn_req
+          verilator: ast_edn_req
           cw310: ast_edn_req
           cw340: ast_edn_req
         }
@@ -28965,6 +29208,7 @@
         signame_chip:
         {
           asic: ast_edn_rsp
+          verilator: ast_edn_rsp
           cw310: ast_edn_rsp
           cw340: ast_edn_rsp
         }
@@ -28985,6 +29229,7 @@
         signame_chip:
         {
           asic: lc_dft_en
+          verilator: lc_dft_en
           cw310: ""
           cw340: ""
         }
@@ -29005,6 +29250,7 @@
         signame_chip:
         {
           asic: obs_ctrl
+          verilator: obs_ctrl
           cw310: obs_ctrl
           cw340: obs_ctrl
         }
@@ -29025,6 +29271,7 @@
         signame_chip:
         {
           asic: ram_1p_cfg
+          verilator: ram_1p_cfg
           cw310: prim_ram_1p_pkg::RAM_1P_CFG_DEFAULT
           cw340: prim_ram_1p_pkg::RAM_1P_CFG_DEFAULT
         }
@@ -29045,6 +29292,7 @@
         signame_chip:
         {
           asic: "'{ram_1p_cfg}"
+          verilator: "'{ram_1p_cfg}"
           cw310: "'{prim_ram_1p_pkg::RAM_1P_CFG_DEFAULT}"
           cw340: "'{prim_ram_1p_pkg::RAM_1P_CFG_DEFAULT}"
         }
@@ -29075,6 +29323,7 @@
         signame_chip:
         {
           asic: "'{ram_1p_cfg}"
+          verilator: "'{ram_1p_cfg}"
           cw310: "'{prim_ram_1p_pkg::RAM_1P_CFG_DEFAULT}"
           cw340: "'{prim_ram_1p_pkg::RAM_1P_CFG_DEFAULT}"
         }
@@ -29105,6 +29354,7 @@
         signame_chip:
         {
           asic: spi_ram_2p_cfg
+          verilator: spi_ram_2p_cfg
           cw310: prim_ram_2p_pkg::RAM_2P_CFG_DEFAULT
           cw340: prim_ram_2p_pkg::RAM_2P_CFG_DEFAULT
         }
@@ -29125,6 +29375,7 @@
         signame_chip:
         {
           asic: usb_ram_1p_cfg
+          verilator: usb_ram_1p_cfg
           cw310: prim_ram_1p_pkg::RAM_1P_CFG_DEFAULT
           cw340: prim_ram_1p_pkg::RAM_1P_CFG_DEFAULT
         }
@@ -29145,6 +29396,7 @@
         signame_chip:
         {
           asic: rom_cfg
+          verilator: rom_cfg
           cw310: prim_rom_pkg::ROM_CFG_DEFAULT
           cw340: prim_rom_pkg::ROM_CFG_DEFAULT
         }
@@ -29165,6 +29417,7 @@
         signame_chip:
         {
           asic: clkmgr_aon_clocks
+          verilator: clkmgr_aon_clocks
           cw310: clkmgr_aon_clocks
           cw340: clkmgr_aon_clocks
         }
@@ -29185,6 +29438,7 @@
         signame_chip:
         {
           asic: clkmgr_aon_cg_en
+          verilator: clkmgr_aon_cg_en
           cw310: clkmgr_aon_cg_en
           cw340: clkmgr_aon_cg_en
         }
@@ -29205,6 +29459,7 @@
         signame_chip:
         {
           asic: clk_main_jitter_en
+          verilator: clk_main_jitter_en
           cw310: clk_main_jitter_en
           cw340: clk_main_jitter_en
         }
@@ -29225,6 +29480,7 @@
         signame_chip:
         {
           asic: io_clk_byp_req
+          verilator: io_clk_byp_req
           cw310: io_clk_byp_req
           cw340: io_clk_byp_req
         }
@@ -29245,6 +29501,7 @@
         signame_chip:
         {
           asic: io_clk_byp_ack
+          verilator: io_clk_byp_ack
           cw310: io_clk_byp_ack
           cw340: io_clk_byp_ack
         }
@@ -29265,6 +29522,7 @@
         signame_chip:
         {
           asic: all_clk_byp_req
+          verilator: all_clk_byp_req
           cw310: all_clk_byp_req
           cw340: all_clk_byp_req
         }
@@ -29285,6 +29543,7 @@
         signame_chip:
         {
           asic: all_clk_byp_ack
+          verilator: all_clk_byp_ack
           cw310: all_clk_byp_ack
           cw340: all_clk_byp_ack
         }
@@ -29305,6 +29564,7 @@
         signame_chip:
         {
           asic: hi_speed_sel
+          verilator: hi_speed_sel
           cw310: hi_speed_sel
           cw340: hi_speed_sel
         }
@@ -29325,6 +29585,7 @@
         signame_chip:
         {
           asic: div_step_down_req
+          verilator: div_step_down_req
           cw310: div_step_down_req
           cw340: div_step_down_req
         }
@@ -29345,6 +29606,7 @@
         signame_chip:
         {
           asic: ast_init_done
+          verilator: ast_init_done
           cw310: ast_init_done
           cw340: ast_init_done
         }
@@ -29365,6 +29627,7 @@
         signame_chip:
         {
           asic: flash_bist_enable
+          verilator: flash_bist_enable
           cw310: flash_bist_enable
           cw340: flash_bist_enable
         }
@@ -29385,6 +29648,7 @@
         signame_chip:
         {
           asic: flash_power_down_h
+          verilator: flash_power_down_h
           cw310: 1'b0
           cw340: 1'b0
         }
@@ -29405,6 +29669,7 @@
         signame_chip:
         {
           asic: flash_power_ready_h
+          verilator: flash_power_ready_h
           cw310: 1'b1
           cw340: 1'b1
         }
@@ -29425,6 +29690,7 @@
         signame_chip:
         {
           asic: "{FLASH_TEST_MODE1, FLASH_TEST_MODE0}"
+          verilator: ""
           cw310: "'0"
           cw340: "'0"
         }
@@ -29445,6 +29711,7 @@
         signame_chip:
         {
           asic: FLASH_TEST_VOLT
+          verilator: ""
           cw310: 1'b0
           cw340: 1'b0
         }
@@ -29465,6 +29732,7 @@
         signame_chip:
         {
           asic: flash_obs
+          verilator: flash_obs
           cw310: flash_obs
           cw340: flash_obs
         }
@@ -29485,6 +29753,7 @@
         signame_chip:
         {
           asic: es_rng_enable
+          verilator: es_rng_enable
           cw310: es_rng_enable
           cw340: es_rng_enable
         }
@@ -29505,6 +29774,7 @@
         signame_chip:
         {
           asic: es_rng_valid
+          verilator: es_rng_valid
           cw310: es_rng_valid
           cw340: es_rng_valid
         }
@@ -29525,6 +29795,7 @@
         signame_chip:
         {
           asic: es_rng_bit
+          verilator: es_rng_bit
           cw310: es_rng_bit
           cw340: es_rng_bit
         }
@@ -29560,6 +29831,7 @@
         signame_chip:
         {
           asic: es_rng_fips
+          verilator: es_rng_fips
           cw310: ""
           cw340: ""
         }
@@ -29580,6 +29852,7 @@
         signame_chip:
         {
           asic: ast_tl_req
+          verilator: ast_tl_req
           cw310: ast_tl_req
           cw340: ast_tl_req
         }
@@ -29600,6 +29873,7 @@
         signame_chip:
         {
           asic: ast_tl_rsp
+          verilator: ast_tl_rsp
           cw310: ast_tl_rsp
           cw340: ast_tl_rsp
         }
@@ -29620,6 +29894,7 @@
         signame_chip:
         {
           asic: dft_strap_test
+          verilator: dft_strap_test
           cw310: ""
           cw340: ""
         }
@@ -29640,6 +29915,7 @@
         signame_chip:
         {
           asic: "'0"
+          verilator: "'0"
           cw310: "'0"
           cw340: "'0"
         }
@@ -29660,6 +29936,7 @@
         signame_chip:
         {
           asic: usb_dp_pullup_en
+          verilator: usb_dp_pullup_en
           cw310: usb_dp_pullup_en
           cw340: usb_dp_pullup_en
         }
@@ -29680,6 +29957,7 @@
         signame_chip:
         {
           asic: usb_dn_pullup_en
+          verilator: usb_dn_pullup_en
           cw310: ""
           cw340: ""
         }
@@ -29700,6 +29978,7 @@
         signame_chip:
         {
           asic: pwrmgr_ast_req
+          verilator: pwrmgr_ast_req
           cw310: pwrmgr_ast_req
           cw340: pwrmgr_ast_req
         }
@@ -29720,6 +29999,7 @@
         signame_chip:
         {
           asic: pwrmgr_ast_rsp
+          verilator: pwrmgr_ast_rsp
           cw310: pwrmgr_ast_rsp
           cw340: pwrmgr_ast_rsp
         }
@@ -29740,6 +30020,7 @@
         signame_chip:
         {
           asic: otp_macro_pwr_seq
+          verilator: otp_macro_pwr_seq
           cw310: otp_macro_pwr_seq
           cw340: otp_macro_pwr_seq
         }
@@ -29760,6 +30041,7 @@
         signame_chip:
         {
           asic: otp_macro_pwr_seq_h
+          verilator: otp_macro_pwr_seq_h
           cw310: otp_macro_pwr_seq_h
           cw340: otp_macro_pwr_seq_h
         }
@@ -29780,6 +30062,7 @@
         signame_chip:
         {
           asic: OTP_EXT_VOLT
+          verilator: ""
           cw310: "'0"
           cw340: "'0"
         }
@@ -29800,6 +30083,7 @@
         signame_chip:
         {
           asic: otp_obs
+          verilator: otp_obs
           cw310: otp_obs
           cw340: otp_obs
         }
@@ -29820,6 +30104,7 @@
         signame_chip:
         {
           asic: por_n
+          verilator: por_n
           cw310: por_n
           cw340: por_n
         }
@@ -29840,6 +30125,7 @@
         signame_chip:
         {
           asic: rstmgr_aon_resets
+          verilator: rstmgr_aon_resets
           cw310: rstmgr_aon_resets
           cw340: rstmgr_aon_resets
         }
@@ -29860,6 +30146,7 @@
         signame_chip:
         {
           asic: rstmgr_aon_rst_en
+          verilator: rstmgr_aon_rst_en
           cw310: rstmgr_aon_rst_en
           cw340: rstmgr_aon_rst_en
         }
@@ -29880,6 +30167,7 @@
         signame_chip:
         {
           asic: "'0"
+          verilator: "'0"
           cw310: fpga_info
           cw340: fpga_info
         }
@@ -29900,6 +30188,7 @@
         signame_chip:
         {
           asic: ast_alert_req
+          verilator: ast_alert_req
           cw310: ast_alert_req
           cw340: ast_alert_req
         }
@@ -29920,6 +30209,7 @@
         signame_chip:
         {
           asic: ast_alert_rsp
+          verilator: ast_alert_rsp
           cw310: ast_alert_rsp
           cw340: ast_alert_rsp
         }
@@ -29940,6 +30230,7 @@
         signame_chip:
         {
           asic: ast_pwst.io_pok
+          verilator: ast_pwst.io_pok
           cw310: ast_pwst.io_pok
           cw340: ast_pwst.io_pok
         }
@@ -29960,6 +30251,7 @@
         signame_chip:
         {
           asic: ast2pinmux
+          verilator: ast2pinmux
           cw310: ast2pinmux
           cw340: ast2pinmux
         }
@@ -29980,6 +30272,7 @@
         signame_chip:
         {
           asic: ast_init_done
+          verilator: ast_init_done
           cw310: ast_init_done
           cw340: ast_init_done
         }
@@ -30000,6 +30293,7 @@
         signame_chip:
         {
           asic: sensor_ctrl_manual_pad_attr
+          verilator: ""
           cw310: ""
           cw340: ""
         }
@@ -30020,6 +30314,7 @@
         signame_chip:
         {
           asic: sck_monitor
+          verilator: sck_monitor
           cw310: sck_monitor
           cw340: sck_monitor
         }
@@ -30040,6 +30335,7 @@
         signame_chip:
         {
           asic: usb_rx_d
+          verilator: usb_rx_d
           cw310: usb_rx_d
           cw340: usb_rx_d
         }
@@ -30060,6 +30356,7 @@
         signame_chip:
         {
           asic: ""
+          verilator: usb_tx_d
           cw310: ""
           cw340: ""
         }
@@ -30080,6 +30377,7 @@
         signame_chip:
         {
           asic: ""
+          verilator: usb_tx_se0
           cw310: ""
           cw340: ""
         }
@@ -30100,6 +30398,7 @@
         signame_chip:
         {
           asic: ""
+          verilator: usb_tx_use_d_se0
           cw310: ""
           cw340: ""
         }
@@ -30120,6 +30419,7 @@
         signame_chip:
         {
           asic: usb_rx_enable
+          verilator: usb_rx_enable
           cw310: usb_rx_enable
           cw340: usb_rx_enable
         }
@@ -30140,6 +30440,7 @@
         signame_chip:
         {
           asic: usb_ref_val
+          verilator: usb_ref_val
           cw310: usb_ref_val
           cw340: usb_ref_val
         }
@@ -30160,6 +30461,7 @@
         signame_chip:
         {
           asic: usb_ref_pulse
+          verilator: usb_ref_pulse
           cw310: usb_ref_pulse
           cw340: usb_ref_pulse
         }
@@ -30180,6 +30482,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_ec_rst_l_d2p
+          verilator: cio_sysrst_ctrl_aon_ec_rst_l_d2p
           cw310: cio_sysrst_ctrl_aon_ec_rst_l_d2p
           cw340: cio_sysrst_ctrl_aon_ec_rst_l_d2p
         }
@@ -30200,6 +30503,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_ec_rst_l_d2p
+          verilator: cio_sysrst_ctrl_aon_ec_rst_l_d2p
           cw310: cio_sysrst_ctrl_aon_ec_rst_l_d2p
           cw340: cio_sysrst_ctrl_aon_ec_rst_l_d2p
         }
@@ -30220,6 +30524,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_ec_rst_l_en_d2p
+          verilator: cio_sysrst_ctrl_aon_ec_rst_l_en_d2p
           cw310: cio_sysrst_ctrl_aon_ec_rst_l_en_d2p
           cw340: cio_sysrst_ctrl_aon_ec_rst_l_en_d2p
         }
@@ -30240,6 +30545,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_ec_rst_l_en_d2p
+          verilator: cio_sysrst_ctrl_aon_ec_rst_l_en_d2p
           cw310: cio_sysrst_ctrl_aon_ec_rst_l_en_d2p
           cw340: cio_sysrst_ctrl_aon_ec_rst_l_en_d2p
         }
@@ -30260,6 +30566,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_ec_rst_l_p2d
+          verilator: cio_sysrst_ctrl_aon_ec_rst_l_p2d
           cw310: cio_sysrst_ctrl_aon_ec_rst_l_p2d
           cw340: cio_sysrst_ctrl_aon_ec_rst_l_p2d
         }
@@ -30280,6 +30587,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_ec_rst_l_p2d
+          verilator: cio_sysrst_ctrl_aon_ec_rst_l_p2d
           cw310: cio_sysrst_ctrl_aon_ec_rst_l_p2d
           cw340: cio_sysrst_ctrl_aon_ec_rst_l_p2d
         }
@@ -30300,6 +30608,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_flash_wp_l_d2p
+          verilator: cio_sysrst_ctrl_aon_flash_wp_l_d2p
           cw310: cio_sysrst_ctrl_aon_flash_wp_l_d2p
           cw340: cio_sysrst_ctrl_aon_flash_wp_l_d2p
         }
@@ -30320,6 +30629,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_flash_wp_l_d2p
+          verilator: cio_sysrst_ctrl_aon_flash_wp_l_d2p
           cw310: cio_sysrst_ctrl_aon_flash_wp_l_d2p
           cw340: cio_sysrst_ctrl_aon_flash_wp_l_d2p
         }
@@ -30340,6 +30650,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_flash_wp_l_en_d2p
+          verilator: cio_sysrst_ctrl_aon_flash_wp_l_en_d2p
           cw310: cio_sysrst_ctrl_aon_flash_wp_l_en_d2p
           cw340: cio_sysrst_ctrl_aon_flash_wp_l_en_d2p
         }
@@ -30360,6 +30671,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_flash_wp_l_en_d2p
+          verilator: cio_sysrst_ctrl_aon_flash_wp_l_en_d2p
           cw310: cio_sysrst_ctrl_aon_flash_wp_l_en_d2p
           cw340: cio_sysrst_ctrl_aon_flash_wp_l_en_d2p
         }
@@ -30380,6 +30692,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_flash_wp_l_p2d
+          verilator: cio_sysrst_ctrl_aon_flash_wp_l_p2d
           cw310: cio_sysrst_ctrl_aon_flash_wp_l_p2d
           cw340: cio_sysrst_ctrl_aon_flash_wp_l_p2d
         }
@@ -30400,6 +30713,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_flash_wp_l_p2d
+          verilator: cio_sysrst_ctrl_aon_flash_wp_l_p2d
           cw310: cio_sysrst_ctrl_aon_flash_wp_l_p2d
           cw340: cio_sysrst_ctrl_aon_flash_wp_l_p2d
         }
@@ -30420,6 +30734,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_ac_present_p2d
+          verilator: cio_sysrst_ctrl_aon_ac_present_p2d
           cw310: cio_sysrst_ctrl_aon_ac_present_p2d
           cw340: cio_sysrst_ctrl_aon_ac_present_p2d
         }
@@ -30440,6 +30755,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_ac_present_p2d
+          verilator: cio_sysrst_ctrl_aon_ac_present_p2d
           cw310: cio_sysrst_ctrl_aon_ac_present_p2d
           cw340: cio_sysrst_ctrl_aon_ac_present_p2d
         }
@@ -30460,6 +30776,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key0_in_p2d
+          verilator: cio_sysrst_ctrl_aon_key0_in_p2d
           cw310: cio_sysrst_ctrl_aon_key0_in_p2d
           cw340: cio_sysrst_ctrl_aon_key0_in_p2d
         }
@@ -30480,6 +30797,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key0_in_p2d
+          verilator: cio_sysrst_ctrl_aon_key0_in_p2d
           cw310: cio_sysrst_ctrl_aon_key0_in_p2d
           cw340: cio_sysrst_ctrl_aon_key0_in_p2d
         }
@@ -30500,6 +30818,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key1_in_p2d
+          verilator: cio_sysrst_ctrl_aon_key1_in_p2d
           cw310: cio_sysrst_ctrl_aon_key1_in_p2d
           cw340: cio_sysrst_ctrl_aon_key1_in_p2d
         }
@@ -30520,6 +30839,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key1_in_p2d
+          verilator: cio_sysrst_ctrl_aon_key1_in_p2d
           cw310: cio_sysrst_ctrl_aon_key1_in_p2d
           cw340: cio_sysrst_ctrl_aon_key1_in_p2d
         }
@@ -30540,6 +30860,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key2_in_p2d
+          verilator: cio_sysrst_ctrl_aon_key2_in_p2d
           cw310: cio_sysrst_ctrl_aon_key2_in_p2d
           cw340: cio_sysrst_ctrl_aon_key2_in_p2d
         }
@@ -30560,6 +30881,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key2_in_p2d
+          verilator: cio_sysrst_ctrl_aon_key2_in_p2d
           cw310: cio_sysrst_ctrl_aon_key2_in_p2d
           cw340: cio_sysrst_ctrl_aon_key2_in_p2d
         }
@@ -30580,6 +30902,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_pwrb_in_p2d
+          verilator: cio_sysrst_ctrl_aon_pwrb_in_p2d
           cw310: cio_sysrst_ctrl_aon_pwrb_in_p2d
           cw340: cio_sysrst_ctrl_aon_pwrb_in_p2d
         }
@@ -30600,6 +30923,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_pwrb_in_p2d
+          verilator: cio_sysrst_ctrl_aon_pwrb_in_p2d
           cw310: cio_sysrst_ctrl_aon_pwrb_in_p2d
           cw340: cio_sysrst_ctrl_aon_pwrb_in_p2d
         }
@@ -30620,6 +30944,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_lid_open_p2d
+          verilator: cio_sysrst_ctrl_aon_lid_open_p2d
           cw310: cio_sysrst_ctrl_aon_lid_open_p2d
           cw340: cio_sysrst_ctrl_aon_lid_open_p2d
         }
@@ -30640,6 +30965,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_lid_open_p2d
+          verilator: cio_sysrst_ctrl_aon_lid_open_p2d
           cw310: cio_sysrst_ctrl_aon_lid_open_p2d
           cw340: cio_sysrst_ctrl_aon_lid_open_p2d
         }
@@ -30660,6 +30986,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_bat_disable_d2p
+          verilator: cio_sysrst_ctrl_aon_bat_disable_d2p
           cw310: cio_sysrst_ctrl_aon_bat_disable_d2p
           cw340: cio_sysrst_ctrl_aon_bat_disable_d2p
         }
@@ -30680,6 +31007,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_bat_disable_d2p
+          verilator: cio_sysrst_ctrl_aon_bat_disable_d2p
           cw310: cio_sysrst_ctrl_aon_bat_disable_d2p
           cw340: cio_sysrst_ctrl_aon_bat_disable_d2p
         }
@@ -30700,6 +31028,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_bat_disable_en_d2p
+          verilator: cio_sysrst_ctrl_aon_bat_disable_en_d2p
           cw310: cio_sysrst_ctrl_aon_bat_disable_en_d2p
           cw340: cio_sysrst_ctrl_aon_bat_disable_en_d2p
         }
@@ -30720,6 +31049,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_bat_disable_en_d2p
+          verilator: cio_sysrst_ctrl_aon_bat_disable_en_d2p
           cw310: cio_sysrst_ctrl_aon_bat_disable_en_d2p
           cw340: cio_sysrst_ctrl_aon_bat_disable_en_d2p
         }
@@ -30740,6 +31070,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key0_out_d2p
+          verilator: cio_sysrst_ctrl_aon_key0_out_d2p
           cw310: cio_sysrst_ctrl_aon_key0_out_d2p
           cw340: cio_sysrst_ctrl_aon_key0_out_d2p
         }
@@ -30760,6 +31091,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key0_out_d2p
+          verilator: cio_sysrst_ctrl_aon_key0_out_d2p
           cw310: cio_sysrst_ctrl_aon_key0_out_d2p
           cw340: cio_sysrst_ctrl_aon_key0_out_d2p
         }
@@ -30780,6 +31112,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key0_out_en_d2p
+          verilator: cio_sysrst_ctrl_aon_key0_out_en_d2p
           cw310: cio_sysrst_ctrl_aon_key0_out_en_d2p
           cw340: cio_sysrst_ctrl_aon_key0_out_en_d2p
         }
@@ -30800,6 +31133,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key0_out_en_d2p
+          verilator: cio_sysrst_ctrl_aon_key0_out_en_d2p
           cw310: cio_sysrst_ctrl_aon_key0_out_en_d2p
           cw340: cio_sysrst_ctrl_aon_key0_out_en_d2p
         }
@@ -30820,6 +31154,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key1_out_d2p
+          verilator: cio_sysrst_ctrl_aon_key1_out_d2p
           cw310: cio_sysrst_ctrl_aon_key1_out_d2p
           cw340: cio_sysrst_ctrl_aon_key1_out_d2p
         }
@@ -30840,6 +31175,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key1_out_d2p
+          verilator: cio_sysrst_ctrl_aon_key1_out_d2p
           cw310: cio_sysrst_ctrl_aon_key1_out_d2p
           cw340: cio_sysrst_ctrl_aon_key1_out_d2p
         }
@@ -30860,6 +31196,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key1_out_en_d2p
+          verilator: cio_sysrst_ctrl_aon_key1_out_en_d2p
           cw310: cio_sysrst_ctrl_aon_key1_out_en_d2p
           cw340: cio_sysrst_ctrl_aon_key1_out_en_d2p
         }
@@ -30880,6 +31217,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key1_out_en_d2p
+          verilator: cio_sysrst_ctrl_aon_key1_out_en_d2p
           cw310: cio_sysrst_ctrl_aon_key1_out_en_d2p
           cw340: cio_sysrst_ctrl_aon_key1_out_en_d2p
         }
@@ -30900,6 +31238,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key2_out_d2p
+          verilator: cio_sysrst_ctrl_aon_key2_out_d2p
           cw310: cio_sysrst_ctrl_aon_key2_out_d2p
           cw340: cio_sysrst_ctrl_aon_key2_out_d2p
         }
@@ -30920,6 +31259,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key2_out_d2p
+          verilator: cio_sysrst_ctrl_aon_key2_out_d2p
           cw310: cio_sysrst_ctrl_aon_key2_out_d2p
           cw340: cio_sysrst_ctrl_aon_key2_out_d2p
         }
@@ -30940,6 +31280,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key2_out_en_d2p
+          verilator: cio_sysrst_ctrl_aon_key2_out_en_d2p
           cw310: cio_sysrst_ctrl_aon_key2_out_en_d2p
           cw340: cio_sysrst_ctrl_aon_key2_out_en_d2p
         }
@@ -30960,6 +31301,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_key2_out_en_d2p
+          verilator: cio_sysrst_ctrl_aon_key2_out_en_d2p
           cw310: cio_sysrst_ctrl_aon_key2_out_en_d2p
           cw340: cio_sysrst_ctrl_aon_key2_out_en_d2p
         }
@@ -30980,6 +31322,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_pwrb_out_d2p
+          verilator: cio_sysrst_ctrl_aon_pwrb_out_d2p
           cw310: cio_sysrst_ctrl_aon_pwrb_out_d2p
           cw340: cio_sysrst_ctrl_aon_pwrb_out_d2p
         }
@@ -31000,6 +31343,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_pwrb_out_d2p
+          verilator: cio_sysrst_ctrl_aon_pwrb_out_d2p
           cw310: cio_sysrst_ctrl_aon_pwrb_out_d2p
           cw340: cio_sysrst_ctrl_aon_pwrb_out_d2p
         }
@@ -31020,6 +31364,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_pwrb_out_en_d2p
+          verilator: cio_sysrst_ctrl_aon_pwrb_out_en_d2p
           cw310: cio_sysrst_ctrl_aon_pwrb_out_en_d2p
           cw340: cio_sysrst_ctrl_aon_pwrb_out_en_d2p
         }
@@ -31040,6 +31385,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_pwrb_out_en_d2p
+          verilator: cio_sysrst_ctrl_aon_pwrb_out_en_d2p
           cw310: cio_sysrst_ctrl_aon_pwrb_out_en_d2p
           cw340: cio_sysrst_ctrl_aon_pwrb_out_en_d2p
         }
@@ -31060,6 +31406,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_z3_wakeup_d2p
+          verilator: cio_sysrst_ctrl_aon_z3_wakeup_d2p
           cw310: cio_sysrst_ctrl_aon_z3_wakeup_d2p
           cw340: cio_sysrst_ctrl_aon_z3_wakeup_d2p
         }
@@ -31080,6 +31427,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_z3_wakeup_d2p
+          verilator: cio_sysrst_ctrl_aon_z3_wakeup_d2p
           cw310: cio_sysrst_ctrl_aon_z3_wakeup_d2p
           cw340: cio_sysrst_ctrl_aon_z3_wakeup_d2p
         }
@@ -31100,6 +31448,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_z3_wakeup_en_d2p
+          verilator: cio_sysrst_ctrl_aon_z3_wakeup_en_d2p
           cw310: cio_sysrst_ctrl_aon_z3_wakeup_en_d2p
           cw340: cio_sysrst_ctrl_aon_z3_wakeup_en_d2p
         }
@@ -31120,6 +31469,7 @@
         signame_chip:
         {
           asic: cio_sysrst_ctrl_aon_z3_wakeup_en_d2p
+          verilator: cio_sysrst_ctrl_aon_z3_wakeup_en_d2p
           cw310: cio_sysrst_ctrl_aon_z3_wakeup_en_d2p
           cw340: cio_sysrst_ctrl_aon_z3_wakeup_en_d2p
         }
@@ -31140,6 +31490,7 @@
         signame_chip:
         {
           asic: cio_sensor_ctrl_aon_ast_debug_out_d2p
+          verilator: cio_sensor_ctrl_aon_ast_debug_out_d2p
           cw310: cio_sensor_ctrl_aon_ast_debug_out_d2p
           cw340: cio_sensor_ctrl_aon_ast_debug_out_d2p
         }
@@ -31160,6 +31511,7 @@
         signame_chip:
         {
           asic: cio_sensor_ctrl_aon_ast_debug_out_d2p
+          verilator: cio_sensor_ctrl_aon_ast_debug_out_d2p
           cw310: cio_sensor_ctrl_aon_ast_debug_out_d2p
           cw340: cio_sensor_ctrl_aon_ast_debug_out_d2p
         }
@@ -31180,6 +31532,7 @@
         signame_chip:
         {
           asic: cio_sensor_ctrl_aon_ast_debug_out_en_d2p
+          verilator: cio_sensor_ctrl_aon_ast_debug_out_en_d2p
           cw310: cio_sensor_ctrl_aon_ast_debug_out_en_d2p
           cw340: cio_sensor_ctrl_aon_ast_debug_out_en_d2p
         }
@@ -31200,6 +31553,7 @@
         signame_chip:
         {
           asic: cio_sensor_ctrl_aon_ast_debug_out_en_d2p
+          verilator: cio_sensor_ctrl_aon_ast_debug_out_en_d2p
           cw310: cio_sensor_ctrl_aon_ast_debug_out_en_d2p
           cw340: cio_sensor_ctrl_aon_ast_debug_out_en_d2p
         }
