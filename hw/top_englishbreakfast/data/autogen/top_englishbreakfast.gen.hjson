@@ -7668,13 +7668,19 @@
           {
             unused: true
           }
-          pinmux_aon.usb_dnpullup_en:
-          {
-            unused: true
-          }
           pinmux_aon.dft_strap_test:
           {
             unused: true
+          }
+          pinmux_aon.usb_dppullup_en:
+          {
+            signal: usb_dp_pullup_en
+            feedthrough: true
+          }
+          pinmux_aon.usb_dnpullup_en:
+          {
+            signal: usb_dn_pullup_en
+            feedthrough: true
           }
           usbdev.usb_tx_d:
           {
@@ -7690,11 +7696,11 @@
           }
           usbdev.usb_rx_d:
           {
-            signal: usb_rx_d
+            unused: true
           }
           usbdev.usb_rx_enable:
           {
-            signal: usb_rx_enable
+            unused: true
           }
           usbdev.usb_ref_val:
           {
@@ -7884,11 +7890,11 @@
       {
         port_overrides:
         {
-          pinmux_aon.dft_hold_tap_sel:
+          rv_core_ibex.fpga_info:
           {
             unused: true
           }
-          pinmux_aon.usb_dnpullup_en:
+          pinmux_aon.dft_hold_tap_sel:
           {
             unused: true
           }
@@ -7896,25 +7902,40 @@
           {
             unused: true
           }
-          usbdev.usb_tx_d:
+          pinmux_aon.usb_dppullup_en:
           {
-            signal: usb_tx_d
+            signal: usb_dp_pullup_en
+            feedthrough: true
           }
-          usbdev.usb_tx_se0:
+          pinmux_aon.usb_dnpullup_en:
           {
-            signal: usb_tx_se0
-          }
-          usbdev.usb_tx_use_d_se0:
-          {
-            signal: usb_tx_use_d_se0
+            signal: usb_dn_pullup_en
+            feedthrough: true
           }
           usbdev.usb_rx_d:
           {
             signal: usb_rx_d
+            feedthrough: true
           }
           usbdev.usb_rx_enable:
           {
             signal: usb_rx_enable
+            feedthrough: true
+          }
+          usbdev.usb_tx_d:
+          {
+            signal: usb_tx_d
+            feedthrough: true
+          }
+          usbdev.usb_tx_se0:
+          {
+            signal: usb_tx_se0
+            feedthrough: true
+          }
+          usbdev.usb_tx_use_d_se0:
+          {
+            signal: usb_tx_use_d_se0
+            feedthrough: true
           }
           usbdev.usb_ref_val:
           {
@@ -13856,8 +13877,8 @@
         signame: usb_dp_pullup_en_o
         signame_chip:
         {
-          cw305: usb_dp_pullup_en
-          verilator: usb_dp_pullup_en
+          cw305: usb_dp_pullup_en_o
+          verilator: usb_dp_pullup_en_o
         }
         width: 1
         type: uni
@@ -13875,8 +13896,8 @@
         signame: usb_dn_pullup_en_o
         signame_chip:
         {
-          cw305: ""
-          verilator: ""
+          cw305: usb_dn_pullup_en_o
+          verilator: usb_dn_pullup_en_o
         }
         width: 1
         type: uni
@@ -13990,7 +14011,7 @@
         signame_chip:
         {
           cw305: fpga_info
-          verilator: fpga_info
+          verilator: "'0"
         }
         width: 32
         type: uni
@@ -14008,8 +14029,8 @@
         signame: usbdev_usb_rx_d_i
         signame_chip:
         {
-          cw305: usb_rx_d
-          verilator: usb_rx_d
+          cw305: 1'b0
+          verilator: usb_rx_d_i
         }
         width: 1
         type: uni
@@ -14028,7 +14049,7 @@
         signame_chip:
         {
           cw305: ""
-          verilator: usb_tx_d
+          verilator: usb_tx_d_o
         }
         width: 1
         type: uni
@@ -14047,7 +14068,7 @@
         signame_chip:
         {
           cw305: ""
-          verilator: usb_tx_se0
+          verilator: usb_tx_se0_o
         }
         width: 1
         type: uni
@@ -14066,7 +14087,7 @@
         signame_chip:
         {
           cw305: ""
-          verilator: usb_tx_use_d_se0
+          verilator: usb_tx_use_d_se0_o
         }
         width: 1
         type: uni
@@ -14084,8 +14105,8 @@
         signame: usbdev_usb_rx_enable_o
         signame_chip:
         {
-          cw305: usb_rx_enable
-          verilator: usb_rx_enable
+          cw305: ""
+          verilator: usb_rx_enable_o
         }
         width: 1
         type: uni
