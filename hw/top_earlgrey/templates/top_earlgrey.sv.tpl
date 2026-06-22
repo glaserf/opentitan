@@ -105,6 +105,8 @@ module top_${top["name"]}_${target["name"]} #(
   output logic usb_tx_d_o,
   output logic usb_tx_se0_o,
   output logic usb_tx_use_d_se0_o\
+%   elif target["name"] == "cw305":
+  output logic usb_dn_pullup_en_o\
 %   elif target["name"] in ["cw310", "cw340"]:
   input  logic usb_rx_d_i,
   output logic usb_rx_enable_o\
@@ -791,6 +793,14 @@ module top_${top["name"]}_${target["name"]} #(
     .SecAesAllowForcingMasks(1'b1),
     .SecRomCtrlDisableScrambling(SecRomCtrlDisableScrambling),
 % elif target["name"] == "verilator":
+%   if top["name"] == "englishbreakfast":
+    .SecAesMasking(1'b1),
+    .SecAesSBoxImpl(aes_pkg::SBoxImplDom),
+    .SecAesStartTriggerDelay(320),
+    .SecAesSkipPRNGReseeding(1'b1),
+    .UsbdevStub(1'b1),
+    .RvCoreIbexICache(0),
+%   endif
     .SecAesAllowForcingMasks(1'b1),
     .SramCtrlMainInstrExec(1),
 % else:

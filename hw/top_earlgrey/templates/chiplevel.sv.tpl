@@ -726,6 +726,8 @@ module chip_${top["name"]}_${target["name"]} #(
     .usb_tx_d_o        (usb_tx_d        ),
     .usb_tx_se0_o      (usb_tx_se0      ),
     .usb_tx_use_d_se0_o(usb_tx_use_d_se0)\
+%   elif target["name"] == "cw305":
+    .usb_dn_pullup_en_o(usb_dn_pullup_en)\
 %   elif target["name"] in ["cw310", "cw340"]:
     .usb_rx_d_i        (usb_rx_d        ),
     .usb_rx_enable_o   (usb_rx_enable   )\
