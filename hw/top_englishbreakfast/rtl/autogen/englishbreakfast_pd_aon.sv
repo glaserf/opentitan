@@ -11,9 +11,6 @@
 `include "prim_assert.sv"
 
 module englishbreakfast_pd_aon #(
-  // TODO Manual parameters for pwrmgr
-  parameter int AlertHandlerEscNumSeverities = 4,
-  parameter int AlertHandlerEscPingCountWidth = 16,
   // Auto-inferred parameters
   // parameters for pwrmgr_aon
   // parameters for rstmgr_aon

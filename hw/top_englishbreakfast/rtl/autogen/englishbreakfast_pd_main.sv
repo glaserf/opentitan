@@ -340,7 +340,6 @@ module englishbreakfast_pd_main #(
   logic [31:0] rv_core_ibex_boot_addr;
   jtag_pkg::jtag_req_t       pinmux_aon_dft_jtag_req;
   jtag_pkg::jtag_rsp_t       pinmux_aon_dft_jtag_rsp;
-  prim_mubi_pkg::mubi8_t       sram_ctrl_main_otp_en_sram_ifetch;
 
   // Create mixed connections to ports
 
@@ -365,17 +364,83 @@ module englishbreakfast_pd_main #(
     .tdo_oe_i (1'b0)
   );
 
+// Tie off unused clock- and reset enables
+//VCS coverage off
+// pragma coverage off
+  prim_mubi_pkg::mubi4_t [20:0] unused_cg_en;
+  prim_mubi_pkg::mubi4_t [33:0] unused_rst_en;
+
+  assign unused_cg_en[0] = clkmgr_aon_cg_en_i.aon_peri;
+  assign unused_cg_en[1] = clkmgr_aon_cg_en_i.aon_powerup;
+  assign unused_cg_en[2] = clkmgr_aon_cg_en_i.aon_secure;
+  assign unused_cg_en[3] = clkmgr_aon_cg_en_i.aon_timers;
+  assign unused_cg_en[4] = clkmgr_aon_cg_en_i.io_div2_peri;
+  assign unused_cg_en[5] = clkmgr_aon_cg_en_i.io_div2_powerup;
+  assign unused_cg_en[6] = clkmgr_aon_cg_en_i.io_div4_infra;
+  assign unused_cg_en[7] = clkmgr_aon_cg_en_i.io_div4_peri;
+  assign unused_cg_en[8] = clkmgr_aon_cg_en_i.io_div4_powerup;
+  assign unused_cg_en[9] = clkmgr_aon_cg_en_i.io_div4_secure;
+  assign unused_cg_en[10] = clkmgr_aon_cg_en_i.io_div4_timers;
+  assign unused_cg_en[11] = clkmgr_aon_cg_en_i.io_infra;
+  assign unused_cg_en[12] = clkmgr_aon_cg_en_i.io_peri;
+  assign unused_cg_en[13] = clkmgr_aon_cg_en_i.io_powerup;
+  assign unused_cg_en[14] = clkmgr_aon_cg_en_i.main_aes;
+  assign unused_cg_en[15] = clkmgr_aon_cg_en_i.main_infra;
+  assign unused_cg_en[16] = clkmgr_aon_cg_en_i.main_powerup;
+  assign unused_cg_en[17] = clkmgr_aon_cg_en_i.main_secure;
+  assign unused_cg_en[18] = clkmgr_aon_cg_en_i.usb_infra;
+  assign unused_cg_en[19] = clkmgr_aon_cg_en_i.usb_peri;
+  assign unused_cg_en[20] = clkmgr_aon_cg_en_i.usb_powerup;
+
+  assign unused_rst_en[0] = rstmgr_aon_rst_en_i.lc[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[1] = rstmgr_aon_rst_en_i.lc[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[2] = rstmgr_aon_rst_en_i.lc_io_div4[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[3] = rstmgr_aon_rst_en_i.lc_io_div4[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[4] = rstmgr_aon_rst_en_i.lc_shadowed[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[5] = rstmgr_aon_rst_en_i.lc_shadowed[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[6] = rstmgr_aon_rst_en_i.por[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[7] = rstmgr_aon_rst_en_i.por[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[8] = rstmgr_aon_rst_en_i.por_aon[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[9] = rstmgr_aon_rst_en_i.por_aon[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[10] = rstmgr_aon_rst_en_i.por_io[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[11] = rstmgr_aon_rst_en_i.por_io[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[12] = rstmgr_aon_rst_en_i.por_io_div2[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[13] = rstmgr_aon_rst_en_i.por_io_div2[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[14] = rstmgr_aon_rst_en_i.por_io_div4[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[15] = rstmgr_aon_rst_en_i.por_io_div4[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[16] = rstmgr_aon_rst_en_i.por_io_div4_shadowed[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[17] = rstmgr_aon_rst_en_i.por_io_div4_shadowed[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[18] = rstmgr_aon_rst_en_i.por_usb[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[19] = rstmgr_aon_rst_en_i.por_usb[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[20] = rstmgr_aon_rst_en_i.spi_device[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[21] = rstmgr_aon_rst_en_i.spi_device[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[22] = rstmgr_aon_rst_en_i.spi_host0[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[23] = rstmgr_aon_rst_en_i.spi_host0[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[24] = rstmgr_aon_rst_en_i.sys[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[25] = rstmgr_aon_rst_en_i.sys[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[26] = rstmgr_aon_rst_en_i.sys_aon[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[27] = rstmgr_aon_rst_en_i.sys_aon[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[28] = rstmgr_aon_rst_en_i.sys_io_div4[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[29] = rstmgr_aon_rst_en_i.sys_io_div4[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[30] = rstmgr_aon_rst_en_i.sys_shadowed[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[31] = rstmgr_aon_rst_en_i.sys_shadowed[rstmgr_pkg::DomainMainSel];
+  assign unused_rst_en[32] = rstmgr_aon_rst_en_i.usb[rstmgr_pkg::DomainAonSel];
+  assign unused_rst_en[33] = rstmgr_aon_rst_en_i.usb[rstmgr_pkg::DomainMainSel];
+// pragma coverage on
+//VCS coverage on
+
 // Tie off unused clocks and resets
 //VCS coverage off
 // pragma coverage off
-  logic [6:0] unused_clocks;
-  assign unused_clocks[0] = clkmgr_aon_clocks_i.clk_aon_timers;
-  assign unused_clocks[1] = clkmgr_aon_clocks_i.clk_io_div2_powerup;
-  assign unused_clocks[2] = clkmgr_aon_clocks_i.clk_io_infra;
-  assign unused_clocks[3] = clkmgr_aon_clocks_i.clk_io_powerup;
-  assign unused_clocks[4] = clkmgr_aon_clocks_i.clk_main_powerup;
-  assign unused_clocks[5] = clkmgr_aon_clocks_i.clk_usb_infra;
-  assign unused_clocks[6] = clkmgr_aon_clocks_i.clk_usb_powerup;
+  logic [7:0] unused_clocks;
+  assign unused_clocks[0] = clkmgr_aon_clocks_i.clk_aon_secure;
+  assign unused_clocks[1] = clkmgr_aon_clocks_i.clk_aon_timers;
+  assign unused_clocks[2] = clkmgr_aon_clocks_i.clk_io_div2_powerup;
+  assign unused_clocks[3] = clkmgr_aon_clocks_i.clk_io_infra;
+  assign unused_clocks[4] = clkmgr_aon_clocks_i.clk_io_powerup;
+  assign unused_clocks[5] = clkmgr_aon_clocks_i.clk_main_powerup;
+  assign unused_clocks[6] = clkmgr_aon_clocks_i.clk_usb_infra;
+  assign unused_clocks[7] = clkmgr_aon_clocks_i.clk_usb_powerup;
 
   logic [20:0] unused_resets;
   assign unused_resets[0] = rstmgr_aon_resets_i.rst_lc_n[rstmgr_pkg::DomainAonSel];
@@ -899,6 +964,8 @@ module englishbreakfast_pd_main #(
 
     // Inter-module signals
     .idle_o(clkmgr_aon_idle_o),
+    .output_valid_o(),
+    .input_ready_o(),
     .lc_escalate_en_i(lc_ctrl_pkg::Off),
     .edn_o(),
     .edn_i(edn_pkg::EDN_RSP_DEFAULT),
@@ -942,7 +1009,7 @@ module englishbreakfast_pd_main #(
     .cfg_rsp_o(),
     .lc_escalate_en_i(lc_ctrl_pkg::Off),
     .lc_hw_debug_en_i(lc_ctrl_pkg::Off),
-    .otp_en_sram_ifetch_i(sram_ctrl_main_otp_en_sram_ifetch),
+    .otp_en_sram_ifetch_i(prim_mubi_pkg::MuBi8False),
     .racl_policies_i(top_racl_pkg::RACL_POLICY_VEC_DEFAULT),
     .racl_error_o(),
     .sram_rerror_o(),
