@@ -105,6 +105,8 @@ module top_${top["name"]}_${target["name"]} #(
   output logic usb_tx_d_o,
   output logic usb_tx_se0_o,
   output logic usb_tx_use_d_se0_o\
+%   elif target["name"] == "cw305":
+  output logic usb_dn_pullup_en_o\
 %   elif target["name"] in ["cw310", "cw340"]:
   input  logic usb_rx_d_i,
   output logic usb_rx_enable_o\
@@ -461,7 +463,33 @@ module top_${top["name"]}_${target["name"]} #(
 
 % endif
 
-  prim_mubi_pkg::mubi4_t ast_init_done;
+  prim_mubi_pkg::mubi4_t ast_init_done;\
+
+% if top["name"] == "englishbreakfast":
+
+  // Englishbreakfast doesn't use many AST signals
+  assign otp_macro_pwr_seq = '0;
+  assign adc_req           = '0;
+  assign es_rng_enable     = '0;
+  assign es_rng_fips       = '0;
+  assign ast_edn_rsp       = '0;
+  assign ast_alert_rsp     = '0;
+  assign lc_dft_en         = '0;
+  assign otp_obs           = '0;
+
+  logic unused_ast;
+
+  assign unused_ast = ^{
+    ast_init_done,
+    otp_macro_pwr_seq_h,
+    adc_rsp,
+    es_rng_valid,
+    es_rng_bit,
+    ast_edn_req,
+    ast_alert_req,
+    ast2pinmux
+  };
+% endif
 
   ast u_ast (
 % if target["name"] == "asic":
@@ -715,6 +743,25 @@ module top_${top["name"]}_${target["name"]} #(
   % endif
 % endfor
 
+% if top["name"] == "englishbreakfast":
+  // Outgoing alerts are currently unused
+  assign alertenglishbreakfast_rx_pd_main = '{default: prim_alert_pkg::ALERT_RX_DEFAULT};
+  assign alertenglishbreakfast_rx_pd_aon  = '{default: prim_alert_pkg::ALERT_RX_DEFAULT};
+
+  logic unused_alertenglishbreakfast_tx;
+  assign unused_alertenglishbreakfast_tx = ^{
+    alertenglishbreakfast_tx_pd_main,
+    alertenglishbreakfast_tx_pd_aon
+  };
+
+  logic unused_outgoing_lpg_englishbreakfast;
+  assign unused_outgoing_lpg_englishbreakfast = ^{
+    outgoing_lpg_cg_en_englishbreakfast,
+    outgoing_lpg_rst_en_englishbreakfast
+  };
+
+% endif\
+
   ///////////////////////////
   // Top-level Main Domain //
   ///////////////////////////
@@ -775,6 +822,14 @@ module top_${top["name"]}_${target["name"]} #(
     .SecAesAllowForcingMasks(1'b1),
     .SecRomCtrlDisableScrambling(SecRomCtrlDisableScrambling),
 % elif target["name"] == "verilator":
+%   if top["name"] == "englishbreakfast":
+    .SecAesMasking(1'b1),
+    .SecAesSBoxImpl(aes_pkg::SBoxImplDom),
+    .SecAesStartTriggerDelay(320),
+    .SecAesSkipPRNGReseeding(1'b1),
+    .UsbdevStub(1'b1),
+    .RvCoreIbexICache(0),
+%   endif
     .SecAesAllowForcingMasks(1'b1),
     .SramCtrlMainInstrExec(1),
 % else:

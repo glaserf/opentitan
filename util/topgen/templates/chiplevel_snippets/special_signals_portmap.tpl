@@ -114,3 +114,20 @@
 % endif
 % endfor
 % endif\
+
+% for alert_group in top["outgoing_alert"].keys():
+<% signals = alert_handler_signals(alert_group) %>\
+<% pd_len = top["alert_handler_info"][alert_group]["count_pd"][domain] - 1 %>\
+% if pd_len >= 0:
+<% chiplevel_sigs = (f"{signals[0]}_pd_{domain.lower()}", f"{signals[1]}_pd_{domain.lower()}") %>\
+    // Outgoing alerts for group ${alert_group}
+    .outgoing_alert_${alert_group}_tx_o(${chiplevel_sigs[0]}),
+    .outgoing_alert_${alert_group}_rx_i(${chiplevel_sigs[1]}),
+% endif
+% if lib.find_module(top["module"], "clkmgr", domain=domain):
+    .outgoing_lpg_cg_en_${alert_group}_o(outgoing_lpg_cg_en_${alert_group}),
+% endif
+% if lib.find_module(top["module"], "rstmgr", domain=domain):
+    .outgoing_lpg_rst_en_${alert_group}_o(outgoing_lpg_rst_en_${alert_group}),
+% endif
+% endfor
