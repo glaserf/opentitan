@@ -72,14 +72,16 @@ module tb;
   assign dut.POR_N = xbar_mode ? rst_n : 1'bz;
 
   // TODO: Absorb this functionality into chip_if.
-  bind dut ast_supply_if ast_supply_if (
-    .clk(top_darjeeling_pd_aon.clk_aon_i),
+  // This interface is bound into the top_darjeeling wrapper, so its internal
+  // hierarchical references (the power domains, ...) are relative to the wrapper hierarchy.
+  bind dut.top_darjeeling ast_supply_if ast_supply_if (
+    .clk(darjeeling_pd_aon.clk_aon_i),
 `ifdef GATE_LEVEL
     .core_sleeping_trigger(0),
     .low_power_trigger(0)
 `else
     .core_sleeping_trigger(rv_core_ibex_pwrmgr.core_sleeping),
-    .low_power_trigger(`PWRMGR_HIER.pwr_rst_o.reset_cause == pwrmgr_pkg::LowPwrEntry)
+    .low_power_trigger(darjeeling_pd_aon.u_pwrmgr_aon.pwr_rst_o.reset_cause == pwrmgr_pkg::LowPwrEntry)
 `endif
   );
 
@@ -282,7 +284,7 @@ module tb;
 
     // AST supply interface.
     uvm_config_db#(virtual ast_supply_if)::set(
-        null, "*.env", "ast_supply_vif", dut.ast_supply_if);
+        null, "*.env", "ast_supply_vif", dut.top_darjeeling.ast_supply_if);
 
     // DMI clk_rst_vif
     uvm_config_db#(virtual clk_rst_if)::set(
@@ -519,27 +521,27 @@ module tb;
       // See chip_padctrl_attributes_vseq for more details.
       forever @dut.chip_if.chip_padctrl_attributes_test_sva_disable begin
         if (dut.chip_if.chip_padctrl_attributes_test_sva_disable) begin
-          $assertoff(0, dut.top_darjeeling.u_gpio);
-          $assertoff(0, dut.top_darjeeling.u_i2c0);
-          $assertoff(0, dut.top_darjeeling.u_pinmux_aon);
-          $assertoff(0, dut.top_darjeeling.u_spi_device);
-          $assertoff(0, dut.top_darjeeling.u_spi_host0);
-          $assertoff(0, dut.top_darjeeling.u_uart0);
+          $assertoff(0, dut.top_darjeeling.darjeeling_pd_main.u_gpio);
+          $assertoff(0, dut.top_darjeeling.darjeeling_pd_main.u_i2c0);
+          $assertoff(0, dut.top_darjeeling.darjeeling_pd_main.u_pinmux_aon);
+          $assertoff(0, dut.top_darjeeling.darjeeling_pd_main.u_spi_device);
+          $assertoff(0, dut.top_darjeeling.darjeeling_pd_main.u_spi_host0);
+          $assertoff(0, dut.top_darjeeling.darjeeling_pd_main.u_uart0);
         end else begin
-          $asserton(0, dut.top_darjeeling.u_gpio);
-          $asserton(0, dut.top_darjeeling.u_i2c0);
-          $asserton(0, dut.top_darjeeling.u_pinmux_aon);
-          $asserton(0, dut.top_darjeeling.u_spi_device);
-          $asserton(0, dut.top_darjeeling.u_spi_host0);
-          $asserton(0, dut.top_darjeeling.u_uart0);
+          $asserton(0, dut.top_darjeeling.darjeeling_pd_main.u_gpio);
+          $asserton(0, dut.top_darjeeling.darjeeling_pd_main.u_i2c0);
+          $asserton(0, dut.top_darjeeling.darjeeling_pd_main.u_pinmux_aon);
+          $asserton(0, dut.top_darjeeling.darjeeling_pd_main.u_spi_device);
+          $asserton(0, dut.top_darjeeling.darjeeling_pd_main.u_spi_host0);
+          $asserton(0, dut.top_darjeeling.darjeeling_pd_main.u_uart0);
         end
       end
       // See chip_sw_sleep_pin_mio_dio_val_vseq for more details.
       forever @dut.chip_if.chip_sw_sleep_pin_mio_dio_val_sva_disable begin
         if (dut.chip_if.chip_sw_sleep_pin_mio_dio_val_sva_disable) begin
-          $assertoff(0, dut.top_darjeeling.u_spi_device);
+          $assertoff(0, dut.top_darjeeling.darjeeling_pd_main.u_spi_device);
         end else begin
-          $asserton(0, dut.top_darjeeling.u_spi_device);
+          $asserton(0, dut.top_darjeeling.darjeeling_pd_main.u_spi_device);
         end
       end
     join
@@ -555,7 +557,7 @@ module tb;
   `ifdef GATE_LEVEL
      initial begin
        // unconnected ports
-       force tb.dut.u_ast.u_entropy.dev1_entropy_o = 'h0;
+       force tb.dut.top_darjeeling.u_ast.u_entropy.dev1_entropy_o = 'h0;
        tb.dut.chip_if.disable_mios_x_check = 1'b1;
 
        // Ignore 0 time x
