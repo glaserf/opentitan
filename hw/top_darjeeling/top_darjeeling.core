@@ -92,7 +92,7 @@ filesets:
       - lowrisc:lint:common
       - lowrisc:lint:comportable
     files:
-      - lint/top_darjeeling.waiver
+      - lint/top_darjeeling_asic.waiver
     file_type: waiver
 
   files_veriblelint_waiver:
@@ -145,6 +145,7 @@ targets:
         mode: lint-only
         verilator_options:
           - "-Wall"
+          - "--max-num-width 131072"
 
   syn:
     <<: *default_target
