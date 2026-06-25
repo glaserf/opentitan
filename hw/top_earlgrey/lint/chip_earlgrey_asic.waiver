@@ -114,6 +114,11 @@ waive -rules {CLOCK_USE} -location {chip_earlgrey_asic.sv}  -msg {'mio_in_raw[28
 waive -rules {HIER_NET_NOT_READ NOT_READ} -location {chip_earlgrey_asic.sv} -regexp {(Signal|Net) 'ast_pwst(\.vcc_pok|_h\.io_pok|_h\.main_pok|_h\.vcc_pok)' is not read from in module 'chip_earlgrey_asic'} \
       -comment "Not all POK signals are used inside top_earlgrey"
 
+# The chiplevel taps ast_base_clks_o for the padring scan clock (clk_sys);
+# the remaining clocks are exposed at the chiplevel as part of the AST clock struct but not used.
+waive -rules {HIER_NET_NOT_READ NOT_READ} -location {chip_earlgrey_asic.sv} -regexp {(Signal|Net) 'ast_base_clks\.clk_(aon|io|sys|usb)' (in module 'chip_earlgrey_asic' )?is not read from( in module 'chip_earlgrey_asic')?} \
+      -comment "ast_base_clks_o is exposed to the chiplevel; only clk_sys feeds the padring scan input."
+
 # Clock / reset connections going back into AST
 waive -rules {CLOCK_USE} -location {chip_earlgrey_asic.sv} -regexp {'clkmgr_aon_clocks..*' is connected to 'ast' port '(sns_clks_i..*|clk_ast_usb_i)', and used as a clock} \
       -comment "This is a clock struct that is fed back into AST."

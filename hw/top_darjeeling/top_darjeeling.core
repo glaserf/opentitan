@@ -93,7 +93,7 @@ filesets:
       - lowrisc:lint:common
       - lowrisc:lint:comportable
     files:
-      - lint/top_darjeeling.waiver
+      - lint/top_darjeeling_asic.waiver
     file_type: waiver
 
   files_veriblelint_waiver:
@@ -104,6 +104,17 @@ filesets:
     files:
       - lint/top_darjeeling.vbl
     file_type: veribleLintWaiver
+
+  # The per-target top-level wrapper (which instantiates the power domains and
+  # the AST) is only pulled in for linting. It is target-specific and therefore
+  # lives in the chip-level cores for all other flows.
+  files_asic_lint_rtl:
+    depend:
+      - "fileset_partner  ? (partner:systems:top_darjeeling_ast)"
+      - "!fileset_partner ? (lowrisc:systems:top_darjeeling_ast)"
+    files:
+      - rtl/autogen/top_darjeeling_asic.sv
+    file_type: systemVerilogSource
 
 mapping:
   "lowrisc:virtual_constants:top_pkg": "lowrisc:darjeeling_constants:top_pkg"
@@ -138,6 +149,16 @@ targets:
 
   lint:
     <<: *default_target
+    filesets:
+      - tool_verilator    ? (files_verilator_waiver)
+      - tool_ascentlint   ? (files_ascentlint_waiver)
+      - tool_veriblelint  ? (files_veriblelint_waiver)
+      - fileset_tapeout   ? (files_rtl_tapeout)
+      - "!fileset_tapeout ? (files_rtl_testing)"
+      - files_rtl_generic
+      # Per-target wrapper, only needed for the lint elaboration.
+      - files_asic_lint_rtl
+    toplevel: top_darjeeling_asic
     default_tool: verilator
     parameters:
       - SYNTHESIS=true
@@ -146,6 +167,7 @@ targets:
         mode: lint-only
         verilator_options:
           - "-Wall"
+          - "--max-num-width 131072"
 
   syn:
     <<: *default_target
