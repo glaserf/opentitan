@@ -1178,6 +1178,30 @@ def check_intermodule(topcfg: Dict, prefix: str) -> int:
             # one-to-one connection
             req_struct["top_type"] = "one-to-one"
 
+        # Signals that are part of module-to-module connections can only be also used as
+        # external ports iff they are of type broadcast and are an output
+        for sig in [req] + rsps:
+            if sig in topcfg["inter_module"]["external"]:
+                sig_m, sig_s, _ = filter_index(sig)
+                sig_struct = find_intermodule_signal(topcfg["inter_signal"]["signals"],
+                                                     sig_m, sig_s)
+                # The checks do not apply for `reggen_only` modules, i.e., modules
+                # that are instantiated outside of the auto-generated toplevel
+                if lib.get_module_by_name(topcfg, sig_m)["attr"] == "reggen_only":
+                    continue
+
+                if req_struct["top_type"] != "broadcast":
+                    log.error(
+                        f"{sig} is part of an inter-module connection and also connected to an "
+                        f"external port but is not of type broadcast (is {req_struct['top_type']}).")
+                    error += 1
+                
+                if sig_struct["act"] != "req":
+                    log.error(
+                        f"{sig} is part of an inter-module connection and also connected to an "
+                        f"external port but is not an output/driver.")
+                    error += 1
+
         # If req is array, it is not allowed to have partial connections.
         # Doing for loop again here: Make code separate from other checker
         # for easier maintenance
