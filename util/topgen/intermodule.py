@@ -411,6 +411,20 @@ def handle_multi_pd_intersig(topcfg, definitions, package,
                               ('act', lhs_struct["act"]),
                               ('suffix', "")])
 
+    # Check if a manual port for the LHS signal was specified in the top.hjson
+    # In this case, we must create a signal definition in the lhs domain, and
+    # then connect both the manual port and the inter-pd port to this signal,
+    # unless the name of the manual port matches the auto-generated one
+    lhs_manual_port = False
+    suffix_lhs_port = False
+    hjson_sig = f"{lhs_struct['inst_name']}.{lhs_struct['name']}"
+    hdl_sig = f"{lhs_struct['inst_name']}_{lhs_struct['name']}"
+    if hjson_sig in topcfg["inter_module"]["external"]:
+        if topcfg["inter_module"]["external"][hjson_sig] in ["", hdl_sig]:
+            suffix_lhs_port = True
+        else:
+            lhs_manual_port = True
+
     # "Main" chiplevel signal
 
     # Determine cumulative width of all rhs signals in foreign PDs
@@ -428,6 +442,9 @@ def handle_multi_pd_intersig(topcfg, definitions, package,
     # Create definition info
     chiplevel_def = definition.copy()
     chiplevel_def["domain"] = "chip"
+    # Add _inter_pd suffix if a name-conflicting port exists
+    if suffix_lhs_port:
+        chiplevel_def["signame"] += "_inter_pd"
     # Subtract lhs signal width on non-broadcast signal
     if lhs_struct['top_type'] != "broadcast":
         # Chiplevel signal must be wide enough to accomodate all rhs signals
@@ -446,13 +463,7 @@ def handle_multi_pd_intersig(topcfg, definitions, package,
 
     # We always need a port in the lhs domain in order to connect to the rhs PD(s)
     lhs_struct["external"] = True
-
-    # Check if a manual port of the LHS signals was specified in the top.hjson
-    # In this case, we must create a signal definition in the lhs domain, and
-    # then connect both the manual port and the inter-pd port to this signal.
-    lhs_manual_port = f"{lhs_struct['inst_name']}.{lhs_struct['name']}" \
-        in topcfg["inter_module"]["external"]
-
+        
     # Check if the lhs signal has unused entries
     lhs_tieoff = lhs_struct['top_type'] == "partial-one-to-N"
 
@@ -524,17 +535,21 @@ def handle_multi_pd_intersig(topcfg, definitions, package,
         lhs_port_width = lhs_struct["width"]
 
     # Create port for lhs PD
-
+    port_name = intersignal_format(lhs_struct) + "_inter_pd" if suffix_lhs_port else ""
     # Obtain port dictionary
-    sig_dict, _ = get_signame_chip(topcfg, lhs_struct, "", "req", inter_pd=True)
+    sig_dict, _ = get_signame_chip(topcfg, lhs_struct, port_name, "req", inter_pd=True)
     sig_dict["width"] = lhs_port_width
+    if suffix_lhs_port:
+        sig_dict["conn_type"] = True
     # Add to PD-specific port list
     topcfg['inter_signal']['external'].append(sig_dict)
 
     # Once more for req_rsp type
     if lhs_struct["type"] == "req_rsp":
-        sig_dict, _ = get_signame_chip(topcfg, lhs_struct, "", "rsp", inter_pd=True)
+        sig_dict, _ = get_signame_chip(topcfg, lhs_struct, port_name, "rsp", inter_pd=True)
         sig_dict["width"] = lhs_port_width
+        if suffix_lhs_port:
+            sig_dict["conn_type"] = True
         topcfg['inter_signal']['external'].append(sig_dict)
 
     # Create ports and connections in all target (rhs) domains
@@ -558,7 +573,8 @@ def handle_multi_pd_intersig(topcfg, definitions, package,
             conn_cnt = len(rhs_structs_filtered)
 
         # Create PD-level port
-        sig_dict, _ = get_signame_chip(topcfg, lhs_struct_inv, "", "req", inter_pd=True)
+        port_name = intersignal_format(lhs_struct_inv) + "_inter_pd" if suffix_lhs_port else ""
+        sig_dict, _ = get_signame_chip(topcfg, lhs_struct_inv, port_name, "req", inter_pd=True)
         sig_dict['width'] = conn_cnt
         # Update the PD to the current rhs PD
         sig_dict['domain'] = rhs_pd
@@ -566,7 +582,7 @@ def handle_multi_pd_intersig(topcfg, definitions, package,
 
         # Once more for req_rsp type
         if lhs_struct["type"] == "req_rsp":
-            sig_dict, _ = get_signame_chip(topcfg, lhs_struct_inv, "", "rsp", inter_pd=True)
+            sig_dict, _ = get_signame_chip(topcfg, lhs_struct_inv, port_name, "rsp", inter_pd=True)
             sig_dict['width'] = conn_cnt
             sig_dict['domain'] = rhs_pd
             topcfg['inter_signal']['external'].append(sig_dict)
@@ -574,6 +590,9 @@ def handle_multi_pd_intersig(topcfg, definitions, package,
         # Connect module ports to PD-level port
         for i, rhs_struct in enumerate(rhs_structs_filtered):
             rhs_struct["top_signame"] = lhs_struct["top_signame"]
+            if suffix_lhs_port:
+                rhs_struct["top_signame"] += "_inter_pd"
+
             if lhs_struct["top_type"] in ["broadcast", "one-to-one"]:
                 rhs_struct["index"] = -1
             else:
