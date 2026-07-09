@@ -668,7 +668,7 @@ def elab_intermodule(topcfg: OrderedDict):
             package = req_struct["package"]
         else:
             for rsp in rsps:
-                rsp_module, rsp_signal, _rsp_index = filter_index(rsp)
+                rsp_module, rsp_signal, _ = filter_index(rsp)
                 rsp_struct = find_intermodule_signal(list_of_intersignals,
                                                      rsp_module, rsp_signal)
                 if "package" in rsp_struct:
@@ -682,7 +682,7 @@ def elab_intermodule(topcfg: OrderedDict):
         rsp_structs = []
         req_pd = lib.get_module_by_name(topcfg, req_struct['inst_name'], True)['domain']
         for rsp in rsps:
-            rsp_module, rsp_signal, _rsp_index = filter_index(rsp)
+            rsp_module, rsp_signal, _ = filter_index(rsp)
             rsp_struct = find_intermodule_signal(list_of_intersignals,
                                                  rsp_module, rsp_signal)
             rsp_pd = lib.get_module_by_name(topcfg, rsp_struct['inst_name'], True)['domain']
@@ -753,7 +753,7 @@ def elab_intermodule(topcfg: OrderedDict):
 
         for i, rsp in enumerate(rsps):
             # Split index
-            rsp_module, rsp_signal, _rsp_index = filter_index(rsp)
+            rsp_module, rsp_signal, _ = filter_index(rsp)
 
             rsp_struct = find_intermodule_signal(list_of_intersignals,
                                                  rsp_module, rsp_signal)
@@ -810,8 +810,9 @@ def elab_intermodule(topcfg: OrderedDict):
         else:  # if sig["type"] == "uni":
             definitions.append(
                 OrderedDict([('package', sig["package"]),
-                             ('struct', sig["struct"]), ('signame', sig_name),
+                             ('struct', sig["struct"]),
                              ('domain', domain),
+                             ('signame', sig_name),
                              ('width', sig["width"]), ('type', sig["type"]),
                              ('end_idx', -1),
                              ('default', sig["default"])]))
@@ -1147,7 +1148,7 @@ def check_intermodule(topcfg: Dict, prefix: str) -> int:
 
         req_struct["end_idx"] = -1
         if width > 1 or len(rsps) != 1:
-            # If req width is same to the every width of rsps ==> broadcast
+            # Each rsp entry has the same width as req ==> broadcast
             if len(rsps) * [width] == widths:
                 log.debug("broadcast type")
                 req_struct["top_type"] = "broadcast"
