@@ -11,12 +11,16 @@ from topgen.lib import Name
 %>\
 
 // This top level controller is fairly hardcoded right now, but will be switched to a template
-module rstmgr
+module rstmgr_part_primary
   import rstmgr_pkg::*;
   import rstmgr_reg_pkg::*;
   import prim_mubi_pkg::mubi4_t;
 #(
-  parameter logic [NumAlerts-1:0] AlertAsyncOn = {NumAlerts{1'b1}},
+  // The primary partition hosts 2 of the IP's alerts (fatal_fault,
+  // fatal_cnsty_fault). The third alert (fatal_sec_test) lives in the
+  // secondary partition. Note: NumAlerts (from rstmgr_reg_pkg) counts all
+  // partitions' alerts, hence the explicit width here.
+  parameter logic [1:0] AlertAsyncOn = 2'b11,
   // Number of cycles a differential skew is tolerated on the alert signal
   parameter int unsigned AlertSkewCycles = 1,
   parameter bit SecCheck = 1,
@@ -38,9 +42,9 @@ module rstmgr
   input tlul_pkg::tl_h2d_t tl_i,
   output tlul_pkg::tl_d2h_t tl_o,
 
-  // Alerts
-  input  prim_alert_pkg::alert_rx_t [NumAlerts-1:0] alert_rx_i,
-  output prim_alert_pkg::alert_tx_t [NumAlerts-1:0] alert_tx_o,
+  // Alerts (primary partition hosts 2 alerts)
+  input  prim_alert_pkg::alert_rx_t [1:0] alert_rx_i,
+  output prim_alert_pkg::alert_tx_t [1:0] alert_tx_o,
 
   // pwrmgr interface
   input pwrmgr_pkg::pwr_rst_req_t pwr_i,
@@ -49,11 +53,10 @@ module rstmgr
   // software initiated reset request
   output mubi4_t sw_rst_req_o,
 
-  // Interface to alert handler
-  input alert_handler_pkg::alert_crashdump_t alert_dump_i,
-
-  // Interface to cpu crash dump
-  input rv_core_ibex_pkg::cpu_crash_dump_t cpu_dump_i,
+  // Inter-partition signalling to the secondary partition, which hosts the
+  // alert/CPU crash-dump capture logic.
+  output rstmgr_pkg::rstmgr_interpart_p2s_t interpart_p2s_o,
+  input  rstmgr_pkg::rstmgr_interpart_s2p_t interpart_s2p_i,
 
   // dft bypass
   input scan_rst_ni,
@@ -207,7 +210,7 @@ module rstmgr
   ////////////////////////////////////////////////////
   // Alerts                                         //
   ////////////////////////////////////////////////////
-  logic [NumAlerts-1:0] alert_test, alerts;
+  logic [1:0] alert_test, alerts;
 
   // All of these are fatal alerts
   assign alerts[0] = reg2hw.err_code.reg_intg_err.q |
@@ -220,7 +223,7 @@ module rstmgr
     reg2hw.alert_test.fatal_fault.q & reg2hw.alert_test.fatal_fault.qe
   };
 
-  for (genvar i = 0; i < NumAlerts; i++) begin : gen_alert_tx
+  for (genvar i = 0; i < 2; i++) begin : gen_alert_tx
     prim_alert_sender #(
       .AsyncOn(AlertAsyncOn[i]),
       .SkewCycles(AlertSkewCycles),
@@ -407,45 +410,31 @@ module rstmgr
 
   ////////////////////////////////////////////////////
   // Crash info capture                             //
+  // The capture logic lives in the secondary       //
+  // partition. Here we only forward the register    //
+  // interface across the partition boundary via the //
+  // p2s / s2p inter-partition structs.               //
   ////////////////////////////////////////////////////
 
-  logic dump_capture;
-  assign dump_capture =  rst_hw_req | rst_low_power;
+  // Primary -> secondary: capture controls and register configuration.
+  assign interpart_p2s_o.dump_capture      = rst_hw_req | rst_low_power;
+  assign interpart_p2s_o.dump_capture_halt = rst_hw_req;
+  assign interpart_p2s_o.alert_info_en     = reg2hw.alert_info_ctrl.en.q;
+  assign interpart_p2s_o.alert_info_index  = reg2hw.alert_info_ctrl.index.q;
+  assign interpart_p2s_o.cpu_info_en       = reg2hw.cpu_info_ctrl.en.q;
+  assign interpart_p2s_o.cpu_info_index    = reg2hw.cpu_info_ctrl.index.q;
 
-  // halt dump capture once we hit particular conditions
-  logic dump_capture_halt;
-  assign dump_capture_halt = rst_hw_req;
-
-  rstmgr_crash_info #(
-    .CrashDumpWidth($bits(alert_handler_pkg::alert_crashdump_t))
-  ) u_alert_info (
-    .clk_i(clk_por_i),
-    .rst_ni(rst_por_ni),
-    .dump_i(alert_dump_i),
-    .dump_capture_i(dump_capture & reg2hw.alert_info_ctrl.en.q),
-    .slot_sel_i(reg2hw.alert_info_ctrl.index.q),
-    .slots_cnt_o(hw2reg.alert_info_attr.d),
-    .slot_o(hw2reg.alert_info.d)
-  );
-
-  rstmgr_crash_info #(
-    .CrashDumpWidth($bits(rv_core_ibex_pkg::cpu_crash_dump_t))
-  ) u_cpu_info (
-    .clk_i(clk_por_i),
-    .rst_ni(rst_por_ni),
-    .dump_i(cpu_dump_i),
-    .dump_capture_i(dump_capture & reg2hw.cpu_info_ctrl.en.q),
-    .slot_sel_i(reg2hw.cpu_info_ctrl.index.q),
-    .slots_cnt_o(hw2reg.cpu_info_attr.d),
-    .slot_o(hw2reg.cpu_info.d)
-  );
-
-  // once dump is captured, no more information is captured until
-  // re-enabled by software.
+  // Secondary -> primary: captured dumps and the capture-halt writeback.
+  assign hw2reg.alert_info_attr.d     = interpart_s2p_i.alert_info_attr;
+  assign hw2reg.alert_info.d          = interpart_s2p_i.alert_info;
+  assign hw2reg.cpu_info_attr.d       = interpart_s2p_i.cpu_info_attr;
+  assign hw2reg.cpu_info.d            = interpart_s2p_i.cpu_info;
+  // '.en.d' is constant 0 (capture is only ever cleared, never set, by hw);
+  // tie it off locally rather than routing a constant across the partitions.
   assign hw2reg.alert_info_ctrl.en.d  = 1'b0;
-  assign hw2reg.alert_info_ctrl.en.de = dump_capture_halt;
-  assign hw2reg.cpu_info_ctrl.en.d  = 1'b0;
-  assign hw2reg.cpu_info_ctrl.en.de = dump_capture_halt;
+  assign hw2reg.alert_info_ctrl.en.de = interpart_s2p_i.alert_info_ctrl_en_de;
+  assign hw2reg.cpu_info_ctrl.en.d    = 1'b0;
+  assign hw2reg.cpu_info_ctrl.en.de   = interpart_s2p_i.cpu_info_ctrl_en_de;
 
   ////////////////////////////////////////////////////
   // Exported resets                                //
@@ -482,4 +471,4 @@ module rstmgr
 
   // Alert assertions for reg_we onehot check
   `ASSERT_PRIM_REG_WE_ONEHOT_ERROR_TRIGGER_ALERT(RegWeOnehotCheck_A, u_reg, alert_tx_o[0])
-endmodule // rstmgr
+endmodule // rstmgr_part_primary

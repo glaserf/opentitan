@@ -49,6 +49,12 @@
 % endfor
     {clock: "clk_por_i", reset: "rst_por_ni"},
   ]
+  // This IP is split across two power domains: the alert and CPU crash-dump
+  // capture logic lives in a secondary partition in a separate power domain.
+  is_split_ip: "true",
+  clocking_secondary: [
+    {clock: "clk_sec_i", reset: "rst_sec_ni", primary: true},
+  ]
   bus_interfaces: [
     { protocol: "tlul", direction: "device" }
   ],
@@ -64,6 +70,12 @@
         This fatal alert is triggered when a reset consistency fault is detected.
         It is separated from the category above for clearer error collection and debug.
       '''
+    }
+    // Pseudo alert used to bring up split-IP tooling; lives in the secondary
+    // partition (secondary power domain).
+    { name: "fatal_sec_test",
+      desc: "Pseudo secondary-partition alert for split-IP bring-up."
+      partition: "secondary"
     }
   ],
   countermeasures: [
@@ -231,6 +243,7 @@
       name:    "alert_dump",
       act:     "rcv",
       package: "alert_handler_pkg",
+      partition: "secondary",
       desc:    '''
         Alert handler crash dump information.
       '''
@@ -241,6 +254,7 @@
       name:    "cpu_dump",
       act:     "rcv",
       package: "rv_core_ibex_pkg",
+      partition: "secondary",
       desc:    '''
         Main processing element crash dump information.
       '''
@@ -253,6 +267,54 @@
       package: "prim_mubi_pkg",
       desc:    '''
         Software requested system reset to pwrmgr.
+      '''
+    },
+
+    // Intra-IP inter-partition signalling for the split IP. Inter-module
+    // signals are unique per partition, so each direction is declared once in
+    // its driver partition (act "req") and once in its receiver partition
+    // (act "rcv") under the same name; topgen auto-connects the pair.
+    { struct:  "rstmgr_interpart_p2s",
+      type:    "uni",
+      name:    "interpart_p2s",
+      act:     "req",
+      partition: "primary",
+      package: "rstmgr_pkg",
+      desc:    '''
+        Primary-to-secondary partition signalling.
+      '''
+    },
+
+    { struct:  "rstmgr_interpart_p2s",
+      type:    "uni",
+      name:    "interpart_p2s",
+      act:     "rcv",
+      partition: "secondary",
+      package: "rstmgr_pkg",
+      desc:    '''
+        Primary-to-secondary partition signalling.
+      '''
+    },
+
+    { struct:  "rstmgr_interpart_s2p",
+      type:    "uni",
+      name:    "interpart_s2p",
+      act:     "req",
+      partition: "secondary",
+      package: "rstmgr_pkg",
+      desc:    '''
+        Secondary-to-primary partition signalling.
+      '''
+    },
+
+    { struct:  "rstmgr_interpart_s2p",
+      type:    "uni",
+      name:    "interpart_s2p",
+      act:     "rcv",
+      partition: "primary",
+      package: "rstmgr_pkg",
+      desc:    '''
+        Secondary-to-primary partition signalling.
       '''
     },
 
