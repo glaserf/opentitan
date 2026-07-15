@@ -633,7 +633,7 @@ static void trigger_alert_test(void) {
   }
 
   // Write rstmgr's alert_test reg and check alert_cause.
-  for (dif_rstmgr_alert_t i = 0; i < 2; ++i) {
+  for (dif_rstmgr_alert_t i = 0; i < 3; ++i) {
     CHECK_DIF_OK(dif_rstmgr_alert_force(&rstmgr, kDifRstmgrAlertFatalFault + i));
 
     // Verify that alert handler received it.

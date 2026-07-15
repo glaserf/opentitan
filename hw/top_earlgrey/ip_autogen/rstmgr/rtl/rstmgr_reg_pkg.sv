@@ -12,7 +12,7 @@ package rstmgr_reg_pkg;
   parameter int NumHwResets = 5;
   parameter int NumSwResets = 8;
   parameter int NumTotalResets = 8;
-  parameter int NumAlerts = 2;
+  parameter int NumAlerts = 3;
 
   // Address widths within the block
   parameter int BlockAw = 7;
@@ -23,7 +23,8 @@ package rstmgr_reg_pkg;
   // Alert indices
   typedef enum int {
     AlertFatalFaultIdx = 0,
-    AlertFatalCnstyFaultIdx = 1
+    AlertFatalCnstyFaultIdx = 1,
+    AlertFatalSecTestIdx = 2
   } rstmgr_alert_idx_t;
 
   ////////////////////////////
@@ -31,6 +32,10 @@ package rstmgr_reg_pkg;
   ////////////////////////////
 
   typedef struct packed {
+    struct packed {
+      logic        q;
+      logic        qe;
+    } fatal_sec_test;
     struct packed {
       logic        q;
       logic        qe;
@@ -155,7 +160,7 @@ package rstmgr_reg_pkg;
 
   // Register -> HW type
   typedef struct packed {
-    rstmgr_reg2hw_alert_test_reg_t alert_test; // [34:31]
+    rstmgr_reg2hw_alert_test_reg_t alert_test; // [36:31]
     rstmgr_reg2hw_reset_req_reg_t reset_req; // [30:27]
     rstmgr_reg2hw_reset_info_reg_t reset_info; // [26:21]
     rstmgr_reg2hw_alert_info_ctrl_reg_t alert_info_ctrl; // [20:16]
@@ -208,9 +213,10 @@ package rstmgr_reg_pkg;
   parameter logic [BlockAw-1:0] RSTMGR_ERR_CODE_OFFSET = 7'h 6c;
 
   // Reset values for hwext registers and their fields
-  parameter logic [1:0] RSTMGR_ALERT_TEST_RESVAL = 2'h 0;
+  parameter logic [2:0] RSTMGR_ALERT_TEST_RESVAL = 3'h 0;
   parameter logic [0:0] RSTMGR_ALERT_TEST_FATAL_FAULT_RESVAL = 1'h 0;
   parameter logic [0:0] RSTMGR_ALERT_TEST_FATAL_CNSTY_FAULT_RESVAL = 1'h 0;
+  parameter logic [0:0] RSTMGR_ALERT_TEST_FATAL_SEC_TEST_RESVAL = 1'h 0;
   parameter logic [3:0] RSTMGR_ALERT_INFO_ATTR_RESVAL = 4'h 0;
   parameter logic [3:0] RSTMGR_ALERT_INFO_ATTR_CNT_AVAIL_RESVAL = 4'h 0;
   parameter logic [31:0] RSTMGR_ALERT_INFO_RESVAL = 32'h 0;

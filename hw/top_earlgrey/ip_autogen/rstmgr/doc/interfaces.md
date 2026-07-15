@@ -21,16 +21,20 @@ Referring to the [Comportable guideline for peripheral device functionality](htt
 
 ## [Inter-Module Signals](https://opentitan.org/book/doc/contributing/hw/comportability/index.html#inter-signal-handling)
 
-| Port Name   | Package::Struct                    | Type    | Act   |   Width | Description                                                                                                                  |
-|:------------|:-----------------------------------|:--------|:------|--------:|:-----------------------------------------------------------------------------------------------------------------------------|
-| por_n       | logic                              | uni     | rcv   |       2 | Root power on reset signals from ast. There is one root reset signal for each core power domain.                             |
-| pwr         | pwr_rst                            | req_rsp | rsp   |       1 | Reset request signals from power manager. Power manager can request for specific domains of the lc/sys reset tree to assert. |
-| resets      | rstmgr_pkg::rstmgr_out             | uni     | req   |       1 | Leaf resets fed to the system.                                                                                               |
-| rst_en      | rstmgr_pkg::rstmgr_rst_en          | uni     | req   |       1 | Low-power-group outputs used by alert handler.                                                                               |
-| alert_dump  | alert_handler_pkg::alert_crashdump | uni     | rcv   |       1 | Alert handler crash dump information.                                                                                        |
-| cpu_dump    | rv_core_ibex_pkg::cpu_crash_dump   | uni     | rcv   |       1 | Main processing element crash dump information.                                                                              |
-| sw_rst_req  | prim_mubi_pkg::mubi4               | uni     | req   |       1 | Software requested system reset to pwrmgr.                                                                                   |
-| tl          | tlul_pkg::tl                       | req_rsp | rsp   |       1 |                                                                                                                              |
+| Port Name     | Package::Struct                    | Type    | Act   |   Width | Description                                                                                                                  |
+|:--------------|:-----------------------------------|:--------|:------|--------:|:-----------------------------------------------------------------------------------------------------------------------------|
+| por_n         | logic                              | uni     | rcv   |       2 | Root power on reset signals from ast. There is one root reset signal for each core power domain.                             |
+| pwr           | pwr_rst                            | req_rsp | rsp   |       1 | Reset request signals from power manager. Power manager can request for specific domains of the lc/sys reset tree to assert. |
+| resets        | rstmgr_pkg::rstmgr_out             | uni     | req   |       1 | Leaf resets fed to the system.                                                                                               |
+| rst_en        | rstmgr_pkg::rstmgr_rst_en          | uni     | req   |       1 | Low-power-group outputs used by alert handler.                                                                               |
+| alert_dump    | alert_handler_pkg::alert_crashdump | uni     | rcv   |       1 | Alert handler crash dump information.                                                                                        |
+| cpu_dump      | rv_core_ibex_pkg::cpu_crash_dump   | uni     | rcv   |       1 | Main processing element crash dump information.                                                                              |
+| sw_rst_req    | prim_mubi_pkg::mubi4               | uni     | req   |       1 | Software requested system reset to pwrmgr.                                                                                   |
+| interpart_p2s | rstmgr_pkg::rstmgr_interpart_p2s   | uni     | req   |       1 | Primary-to-secondary partition signalling.                                                                                   |
+| interpart_p2s | rstmgr_pkg::rstmgr_interpart_p2s   | uni     | rcv   |       1 | Primary-to-secondary partition signalling.                                                                                   |
+| interpart_s2p | rstmgr_pkg::rstmgr_interpart_s2p   | uni     | req   |       1 | Secondary-to-primary partition signalling.                                                                                   |
+| interpart_s2p | rstmgr_pkg::rstmgr_interpart_s2p   | uni     | rcv   |       1 | Secondary-to-primary partition signalling.                                                                                   |
+| tl            | tlul_pkg::tl                       | req_rsp | rsp   |       1 |                                                                                                                              |
 
 ## Security Alerts
 
@@ -38,6 +42,7 @@ Referring to the [Comportable guideline for peripheral device functionality](htt
 |:------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | fatal_fault       | This fatal alert is triggered when a fatal structural fault is detected. Structural faults include errors such as sparse fsm errors and tlul integrity errors. |
 | fatal_cnsty_fault | This fatal alert is triggered when a reset consistency fault is detected. It is separated from the category above for clearer error collection and debug.      |
+| fatal_sec_test    | Pseudo secondary-partition alert for split-IP bring-up.                                                                                                        |
 
 ## Security Countermeasures
 

@@ -13,6 +13,27 @@ package rstmgr_pkg;
   // Number of non-always-on domains
   parameter int OffDomains = PowerDomains-1;
 
+  // Split-IP inter-partition signalling. These structs carry the crash-dump
+  // register interface between the primary partition (which hosts reg_top) and
+  // the secondary partition (which hosts the crash-dump capture logic).
+  typedef struct packed {
+    logic                                dump_capture;
+    logic                                dump_capture_halt;
+    logic                                alert_info_en;
+    logic [rstmgr_reg_pkg::IdxWidth-1:0] alert_info_index;
+    logic                                cpu_info_en;
+    logic [rstmgr_reg_pkg::IdxWidth-1:0] cpu_info_index;
+  } rstmgr_interpart_p2s_t;
+
+  typedef struct packed {
+    logic [rstmgr_reg_pkg::RdWidth-1:0]  alert_info;
+    logic [rstmgr_reg_pkg::IdxWidth-1:0] alert_info_attr;
+    logic [rstmgr_reg_pkg::RdWidth-1:0]  cpu_info;
+    logic [rstmgr_reg_pkg::IdxWidth-1:0] cpu_info_attr;
+    logic                                alert_info_ctrl_en_de;
+    logic                                cpu_info_ctrl_en_de;
+  } rstmgr_interpart_s2p_t;
+
   // positions of software controllable reset bits
   parameter int SPI_DEVICE = 0;
   parameter int SPI_HOST0 = 1;

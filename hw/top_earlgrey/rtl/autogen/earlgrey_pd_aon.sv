@@ -27,7 +27,6 @@ module earlgrey_pd_aon #(
   parameter bit SramCtrlRetEccCorrection = 0
 ) (
   // Inter-module Signal External type
-  input  alert_handler_pkg::alert_crashdump_t       alert_handler_crashdump_i,
   output prim_esc_pkg::esc_rx_t       alert_handler_esc_rx_o,
   input  prim_esc_pkg::esc_tx_t       alert_handler_esc_tx_i,
   output logic       aon_timer_nmi_wdog_timer_bark_o,
@@ -48,10 +47,11 @@ module earlgrey_pd_aon #(
   input  lc_ctrl_pkg::lc_tx_t       lc_ctrl_lc_escalate_en_i,
   input  lc_ctrl_pkg::lc_tx_t       lc_ctrl_lc_clk_byp_req_i,
   output lc_ctrl_pkg::lc_tx_t       lc_ctrl_lc_clk_byp_ack_o,
-  input  rv_core_ibex_pkg::cpu_crash_dump_t       rv_core_ibex_crash_dump_i,
   input  rv_core_ibex_pkg::cpu_pwrmgr_t       rv_core_ibex_pwrmgr_i,
   input  logic       rv_dm_ndmreset_req_i,
   input  logic [1:0] pwrmgr_wakeups_i,
+  output rstmgr_pkg::rstmgr_interpart_p2s_t       rstmgr_interpart_p2s_o,
+  input  rstmgr_pkg::rstmgr_interpart_s2p_t       rstmgr_interpart_s2p_i,
   input  tlul_pkg::tl_h2d_t       pwrmgr_tl_req_i,
   output tlul_pkg::tl_d2h_t       pwrmgr_tl_rsp_o,
   input  tlul_pkg::tl_h2d_t       rstmgr_tl_req_i,
@@ -244,12 +244,12 @@ module earlgrey_pd_aon #(
     .tl_o(pwrmgr_tl_rsp_o)
   );
 
-  rstmgr #(
+  rstmgr_part_primary #(
     .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[23:22]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles),
     .SecCheck(SecRstmgrCheck),
     .SecMaxSyncDelay(SecRstmgrMaxSyncDelay)
-  ) u_rstmgr (
+  ) u_rstmgr_part_primary (
     // Clock and reset connections
     .clk_i(clkmgr_clocks.clk_io_div4_powerup),
     .clk_por_i(clkmgr_clocks.clk_io_div4_powerup),
@@ -277,15 +277,15 @@ module earlgrey_pd_aon #(
     .pwr_o(pwrmgr_pwr_rst_rsp),
     .resets_o(rstmgr_resets),
     .rst_en_o(rstmgr_rst_en),
-    .alert_dump_i(alert_handler_crashdump_i),
-    .cpu_dump_i(rv_core_ibex_crash_dump_i),
     .sw_rst_req_o(rstmgr_sw_rst_req),
+    .interpart_p2s_o(rstmgr_interpart_p2s_o),
+    .interpart_s2p_i(rstmgr_interpart_s2p_i),
     .tl_i(rstmgr_tl_req_i),
     .tl_o(rstmgr_tl_rsp_o)
   );
 
   clkmgr #(
-    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[25:24]),
+    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[26:25]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
   ) u_clkmgr (
     // Clock and reset connections
@@ -312,8 +312,8 @@ module earlgrey_pd_aon #(
     // DFT/scan connections
     .scanmode_i,
 
-    // alert_handler[24]: recov_fault
-    // alert_handler[25]: fatal_fault
+    // alert_handler[25]: recov_fault
+    // alert_handler[26]: fatal_fault
     .alert_tx_o(alert_tx_o[4:3]),
     .alert_rx_i(alert_rx_i[4:3]),
 
@@ -339,7 +339,7 @@ module earlgrey_pd_aon #(
   );
 
   sysrst_ctrl #(
-    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[26]),
+    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[27]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
   ) u_sysrst_ctrl (
     // Clock and reset connections
@@ -351,7 +351,7 @@ module earlgrey_pd_aon #(
     // Interrupts
     .intr_event_detected_o(intr_sysrst_ctrl_event_detected),
 
-    // alert_handler[26]: fatal_fault
+    // alert_handler[27]: fatal_fault
     .alert_tx_o(alert_tx_o[5]),
     .alert_rx_i(alert_rx_i[5]),
 
@@ -391,7 +391,7 @@ module earlgrey_pd_aon #(
   );
 
   adc_ctrl #(
-    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[27]),
+    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[28]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
   ) u_adc_ctrl (
     // Clock and reset connections
@@ -403,7 +403,7 @@ module earlgrey_pd_aon #(
     // Interrupts
     .intr_match_pending_o(intr_adc_ctrl_match_pending),
 
-    // alert_handler[27]: fatal_fault
+    // alert_handler[28]: fatal_fault
     .alert_tx_o(alert_tx_o[6]),
     .alert_rx_i(alert_rx_i[6]),
 
@@ -416,7 +416,7 @@ module earlgrey_pd_aon #(
   );
 
   aon_timer #(
-    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[29]),
+    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[30]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
   ) u_aon_timer (
     // Clock and reset connections
@@ -429,7 +429,7 @@ module earlgrey_pd_aon #(
     .intr_wkup_timer_expired_o(intr_aon_timer_wkup_timer_expired),
     .intr_wdog_timer_bark_o   (intr_aon_timer_wdog_timer_bark),
 
-    // alert_handler[29]: fatal_fault
+    // alert_handler[30]: fatal_fault
     .alert_tx_o(alert_tx_o[7]),
     .alert_rx_i(alert_rx_i[7]),
 
@@ -446,7 +446,7 @@ module earlgrey_pd_aon #(
   );
 
   sensor_ctrl #(
-    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[31:30]),
+    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[32:31]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles)
   ) u_sensor_ctrl (
     // Clock and reset connections
@@ -459,8 +459,8 @@ module earlgrey_pd_aon #(
     .intr_io_status_change_o  (intr_sensor_ctrl_io_status_change),
     .intr_init_status_change_o(intr_sensor_ctrl_init_status_change),
 
-    // alert_handler[30]: recov_alert
-    // alert_handler[31]: fatal_alert
+    // alert_handler[31]: recov_alert
+    // alert_handler[32]: fatal_alert
     .alert_tx_o(alert_tx_o[9:8]),
     .alert_rx_i(alert_rx_i[9:8]),
 
@@ -481,7 +481,7 @@ module earlgrey_pd_aon #(
   );
 
   sram_ctrl #(
-    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[32]),
+    .AlertAsyncOn(alert_handler_reg_pkg::AsyncOn[33]),
     .AlertSkewCycles(top_pkg::AlertSkewCycles),
     .RndCnstSramKey(RndCnstSramCtrlRetSramKey),
     .RndCnstSramNonce(RndCnstSramCtrlRetSramNonce),
@@ -502,7 +502,7 @@ module earlgrey_pd_aon #(
     .rst_ni(rstmgr_resets.rst_lc_io_div4_n[rstmgr_pkg::DomainAonSel]),
     .rst_otp_ni(rstmgr_resets.rst_lc_io_div4_n[rstmgr_pkg::DomainAonSel]),
 
-    // alert_handler[32]: fatal_error
+    // alert_handler[33]: fatal_error
     .alert_tx_o(alert_tx_o[10]),
     .alert_rx_i(alert_rx_i[10]),
 

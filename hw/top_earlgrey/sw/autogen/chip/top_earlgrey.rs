@@ -1921,90 +1921,92 @@ pub enum AlertId {
     RstmgrFatalFault = 22,
     /// rstmgr_fatal_cnsty_fault
     RstmgrFatalCnstyFault = 23,
+    /// rstmgr_fatal_sec_test
+    RstmgrFatalSecTest = 24,
     /// clkmgr_recov_fault
-    ClkmgrRecovFault = 24,
+    ClkmgrRecovFault = 25,
     /// clkmgr_fatal_fault
-    ClkmgrFatalFault = 25,
+    ClkmgrFatalFault = 26,
     /// sysrst_ctrl_fatal_fault
-    SysrstCtrlFatalFault = 26,
+    SysrstCtrlFatalFault = 27,
     /// adc_ctrl_fatal_fault
-    AdcCtrlFatalFault = 27,
+    AdcCtrlFatalFault = 28,
     /// pinmux_fatal_fault
-    PinmuxFatalFault = 28,
+    PinmuxFatalFault = 29,
     /// aon_timer_fatal_fault
-    AonTimerFatalFault = 29,
+    AonTimerFatalFault = 30,
     /// sensor_ctrl_recov_alert
-    SensorCtrlRecovAlert = 30,
+    SensorCtrlRecovAlert = 31,
     /// sensor_ctrl_fatal_alert
-    SensorCtrlFatalAlert = 31,
+    SensorCtrlFatalAlert = 32,
     /// sram_ctrl_ret_fatal_error
-    SramCtrlRetFatalError = 32,
+    SramCtrlRetFatalError = 33,
     /// rram_ctrl_recov_err
-    RramCtrlRecovErr = 33,
+    RramCtrlRecovErr = 34,
     /// rram_ctrl_fatal_std_err
-    RramCtrlFatalStdErr = 34,
+    RramCtrlFatalStdErr = 35,
     /// rram_ctrl_fatal_err
-    RramCtrlFatalErr = 35,
+    RramCtrlFatalErr = 36,
     /// rram_ctrl_fatal_macro_err
-    RramCtrlFatalMacroErr = 36,
+    RramCtrlFatalMacroErr = 37,
     /// rram_ctrl_recov_macro_err
-    RramCtrlRecovMacroErr = 37,
+    RramCtrlRecovMacroErr = 38,
     /// rv_dm_fatal_fault
-    RvDmFatalFault = 38,
+    RvDmFatalFault = 39,
     /// rv_plic_fatal_fault
-    RvPlicFatalFault = 39,
+    RvPlicFatalFault = 40,
     /// aes_recov_ctrl_update_err
-    AesRecovCtrlUpdateErr = 40,
+    AesRecovCtrlUpdateErr = 41,
     /// aes_fatal_fault
-    AesFatalFault = 41,
+    AesFatalFault = 42,
     /// hmac_fatal_fault
-    HmacFatalFault = 42,
+    HmacFatalFault = 43,
     /// kmac_recov_operation_err
-    KmacRecovOperationErr = 43,
+    KmacRecovOperationErr = 44,
     /// kmac_fatal_fault_err
-    KmacFatalFaultErr = 44,
+    KmacFatalFaultErr = 45,
     /// otbn_fatal
-    OtbnFatal = 45,
+    OtbnFatal = 46,
     /// otbn_recov
-    OtbnRecov = 46,
+    OtbnRecov = 47,
     /// keymgr_dpe_recov_operation_err
-    KeymgrDpeRecovOperationErr = 47,
+    KeymgrDpeRecovOperationErr = 48,
     /// keymgr_dpe_fatal_fault_err
-    KeymgrDpeFatalFaultErr = 48,
+    KeymgrDpeFatalFaultErr = 49,
     /// csrng_recov_alert
-    CsrngRecovAlert = 49,
+    CsrngRecovAlert = 50,
     /// csrng_fatal_alert
-    CsrngFatalAlert = 50,
+    CsrngFatalAlert = 51,
     /// entropy_src_recov_alert
-    EntropySrcRecovAlert = 51,
+    EntropySrcRecovAlert = 52,
     /// entropy_src_fatal_alert
-    EntropySrcFatalAlert = 52,
+    EntropySrcFatalAlert = 53,
     /// edn0_recov_alert
-    Edn0RecovAlert = 53,
+    Edn0RecovAlert = 54,
     /// edn0_fatal_alert
-    Edn0FatalAlert = 54,
+    Edn0FatalAlert = 55,
     /// edn1_recov_alert
-    Edn1RecovAlert = 55,
+    Edn1RecovAlert = 56,
     /// edn1_fatal_alert
-    Edn1FatalAlert = 56,
+    Edn1FatalAlert = 57,
     /// sram_ctrl_main_fatal_error
-    SramCtrlMainFatalError = 57,
+    SramCtrlMainFatalError = 58,
     /// sram_ctrl_sec_fatal_error
-    SramCtrlSecFatalError = 58,
+    SramCtrlSecFatalError = 59,
     /// rom_ctrl_fatal
-    RomCtrlFatal = 59,
+    RomCtrlFatal = 60,
     /// rv_core_ibex_fatal_sw_err
-    RvCoreIbexFatalSwErr = 60,
+    RvCoreIbexFatalSwErr = 61,
     /// rv_core_ibex_recov_sw_err
-    RvCoreIbexRecovSwErr = 61,
+    RvCoreIbexRecovSwErr = 62,
     /// rv_core_ibex_fatal_hw_err
-    RvCoreIbexFatalHwErr = 62,
+    RvCoreIbexFatalHwErr = 63,
     /// rv_core_ibex_recov_hw_err
-    RvCoreIbexRecovHwErr = 63,
+    RvCoreIbexRecovHwErr = 64,
     /// cheriot_fatal_fault
-    CheriotFatalFault = 64,
+    CheriotFatalFault = 65,
     /// sram_ctrl_meta_fatal_error
-    SramCtrlMetaFatalError = 65,
+    SramCtrlMetaFatalError = 66,
 }
 
 impl TryFrom<u32> for AlertId {
@@ -2035,48 +2037,49 @@ impl TryFrom<u32> for AlertId {
             21 => Ok(Self::PwrmgrFatalFault),
             22 => Ok(Self::RstmgrFatalFault),
             23 => Ok(Self::RstmgrFatalCnstyFault),
-            24 => Ok(Self::ClkmgrRecovFault),
-            25 => Ok(Self::ClkmgrFatalFault),
-            26 => Ok(Self::SysrstCtrlFatalFault),
-            27 => Ok(Self::AdcCtrlFatalFault),
-            28 => Ok(Self::PinmuxFatalFault),
-            29 => Ok(Self::AonTimerFatalFault),
-            30 => Ok(Self::SensorCtrlRecovAlert),
-            31 => Ok(Self::SensorCtrlFatalAlert),
-            32 => Ok(Self::SramCtrlRetFatalError),
-            33 => Ok(Self::RramCtrlRecovErr),
-            34 => Ok(Self::RramCtrlFatalStdErr),
-            35 => Ok(Self::RramCtrlFatalErr),
-            36 => Ok(Self::RramCtrlFatalMacroErr),
-            37 => Ok(Self::RramCtrlRecovMacroErr),
-            38 => Ok(Self::RvDmFatalFault),
-            39 => Ok(Self::RvPlicFatalFault),
-            40 => Ok(Self::AesRecovCtrlUpdateErr),
-            41 => Ok(Self::AesFatalFault),
-            42 => Ok(Self::HmacFatalFault),
-            43 => Ok(Self::KmacRecovOperationErr),
-            44 => Ok(Self::KmacFatalFaultErr),
-            45 => Ok(Self::OtbnFatal),
-            46 => Ok(Self::OtbnRecov),
-            47 => Ok(Self::KeymgrDpeRecovOperationErr),
-            48 => Ok(Self::KeymgrDpeFatalFaultErr),
-            49 => Ok(Self::CsrngRecovAlert),
-            50 => Ok(Self::CsrngFatalAlert),
-            51 => Ok(Self::EntropySrcRecovAlert),
-            52 => Ok(Self::EntropySrcFatalAlert),
-            53 => Ok(Self::Edn0RecovAlert),
-            54 => Ok(Self::Edn0FatalAlert),
-            55 => Ok(Self::Edn1RecovAlert),
-            56 => Ok(Self::Edn1FatalAlert),
-            57 => Ok(Self::SramCtrlMainFatalError),
-            58 => Ok(Self::SramCtrlSecFatalError),
-            59 => Ok(Self::RomCtrlFatal),
-            60 => Ok(Self::RvCoreIbexFatalSwErr),
-            61 => Ok(Self::RvCoreIbexRecovSwErr),
-            62 => Ok(Self::RvCoreIbexFatalHwErr),
-            63 => Ok(Self::RvCoreIbexRecovHwErr),
-            64 => Ok(Self::CheriotFatalFault),
-            65 => Ok(Self::SramCtrlMetaFatalError),
+            24 => Ok(Self::RstmgrFatalSecTest),
+            25 => Ok(Self::ClkmgrRecovFault),
+            26 => Ok(Self::ClkmgrFatalFault),
+            27 => Ok(Self::SysrstCtrlFatalFault),
+            28 => Ok(Self::AdcCtrlFatalFault),
+            29 => Ok(Self::PinmuxFatalFault),
+            30 => Ok(Self::AonTimerFatalFault),
+            31 => Ok(Self::SensorCtrlRecovAlert),
+            32 => Ok(Self::SensorCtrlFatalAlert),
+            33 => Ok(Self::SramCtrlRetFatalError),
+            34 => Ok(Self::RramCtrlRecovErr),
+            35 => Ok(Self::RramCtrlFatalStdErr),
+            36 => Ok(Self::RramCtrlFatalErr),
+            37 => Ok(Self::RramCtrlFatalMacroErr),
+            38 => Ok(Self::RramCtrlRecovMacroErr),
+            39 => Ok(Self::RvDmFatalFault),
+            40 => Ok(Self::RvPlicFatalFault),
+            41 => Ok(Self::AesRecovCtrlUpdateErr),
+            42 => Ok(Self::AesFatalFault),
+            43 => Ok(Self::HmacFatalFault),
+            44 => Ok(Self::KmacRecovOperationErr),
+            45 => Ok(Self::KmacFatalFaultErr),
+            46 => Ok(Self::OtbnFatal),
+            47 => Ok(Self::OtbnRecov),
+            48 => Ok(Self::KeymgrDpeRecovOperationErr),
+            49 => Ok(Self::KeymgrDpeFatalFaultErr),
+            50 => Ok(Self::CsrngRecovAlert),
+            51 => Ok(Self::CsrngFatalAlert),
+            52 => Ok(Self::EntropySrcRecovAlert),
+            53 => Ok(Self::EntropySrcFatalAlert),
+            54 => Ok(Self::Edn0RecovAlert),
+            55 => Ok(Self::Edn0FatalAlert),
+            56 => Ok(Self::Edn1RecovAlert),
+            57 => Ok(Self::Edn1FatalAlert),
+            58 => Ok(Self::SramCtrlMainFatalError),
+            59 => Ok(Self::SramCtrlSecFatalError),
+            60 => Ok(Self::RomCtrlFatal),
+            61 => Ok(Self::RvCoreIbexFatalSwErr),
+            62 => Ok(Self::RvCoreIbexRecovSwErr),
+            63 => Ok(Self::RvCoreIbexFatalHwErr),
+            64 => Ok(Self::RvCoreIbexRecovHwErr),
+            65 => Ok(Self::CheriotFatalFault),
+            66 => Ok(Self::SramCtrlMetaFatalError),
             _ => Err(val),
         }
     }
@@ -2086,7 +2089,7 @@ impl TryFrom<u32> for AlertId {
 ///
 /// This array is a mapping from `AlertId` to
 /// `AlertPeripheral`.
-pub const ALERT_FOR_PERIPHERAL: [AlertPeripheral; 66] = [
+pub const ALERT_FOR_PERIPHERAL: [AlertPeripheral; 67] = [
     // Uart0FatalFault -> AlertPeripheral::Uart0
     AlertPeripheral::Uart0,
     // Uart1FatalFault -> AlertPeripheral::Uart1
@@ -2134,6 +2137,8 @@ pub const ALERT_FOR_PERIPHERAL: [AlertPeripheral; 66] = [
     // RstmgrFatalFault -> AlertPeripheral::Rstmgr
     AlertPeripheral::Rstmgr,
     // RstmgrFatalCnstyFault -> AlertPeripheral::Rstmgr
+    AlertPeripheral::Rstmgr,
+    // RstmgrFatalSecTest -> AlertPeripheral::Rstmgr
     AlertPeripheral::Rstmgr,
     // ClkmgrRecovFault -> AlertPeripheral::Clkmgr
     AlertPeripheral::Clkmgr,

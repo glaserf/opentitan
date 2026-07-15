@@ -267,7 +267,6 @@ module top_earlgrey #(
   logic [6:0] intr_vector_pd_aon;
   prim_alert_pkg::alert_tx_t [10:0] alert_tx_pd_aon;
   prim_alert_pkg::alert_rx_t [10:0] alert_rx_pd_aon;
-  alert_handler_pkg::alert_crashdump_t       alert_handler_crashdump;
   prim_esc_pkg::esc_rx_t       alert_handler_esc_rx;
   prim_esc_pkg::esc_tx_t       alert_handler_esc_tx;
   logic       aon_timer_nmi_wdog_timer_bark;
@@ -288,10 +287,11 @@ module top_earlgrey #(
   lc_ctrl_pkg::lc_tx_t       lc_ctrl_lc_escalate_en;
   lc_ctrl_pkg::lc_tx_t       lc_ctrl_lc_clk_byp_req;
   lc_ctrl_pkg::lc_tx_t       lc_ctrl_lc_clk_byp_ack;
-  rv_core_ibex_pkg::cpu_crash_dump_t       rv_core_ibex_crash_dump;
   rv_core_ibex_pkg::cpu_pwrmgr_t       rv_core_ibex_pwrmgr;
   logic       rv_dm_ndmreset_req;
   logic [1:0] pwrmgr_wakeups;
+  rstmgr_pkg::rstmgr_interpart_p2s_t       rstmgr_interpart_p2s;
+  rstmgr_pkg::rstmgr_interpart_s2p_t       rstmgr_interpart_s2p;
   tlul_pkg::tl_h2d_t       pwrmgr_tl_req;
   tlul_pkg::tl_d2h_t       pwrmgr_tl_rsp;
   tlul_pkg::tl_h2d_t       rstmgr_tl_req;
@@ -359,6 +359,8 @@ module top_earlgrey #(
   .AlertHandlerEscPingCountWidth(AlertHandlerEscPingCountWidth),
   .UsbdevStub(UsbdevStub),
   .UsbdevRcvrWakeTimeUs(UsbdevRcvrWakeTimeUs),
+  .SecRstmgrCheck(SecRstmgrCheck),
+  .SecRstmgrMaxSyncDelay(SecRstmgrMaxSyncDelay),
   .SecPinmuxVolatileRawUnlockEn(SecPinmuxVolatileRawUnlockEn),
   .PinmuxTargetCfg(PinmuxTargetCfg),
   .SecRramCtrlScrambleEn(SecRramCtrlScrambleEn),
@@ -486,7 +488,6 @@ module top_earlgrey #(
     .alert_rx_pd_aon_o(alert_rx_pd_aon),
 
     // Ports to and from other power domains (auto-generated)
-    .alert_handler_crashdump_o             (alert_handler_crashdump  ),
     .alert_handler_esc_rx_i                (alert_handler_esc_rx     ),
     .alert_handler_esc_tx_o                (alert_handler_esc_tx     ),
     .aon_timer_nmi_wdog_timer_bark_i       (aon_timer_nmi_wdog_timer_bark),
@@ -507,10 +508,11 @@ module top_earlgrey #(
     .lc_ctrl_lc_escalate_en_o              (lc_ctrl_lc_escalate_en   ),
     .lc_ctrl_lc_clk_byp_req_o              (lc_ctrl_lc_clk_byp_req   ),
     .lc_ctrl_lc_clk_byp_ack_i              (lc_ctrl_lc_clk_byp_ack   ),
-    .rv_core_ibex_crash_dump_o             (rv_core_ibex_crash_dump  ),
     .rv_core_ibex_pwrmgr_o                 (rv_core_ibex_pwrmgr      ),
     .rv_dm_ndmreset_req_o                  (rv_dm_ndmreset_req       ),
     .pwrmgr_wakeups_o                      (pwrmgr_wakeups           ),
+    .rstmgr_interpart_p2s_i                (rstmgr_interpart_p2s     ),
+    .rstmgr_interpart_s2p_o                (rstmgr_interpart_s2p     ),
     .pwrmgr_tl_req_o                       (pwrmgr_tl_req            ),
     .pwrmgr_tl_rsp_i                       (pwrmgr_tl_rsp            ),
     .rstmgr_tl_req_o                       (rstmgr_tl_req            ),
@@ -642,7 +644,6 @@ module top_earlgrey #(
     .alert_rx_i(alert_rx_pd_aon),
 
     // Ports to and from other power domains (auto-generated)
-    .alert_handler_crashdump_i             (alert_handler_crashdump  ),
     .alert_handler_esc_rx_o                (alert_handler_esc_rx     ),
     .alert_handler_esc_tx_i                (alert_handler_esc_tx     ),
     .aon_timer_nmi_wdog_timer_bark_o       (aon_timer_nmi_wdog_timer_bark),
@@ -663,10 +664,11 @@ module top_earlgrey #(
     .lc_ctrl_lc_escalate_en_i              (lc_ctrl_lc_escalate_en   ),
     .lc_ctrl_lc_clk_byp_req_i              (lc_ctrl_lc_clk_byp_req   ),
     .lc_ctrl_lc_clk_byp_ack_o              (lc_ctrl_lc_clk_byp_ack   ),
-    .rv_core_ibex_crash_dump_i             (rv_core_ibex_crash_dump  ),
     .rv_core_ibex_pwrmgr_i                 (rv_core_ibex_pwrmgr      ),
     .rv_dm_ndmreset_req_i                  (rv_dm_ndmreset_req       ),
     .pwrmgr_wakeups_i                      (pwrmgr_wakeups           ),
+    .rstmgr_interpart_p2s_o                (rstmgr_interpart_p2s     ),
+    .rstmgr_interpart_s2p_i                (rstmgr_interpart_s2p     ),
     .pwrmgr_tl_req_i                       (pwrmgr_tl_req            ),
     .pwrmgr_tl_rsp_o                       (pwrmgr_tl_rsp            ),
     .rstmgr_tl_req_i                       (rstmgr_tl_req            ),

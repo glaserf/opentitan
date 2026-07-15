@@ -38,17 +38,18 @@
 Alert Test Register
 - Offset: `0x0`
 - Reset default: `0x0`
-- Reset mask: `0x3`
+- Reset mask: `0x7`
 
 ### Fields
 
 ```wavejson
-{"reg": [{"name": "fatal_fault", "bits": 1, "attr": ["wo"], "rotate": -90}, {"name": "fatal_cnsty_fault", "bits": 1, "attr": ["wo"], "rotate": -90}, {"bits": 30}], "config": {"lanes": 1, "fontsize": 10, "vspace": 190}}
+{"reg": [{"name": "fatal_fault", "bits": 1, "attr": ["wo"], "rotate": -90}, {"name": "fatal_cnsty_fault", "bits": 1, "attr": ["wo"], "rotate": -90}, {"name": "fatal_sec_test", "bits": 1, "attr": ["wo"], "rotate": -90}, {"bits": 29}], "config": {"lanes": 1, "fontsize": 10, "vspace": 190}}
 ```
 
 |  Bits  |  Type  |  Reset  | Name              | Description                                      |
 |:------:|:------:|:-------:|:------------------|:-------------------------------------------------|
-|  31:2  |        |         |                   | Reserved                                         |
+|  31:3  |        |         |                   | Reserved                                         |
+|   2    |   wo   |   0x0   | fatal_sec_test    | Write 1 to trigger one alert event of this kind. |
 |   1    |   wo   |   0x0   | fatal_cnsty_fault | Write 1 to trigger one alert event of this kind. |
 |   0    |   wo   |   0x0   | fatal_fault       | Write 1 to trigger one alert event of this kind. |
 
