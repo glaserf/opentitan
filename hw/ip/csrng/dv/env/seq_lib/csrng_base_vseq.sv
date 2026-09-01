@@ -73,6 +73,18 @@ class csrng_base_vseq extends cip_base_vseq #(
     check_interrupts(.interrupts((1 << CmdReqDone)), .check_set(1'b1));
   endtask
 
+  // Retire any EDN push sequences that are still waiting on their sequencer.
+  //
+  // send_cmd_req() starts these sequences without waiting for them to finish, so one of them can
+  // still be waiting for a grant once the sequence that started it returns. If the enclosing
+  // sequence is killed at that point, as stress_all_with_rand_reset does, UVM complains that a
+  // sequence was killed while waiting for a grant. Killing them here retires them cleanly.
+  function void stop_edn_push_seqs();
+    foreach (m_edn_push_seq[i]) begin
+      if (m_edn_push_seq[i] != null) m_edn_push_seq[i].kill();
+    end
+  endfunction
+
   function automatic bit edn_under_reset();
     return cfg.m_edn_agent_cfg[0].in_reset;
   endfunction
@@ -114,6 +126,14 @@ class csrng_base_vseq extends cip_base_vseq #(
       for (int i = 0; i < cs_item.clen; i++)
         cfg.m_edn_agent_cfg[app].m_cmd_push_agent_cfg.add_h_user_data(
             cs_item.cmd_data_q.pop_front());
+      // The push sequence of the previous command on this app may still be in flight, because a
+      // reset makes us stop waiting for its ack below. UVM refuses to re-start a sequence object
+      // that has not finished, so retire it first. This is the exact set of states that start()
+      // rejects, so in the normal case it is a no-op.
+      if (!(m_edn_push_seq[app].get_sequence_state() inside
+            {UVM_CREATED, UVM_STOPPED, UVM_FINISHED})) begin
+        m_edn_push_seq[app].kill();
+      end
       fork
         // Drive cmd_req
         m_edn_push_seq[app].start(p_sequencer.edn_sequencer_h[app].m_cmd_push_sequencer);
@@ -122,8 +142,12 @@ class csrng_base_vseq extends cip_base_vseq #(
         // Wait for ack
         if (edn_rst_as_ack) cfg.m_edn_agent_cfg[app].vif.wait_cmd_ack_or_rst_n();
         else cfg.m_edn_agent_cfg[app].vif.wait_cmd_ack();
+        // A reset rather than a real ack may be what stopped the wait above, in which case there
+        // is no status to look at.
         // TODO(#22219): Move this check to the scoreboard.
-        `DV_CHECK(cfg.m_edn_agent_cfg[app].vif.mon_cb.cmd_rsp.csrng_rsp_sts == exp_sts);
+        if (!edn_under_reset()) begin
+          `DV_CHECK(cfg.m_edn_agent_cfg[app].vif.mon_cb.cmd_rsp.csrng_rsp_sts == exp_sts);
+        end
       end
     end
     else begin
