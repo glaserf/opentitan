@@ -313,37 +313,69 @@ class csrng_env_cfg extends cip_base_env_cfg #(.RAL_T(csrng_reg_block));
   endfunction
 
   // Check internal state w/ optional compare
+  //
+  // A reset in the middle of this check invalidates both the register values that we read and the
+  // predictions that we compare them against (the scoreboard drops its state on reset), so watch
+  // out for one and skip the comparison if it happens.
   task check_internal_state(uint app, bit compare = 0);
+    bit                                  reset_seen = 1'b0;
     bit [TL_DW-1:0]                      rdata;
     bit                                  hw_compliance, hw_status;
     bit [csrng_env_pkg::KEY_LEN-1:0]     hw_key;
     bit [csrng_env_pkg::BLOCK_LEN-1:0]   hw_v;
     bit [csrng_env_pkg::RSD_CTR_LEN-1:0] hw_reseed_counter;
     bit [MaxNumApps-1:0]                 csr_int_state_read_enable;
-
-    // The dedicated RESEED_COUNTER CSR is always readable.
     bit [csrng_env_pkg::RSD_CTR_LEN-1:0] csr_reseed_counter;
-    csr_rd(.ptr(ral.reseed_counter[app]), .value(csr_reseed_counter));
 
-    csr_wr(.ptr(ral.int_state_num), .value(app));
-    // To give the hardware time to update
-    clk_rst_vif.wait_clks(1);
-    for (int i = 0; i < RSD_CTR_LEN/TL_DW; i++) begin
-      csr_rd(.ptr(ral.int_state_val), .value(rdata));
-      hw_reseed_counter = (rdata<<TL_DW*i) + hw_reseed_counter;
-    end
-    for (int i = 0; i < BLOCK_LEN/TL_DW; i++) begin
-      csr_rd(.ptr(ral.int_state_val), .value(rdata));
-      hw_v = (rdata<<TL_DW*i) + hw_v;
-    end
-    for (int i = 0; i < KEY_LEN/TL_DW; i++) begin
-      csr_rd(.ptr(ral.int_state_val), .value(rdata));
-      hw_key = (rdata<<TL_DW*i) + hw_key;
-    end
-    csr_rd(.ptr(ral.int_state_val), .value(rdata));
-    hw_compliance = rdata[1];
-    hw_status     = rdata[0];
-    csr_rd(.ptr(ral.int_state_read_enable), .value(csr_int_state_read_enable));
+    fork begin : isolation_fork
+      fork
+        // Watch for a reset for as long as the reads take. This thread never finishes on its own,
+        // so the join_any below always triggers on the reads, which means no CSR access is ever
+        // killed halfway through.
+        forever begin
+          wait (under_reset);
+          reset_seen = 1'b1;
+          wait (!under_reset);
+        end
+        // Give up as soon as a reset is seen: the results are worthless from that point on and
+        // the caller is expected to wrap up quickly. The check sits in front of each access rather
+        // than killing the thread, so that an access that is already in flight is never left
+        // dangling in the outstanding access count.
+        begin : read_internal_state
+          // The dedicated RESEED_COUNTER CSR is always readable.
+          csr_rd(.ptr(ral.reseed_counter[app]), .value(csr_reseed_counter));
+
+          if (!under_reset) csr_wr(.ptr(ral.int_state_num), .value(app));
+          // To give the hardware time to update
+          if (!under_reset) clk_rst_vif.wait_clks(1);
+          for (int i = 0; i < RSD_CTR_LEN/TL_DW; i++) begin
+            if (under_reset) break;
+            csr_rd(.ptr(ral.int_state_val), .value(rdata));
+            hw_reseed_counter = (rdata<<TL_DW*i) + hw_reseed_counter;
+          end
+          for (int i = 0; i < BLOCK_LEN/TL_DW; i++) begin
+            if (under_reset) break;
+            csr_rd(.ptr(ral.int_state_val), .value(rdata));
+            hw_v = (rdata<<TL_DW*i) + hw_v;
+          end
+          for (int i = 0; i < KEY_LEN/TL_DW; i++) begin
+            if (under_reset) break;
+            csr_rd(.ptr(ral.int_state_val), .value(rdata));
+            hw_key = (rdata<<TL_DW*i) + hw_key;
+          end
+          if (!under_reset) begin
+            csr_rd(.ptr(ral.int_state_val), .value(rdata));
+            hw_compliance = rdata[1];
+            hw_status     = rdata[0];
+          end
+          if (!under_reset) begin
+            csr_rd(.ptr(ral.int_state_read_enable), .value(csr_int_state_read_enable));
+          end
+        end
+      join_any
+      disable fork;
+    end join
+
     `uvm_info(`gfn, $sformatf("\n"), UVM_DEBUG)
     `uvm_info(`gfn, $sformatf("************ internal_state[%0d] ***********", app), UVM_DEBUG)
     `uvm_info(`gfn, $sformatf("hw_reseed_counter  = %0d", hw_reseed_counter), UVM_DEBUG)
@@ -357,6 +389,14 @@ class csrng_env_cfg extends cip_base_env_cfg #(.RAL_T(csrng_reg_block));
     `uvm_info(`gfn, $sformatf("cfg.compliance/status = 0b%b", {compliance[app], status[app]}),
         UVM_DEBUG)
     `uvm_info(`gfn, $sformatf("******************************************\n"), UVM_DEBUG)
+
+    if (reset_seen) begin
+      `uvm_info(`gfn,
+                $sformatf("Skipping the internal state check of app %0d because of a reset", app),
+                UVM_MEDIUM)
+      return;
+    end
+
     if (compare) begin
       // The dedicated RESEED_COUNTER CSR is always readable.
       `DV_CHECK_EQ_FATAL(csr_reseed_counter, reseed_counter[app])

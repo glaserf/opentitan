@@ -96,6 +96,7 @@ class csrng_cmds_vseq extends csrng_base_vseq;
   endtask
 
   task body();
+    bit reset_seen = 1'b0;
     super.body();
 
     cs_item_q     = new[cfg.m_num_apps];
@@ -196,12 +197,30 @@ class csrng_cmds_vseq extends csrng_base_vseq;
         wait(cmds_sent == cmds_gen)
         `uvm_info(`gfn, "All commands sent, completing test.", UVM_LOW)
       end
+
+      // A reset invalidates the command queues that were generated above: the apps that the
+      // queued commands assume are instantiated are not, so sending the rest of them would draw
+      // command status errors. Give up on this sequence instead, and leave it to the caller to
+      // start a fresh one.
+      begin
+        wait (cfg.under_reset);
+        `uvm_info(`gfn, "Reset detected, abandoning the remaining commands.", UVM_LOW)
+        reset_seen = 1'b1;
+        // Let any CSR access that is already in flight retire before the disable fork below kills
+        // the thread that issued it, which would otherwise strand a TL sequence in the sequencer
+        // arbitration queue. Accesses are aborted while in reset, so this does not take long.
+        csr_utils_pkg::wait_no_outstanding_access();
+      end
     join_any
     disable fork;
 
-    // Check internal state, then uninstantiate if not already
-    if (cfg.check_int_state) begin
+    // Check internal state, then uninstantiate if not already. Both are pointless once a reset
+    // has wiped the state that we would be checking and cleaning up.
+    if (cfg.check_int_state && !reset_seen) begin
       for (int i = 0; i < cfg.m_num_apps; i++) begin
+        // A reset drops the state that we would be checking against, and the caller of this
+        // sequence expects us to have finished by the time it de-asserts the reset again.
+        if (cfg.stop_transaction_generators()) break;
         cfg.check_internal_state(.app(i), .compare(1));
         if (!uninstantiate[i]) begin
           cs_item = new();
@@ -212,5 +231,7 @@ class csrng_cmds_vseq extends csrng_base_vseq;
         end
       end
     end
+
+    stop_edn_push_seqs();
   endtask : body
 endclass : csrng_cmds_vseq
