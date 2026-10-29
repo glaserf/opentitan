@@ -162,3 +162,33 @@ The secondary partition does not expose the request for a reset of the whole chi
 The I3C Basic Specification does not require a Whole Target reset to reset the whole chip, and a Root of Trust should not allow an external I3C Controller to reset the whole chip.
 
 The secondary partition has no DFT inputs; scan and DFT signals are only available in the primary partition ([#31335](https://github.com/lowRISC/opentitan/issues/31335)).
+
+## Timing constraints
+
+The IP block does not present a conventional single-clock timing problem, so a set of
+reusable constraint procedures is supplied in `hw/ip/i3c/syn/i3c_constraints.tcl` rather
+than leaving each integration to rediscover the structure.
+The file is written to be sourced by both an ASIC flow (`chip_earlgrey_asic.sdc`) and an
+FPGA flow (`clocks_cw341.xdc`), and is applied once per I3C instance.
+
+Three properties drive the constraints:
+
+- The Target-side logic has no free-running clock of its own; it is clocked by SCL, by an
+  inverted copy of SCL for the HDR-DDR negative-edge logic, and by SDA and its inverse for
+  (Repeated) START and STOP detection.
+- The Controller-side logic is synchronous to the IP clock and *generates* SCL, so on a
+  given pad SCL may originate either from this device or from an external Active
+  Controller. Only one of those can drive the bus at a time, so the two are declared as
+  mutually exclusive clocks on the same pad; the Target clock trees are clocked in either
+  case and remain timed against both.
+- The Controller samples SDA with the IP clock an integral number of IP clock cycles after
+  the SCL edge rather than with SCL itself, so the received-data path needs a multicycle
+  path that matches the configured `tclh`/`tcls` timing parameters.
+
+An integrator is expected to set the delays that depend on the physical implementation
+before calling the procedures, in particular the pad-to-pad board delay and, if the pad
+cells are not timed by the library, the pad delays themselves.
+The remaining values default to the limits in the I3C Basic Specification, Version 1.2:
+`tSCO` (20ns), `tSU_PP` (3ns), `tHD_PP`, `tCAS` and the maximum SCL frequency of 12.9MHz.
+Note that the I3C bus timing may be met while the SCL rise and fall times discussed above
+still require a reduced signaling rate; these constraints do not model the bus electrically.
