@@ -1,0 +1,25 @@
+CAPI=2:
+# Copyright lowRISC contributors (OpenTitan project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+name: "lowrisc:ip:i3c_constraints:0.1"
+description: "Shared I3C timing constraint procedures"
+
+filesets:
+  files_constraints:
+    files:
+      # Procedures only; a toplevel constraint file calls them for each I3C
+      # instance. Must be read before the file that calls them.
+      #
+      # file_type SDC makes Edalize emit `read_xdc -unmanaged`. Vivado's
+      # managed XDC parser rejects `proc`, `if` and any user-defined command
+      # with "[Designutils 20-1307] ... is not supported in the xdc constraint
+      # file", and then silently continues, so a managed read would drop every
+      # I3C constraint.
+      - i3c_constraints.tcl
+    file_type: SDC
+
+targets:
+  default:
+    filesets:
+      - files_constraints

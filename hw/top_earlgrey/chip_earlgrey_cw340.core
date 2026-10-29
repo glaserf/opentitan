@@ -22,10 +22,18 @@ filesets:
     file_type: systemVerilogSource
 
   files_constraints:
+    depend:
+      # Defines the I3C constraint procedures called from clocks_cw341.xdc.
+      # Dependencies are read first, so the procedures exist by then.
+      - lowrisc:ip:i3c_constraints
     files:
-      - data/clocks_cw341.xdc
-      - data/pins_cw341.xdc
-    file_type: xdc
+      - data/clocks_cw341.xdc: { file_type: xdc }
+      # SDC rather than xdc: this file calls the I3C constraint procedures, and
+      # Vivado's managed XDC parser does not allow user-defined commands. It
+      # needs the clocks and variables from clocks_cw341.xdc, so it is read
+      # after it. See the headers of i3c_cw341.tcl and i3c_constraints.core.
+      - data/i3c_cw341.tcl: { file_type: SDC }
+      - data/pins_cw341.xdc: { file_type: xdc }
 
   files_tcl:
     files:

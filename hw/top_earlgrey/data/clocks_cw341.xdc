@@ -9,6 +9,12 @@ set u_ast_secondary top_*/*_pd_aon/u_ast_part_secondary
 set u_clkmgr        top_*/*_pd_aon/u_clkmgr
 set u_pinmux        top_*/*_pd_aon/u_pinmux
 set u_spi_device    top_*/*_pd_main/u_spi_device
+set u_i3c0          top_*/*_pd_main/u_i3c0_part_primary
+set u_i3c1          top_*/*_pd_main/u_i3c1_part_primary
+# Reset detectors. i3c0 wakes the chip from deep sleep, so its detector sits in
+# the AON power domain; i3c1's stays in the Main domain.
+set u_i3c0_rstdet   top_*/*_pd_aon/u_i3c0_part_secondary
+set u_i3c1_rstdet   top_*/*_pd_main/u_i3c1_part_secondary
 
 ## Clock Signal
 create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports IO_CLK]
@@ -339,96 +345,8 @@ set_multicycle_path -hold -end -from [get_clocks clk_spi_tpm] \
 ## even though its interface is also a usb clock.
 set_false_path -from [get_clocks clk_usb_48] -to [get_pins ${u_ast_primary}/u_usb_clk/u_ref_pulse_sync/u_sync*/u_sync_1/q_o_reg[0]/D]
 
-## I3C
-# The I3C Target logic is clocked by the bus itself: SCL, plus an inverted copy
-# for the HDR-DDR negative-edge flops, and SDA plus its inverse for START/STOP
-# detection. Both reach the clock buffers in u_targ_inbufs through the MIO
-# pinmux. Pin the pinmux input selects of the I3C inputs to fixed pads, so each
-# I3C clock tree is driven from exactly one pad and no other muxed-pad clock
-# (e.g. jtag_tck on IOR3) propagates into it. Only these pads are analyzed;
-# software may still select others.
-#   I3C0: SCL = IOB10 (insel 21), SDA = IOB9  (insel 20)
-#   I3C1: SCL = IOB11 (insel 22), SDA = IOB12 (insel 23)
-set i3c0_scl_insel ${u_pinmux}/u_reg/u_mio_periph_insel_38/q_reg
-set i3c0_sda_insel ${u_pinmux}/u_reg/u_mio_periph_insel_39/q_reg
-set i3c1_scl_insel ${u_pinmux}/u_reg/u_mio_periph_insel_40/q_reg
-set i3c1_sda_insel ${u_pinmux}/u_reg/u_mio_periph_insel_41/q_reg
-
-# insel 21 = 6'b010101
-set_case_analysis 1 [get_pins [list ${i3c0_scl_insel}\[0\]/Q ${i3c0_scl_insel}\[2\]/Q \
-    ${i3c0_scl_insel}\[4\]/Q]]
-set_case_analysis 0 [get_pins [list ${i3c0_scl_insel}\[1\]/Q ${i3c0_scl_insel}\[3\]/Q \
-    ${i3c0_scl_insel}\[5\]/Q]]
-# insel 20 = 6'b010100
-set_case_analysis 1 [get_pins [list ${i3c0_sda_insel}\[2\]/Q ${i3c0_sda_insel}\[4\]/Q]]
-set_case_analysis 0 [get_pins [list ${i3c0_sda_insel}\[0\]/Q ${i3c0_sda_insel}\[1\]/Q \
-    ${i3c0_sda_insel}\[3\]/Q ${i3c0_sda_insel}\[5\]/Q]]
-# insel 22 = 6'b010110
-set_case_analysis 1 [get_pins [list ${i3c1_scl_insel}\[1\]/Q ${i3c1_scl_insel}\[2\]/Q \
-    ${i3c1_scl_insel}\[4\]/Q]]
-set_case_analysis 0 [get_pins [list ${i3c1_scl_insel}\[0\]/Q ${i3c1_scl_insel}\[3\]/Q \
-    ${i3c1_scl_insel}\[5\]/Q]]
-# insel 23 = 6'b010111
-set_case_analysis 1 [get_pins [list ${i3c1_sda_insel}\[0\]/Q ${i3c1_sda_insel}\[1\]/Q \
-    ${i3c1_sda_insel}\[2\]/Q ${i3c1_sda_insel}\[4\]/Q]]
-set_case_analysis 0 [get_pins [list ${i3c1_sda_insel}\[3\]/Q ${i3c1_sda_insel}\[5\]/Q]]
-
-# The Target Reset Detectors are clocked by SCL and SDA too, through their own
-# pinmux inputs. Pin these to the same pads as the inputs of their I3C instance.
-set i3c0_rstdet_scl_insel ${u_pinmux}/u_reg/u_mio_periph_insel_50/q_reg
-set i3c0_rstdet_sda_insel ${u_pinmux}/u_reg/u_mio_periph_insel_51/q_reg
-set i3c1_rstdet_scl_insel ${u_pinmux}/u_reg/u_mio_periph_insel_52/q_reg
-set i3c1_rstdet_sda_insel ${u_pinmux}/u_reg/u_mio_periph_insel_53/q_reg
-
-# insel 21 = 6'b010101
-set_case_analysis 1 [get_pins [list ${i3c0_rstdet_scl_insel}\[0\]/Q \
-    ${i3c0_rstdet_scl_insel}\[2\]/Q ${i3c0_rstdet_scl_insel}\[4\]/Q]]
-set_case_analysis 0 [get_pins [list ${i3c0_rstdet_scl_insel}\[1\]/Q \
-    ${i3c0_rstdet_scl_insel}\[3\]/Q ${i3c0_rstdet_scl_insel}\[5\]/Q]]
-# insel 20 = 6'b010100
-set_case_analysis 1 [get_pins [list ${i3c0_rstdet_sda_insel}\[2\]/Q \
-    ${i3c0_rstdet_sda_insel}\[4\]/Q]]
-set_case_analysis 0 [get_pins [list ${i3c0_rstdet_sda_insel}\[0\]/Q \
-    ${i3c0_rstdet_sda_insel}\[1\]/Q ${i3c0_rstdet_sda_insel}\[3\]/Q \
-    ${i3c0_rstdet_sda_insel}\[5\]/Q]]
-# insel 22 = 6'b010110
-set_case_analysis 1 [get_pins [list ${i3c1_rstdet_scl_insel}\[1\]/Q \
-    ${i3c1_rstdet_scl_insel}\[2\]/Q ${i3c1_rstdet_scl_insel}\[4\]/Q]]
-set_case_analysis 0 [get_pins [list ${i3c1_rstdet_scl_insel}\[0\]/Q \
-    ${i3c1_rstdet_scl_insel}\[3\]/Q ${i3c1_rstdet_scl_insel}\[5\]/Q]]
-# insel 23 = 6'b010111
-set_case_analysis 1 [get_pins [list ${i3c1_rstdet_sda_insel}\[0\]/Q \
-    ${i3c1_rstdet_sda_insel}\[1\]/Q ${i3c1_rstdet_sda_insel}\[2\]/Q \
-    ${i3c1_rstdet_sda_insel}\[4\]/Q]]
-set_case_analysis 0 [get_pins [list ${i3c1_rstdet_sda_insel}\[3\]/Q \
-    ${i3c1_rstdet_sda_insel}\[5\]/Q]]
-
-# Also fix the input inversion pad attribute of these pads (MIO pads 18 to 21) to off.
-# Otherwise, the XOR in the pad wrapper is non-unate, potentially leading Vivado to
-# propagating each clock with both polarities.
-set_case_analysis 0 [get_pins [list \
-    ${u_pinmux}/mio_pad_attr_q_reg\[18\]\[invert\]/Q \
-    ${u_pinmux}/mio_pad_attr_q_reg\[19\]\[invert\]/Q \
-    ${u_pinmux}/mio_pad_attr_q_reg\[20\]\[invert\]/Q \
-    ${u_pinmux}/mio_pad_attr_q_reg\[21\]\[invert\]/Q]]
-
-# SCL runs at up to 12.5 MHz. SDA changes at most once per SCL half period
-# (HDR-DDR), so the same period bounds it. The inverted clock trees derive from
-# the same clocks through inverting BUFGCEs, so the HDR-DDR half-cycle paths
-# between both SCL edges remain timed.
-set i3c_period 80
-create_clock -name i3c0_scl -period ${i3c_period} [get_ports IOB10]
-create_clock -name i3c0_sda -period ${i3c_period} [get_ports IOB9]
-create_clock -name i3c1_scl -period ${i3c_period} [get_ports IOB11]
-create_clock -name i3c1_sda -period ${i3c_period} [get_ports IOB12]
-
-# For now, treat all I3C bus clock as asynchronous to all other clocks, including
-# the other bus clocks. This cuts the crossings between the bus and the IP
-# clock (clk_io), the SCL/SDA interaction in the START/STOP detectors, and the
-# I/O paths relative to other clocks (e.g. the TPM CSB input delays on all
-# muxed ports).
-
-# TODO: Neither I/O timing nor I3C bus timing is modeled yet.
+# The I3C constraints live in data/i3c_cw341.tcl, which is read next. See the
+# header of that file for why they cannot be part of this one.
 
 ## Set asynchronous clock groups
 set_clock_groups -asynchronous \
@@ -440,8 +358,4 @@ set_clock_groups -asynchronous \
     -group {clk_io_pre clk_io clk_io_ext_lc clk_spi_host0} \
     -group [get_clocks -include_generated_clocks jtag_tck] \
     -group {clk_spi clk_spi_in clk_spi_out clk_spi_pt clk_spid_csb clk_spi_tpm clk_spi_tpm_in clk_spi_tpm_out} \
-    -group sys_clk_pin \
-    -group [get_clocks i3c0_scl] \
-    -group [get_clocks i3c0_sda] \
-    -group [get_clocks i3c1_scl] \
-    -group [get_clocks i3c1_sda] \
+    -group sys_clk_pin
