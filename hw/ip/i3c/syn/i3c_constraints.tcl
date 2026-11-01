@@ -13,26 +13,41 @@
 #    SCL and its inverse for SDR/HDR-DDR data, SDA and its inverse for
 #    START/STOP detection (i3c_input_buffers.sv, four clock trees).
 #
-# Consequently, each pad carries two mutually exclusive SCL *sources*:
-# The self-generated Controller clock, and the one from an external Active
-# Controller.
-# Important: The Target clock trees are live in either case. Both SCL clocks
-# are therefore declared on the pad and made physically exclusive, and both
-# propagate into the Target.
+# Each pad therefore carries two mutually exclusive SCL *sources*: One from our
+# Controller, and one from an external Active Controller; the Target is timed
+# against the external one.
+# The generated SCL is stopped before it reaches the Target clockt rees, because
+# this path would leave and re-enter the chip through the pad and with the
+# resulting skews making timing closure impossible.
 #
 # Timing is per MIPI I3C Basic v1.2 (+ Errata 01), Tables 48-50 and Figures
-# 73/80/81. In SDR, SDA is launched on the falling SCL edge and sampled on the
-# rising edge; HDR-DDR uses both edges, so every data constraint is applied to
-# both.
+# 73/80/81. In SDR the Target launches SDA on the falling SCL edge and samples
+# on the rising edge, but both of its shift registers sample unconditionally and
+# the output enable toggles on both edges, so both edges are referenced even in
+# pure SDR; HDR-DDR adds data on both edges.
 #
 # Usage:
-#   set ::i3c_cfg(reg_q_pin) {q[%d]}       ;# Netlist naming; DC/PT by default
+#   set ::i3c_cfg(reg_q_pin) {q_reg[%d]/Q} ;# netlist naming; defaults are ASIC
 #   set ::i3c_cfg(board_dly_max) 2.0       ;# override any default below
 #   source .../i3c_constraints.tcl
 #   i3c_pinmux_case_analysis $u_pinmux { {38 38 19} {39 39 18} ... }
-#   i3c_constrain $inst IOB10 IOB9 I3C0 $clk_pin $clk_name
+#   i3c_constrain $inst IOB10 IOB9 I3C0 $clk_pin $clk_name $clk_period
+#   i3c_summary
 #
 # All delay values are in nanoseconds.
+#
+# Note: Whenever a pattern in the commands below matches nothing, all tools
+# (Vivado + ASIC) silently return an empty collection instead of throwing an
+# error. This then leads to downstream errors when those empty collections are
+# handed to commands such as create_clock.
+# All of this makes sdc debugging notouriosly tedious and error-prone.
+#
+# This file therefore wraps the bare sdc commands into `i3c_get_pins`,
+# `i3c_get_cells`, and similar. The calls to these carry a human-readable label
+# which gets recorded if the requested pattern does not match. On a match, a
+# counter is increased.
+# i3c_summary then prints both the lables of all commands with no match as well
+# as the number of successfully applied commands.
 
 #############################
 # Configuration             #
@@ -63,8 +78,8 @@ i3c_cfg_default tsco_ext_max 20.0
 i3c_cfg_default tsu_pp 3.0
 # Table 50: tHD_PP, min 0 for a Target, tCR/tCF + 3 ns for a Controller.
 i3c_cfg_default thd_pp_tgt 0.0
-# Table 50 note 5 caps tCR/tCF at 60 ns; integration_notes.md:62-63 requires
-# <= 8 ns to reach the full 12.5 MHz signalling rate.
+# Table 50 note 5 caps tCR/tCF at 60 ns; integration_notes.md requires <= 8 ns
+# to reach the full 12.5 MHz signalling rate.
 i3c_cfg_default tcr 8.0
 i3c_cfg_default tcf 8.0
 
@@ -72,8 +87,9 @@ i3c_cfg_default tcf 8.0
 ## clocks, the pinmux case analysis and the internal budgets are applied: the
 ## logic is still timed, but the interface is not held to the specification.
 ## Turn it off for a target that physically cannot meet the specification and
-## is only used for functional bring-up, such as an FPGA where SCL and SDA run
-## through a pinmux.
+## is only used for functional bring-up.
+## TODO: This is currently true for CW340 due to SDA and SCL going through
+## pinmux. Ensure bus delays work once the sparse pinmux lands.
 i3c_cfg_default bus_io_delays 1
 
 ## Board and pad delays. Set these to the real numbers for the system.
@@ -91,20 +107,38 @@ i3c_cfg_default pad_in_dly_min 0.0
 ## Controller SCL waveform, in edges of the clk_i source clock.
 # i3c_timing_pkg::tm_params() turns the target SCL period (TPERIOD_SDR0 = 80 ns)
 # and high interval (TDIGH = 36 ns) into clk_i cycle counts. At ClkFreq = 96 MHz
-# this yields tchh=2, tchs=1, hcext=1, tclh=3, tcls=2: an 8 cycle period whose
-# high phase is 3.5 cycles, because the half-cycle extension overlaps tclh
-# rather than lengthening the period (i3c_timing_pkg.sv).
+# this yields tchh=2, tchs=1, hcext=1, tclh=3, tcls=2 (the package stores them
+# pre-decremented for down-counting). SCL is high for tchh+tchs = 3 cycles and
+# the half-cycle extension holds it high half a cycle longer, so the period is
+# 8 cycles with a 3.5 cycle high phase and a 4.5 cycle low phase.
 # Counting source clock transitions, edge 1 is the first rising edge, edge 8 the
 # falling edge 3.5 cycles later and edge 17 the rising edge 8 cycles later.
+# Software can slow SCL down through the CTRL_TIME_* registers; this models the
+# fastest case, which is the one that has to close.
 i3c_cfg_default scl_edges {1 8 17}
-# clk_i cycles the Controller waits after the SCL edge before sampling SDA. It
-# captures at the end of State_ClkLoAwaitD (i3c_controller_trx.sv), the
-# clk_i edge on which SCL rises, which is tclh + tcls cycles after SCL fell.
+
+## Where the Controller samples SDA, in clk_i cycles, for each of its capture
+## points. The Controller samples with clk_i, so each capture point needs a
+## multicycle that matches the state it is captured in
+## (i3c_controller_trx.sv): Without one, STA pairs the SCL edge with the nearest
+## clk_i edge and reports violations the design cannot meet.
+# Read data, end of State_ClkLoAwaitD: the clk_i edge on which SCL rises again.
 i3c_cfg_default ctrl_rx_cycles 5
+# HDR-DDR even bits, end of State_ClkHiAwaitD, launched by the rising edge.
+i3c_cfg_default ctrl_rx_ddr_cycles 3
+# SDR read T-bit, end of State_ClkLoSampleD, earlier than the read data.
+i3c_cfg_default ctrl_tbit_cycles 3
+# Arbitration and IBI, end of State_ArbClkHiHoldD. Also launched by the rising
+# edge, but captured a cycle before the HDR-DDR data, so it needs its own.
+i3c_cfg_default ctrl_arb_cycles 2
+# The Controller drives SDA tcls cycles ahead of the SCL edge that the far end
+# samples on, so the launch edge is earlier than the one STA would pick.
+i3c_cfg_default ctrl_tx_cycles 2
 
 ## Internal paths.
 # Budget for clk_i <-> bus clock domain crossings, as a fraction of the clk_i
-# period. Matches what is done in chip_earlgrey_asic_check_only.sdc.
+# period. Only applied by i3c_set_cdc_bounds, which belongs in the check-only
+# flow: in the synthesis SDC the asynchronous clock groups would override it.
 i3c_cfg_default cdc_fraction 0.9
 # Allowed skew between the SCL clock tree and the buffered SDA data it samples
 # (i3c_input_buffers.sv, TODO #31335), and between the two flops forming the
@@ -117,64 +151,113 @@ i3c_cfg_default scl_out_skew_max 1.0
 # tCBP min tCAS/2.
 i3c_cfg_default start_stop_max 19.2
 
-## Netlist naming. Vivado names a prim_subreg bit q_reg[N]/Q; DC and PrimeTime
-## name the module output pin q[N]. Likewise for the packed pad attribute
-## register: mio_pad_attr_q_reg[19][invert] vs mio_pad_attr_q_reg_19__invert.
+## Netlist naming. The tools disagree on all of this and a wrong spelling
+## matches nothing silently, so it is configuration. The defaults are for the
+## Cadence/Synopsys ASIC flows; the FPGA flow overrides them.
+# Bit of a prim_subreg: the module output pin.
 i3c_cfg_default reg_q_pin {q[%d]}
-i3c_cfg_default pad_attr_pin {mio_pad_attr_q_reg_%d__%s/Q}
+# Bit of the packed pad attribute register, by pad index and field name.
+i3c_cfg_default pad_attr_pin {mio_pad_attr_q_reg[%d][%s]/q}
+# Buffer pins. A clock has to be created on a pin, stopping a clock takes pins,
+# and a buffer is not a sequential cell so it is not a valid path startpoint
+# either, which is why its output is named here as well.
+i3c_cfg_default buf_in_pin A
+i3c_cfg_default buf_out_pin Y
+# Path from a prim_flop_2sync instance down to its first-stage flop cells.
+# These do not follow the `_reg` convention that inferred flops do.
+i3c_cfg_default sync_flop {u_sync_1/*flop*}
+
+# Timing exceptions accept sequential cells as well as pins, and a cell has the
+# same name in every tool while its pins do not (d/D, q/Q, Y/O), so flops are
+# selected as cells below. The patterns are qualified with `_reg` because an
+# unqualified wildcard also picks up the tool-generated muxes that share the
+# signal name, which are not valid path endpoints.
+# Annoyingly, one invalid object often aborts the whole constraint call,
+# and not as a catchable Tcl error.
 
 #############################
 # Helpers                   #
 #############################
 
-# Apply set_case_analysis to a pin, if it exists. Attribute flops in particular
-# are WARL-masked per technology, so some are legitimately absent: on FPGA only
-# `invert` survives for a MIO pad. Returns 1 if applied.
-proc i3c_case_if_present {value pattern} {
+# Lookups that found nothing, reported by i3c_summary.
+set ::i3c_misses {}
+set ::i3c_applied 0
+
+proc i3c_miss {desc pattern} {
+  lappend ::i3c_misses "${desc}  (no match: ${pattern})"
+}
+
+# get_pins that accounts for a pattern matching nothing. Never filters on
+# attributes: the attribute names and the case of their values differ between
+# tools, and a bad filter does not return an empty collection but an error that
+# some tools then feed into the constraint as a bogus object. Naming the pin
+# explicitly through the cfg templates achieves the same selection portably.
+proc i3c_get_pins {desc pattern} {
   set pins [get_pins -quiet $pattern]
   if {[llength $pins] == 0} {
+    i3c_miss $desc $pattern
+  }
+  return $pins
+}
+
+proc i3c_get_cells {desc pattern} {
+  set cells [get_cells -quiet $pattern]
+  if {[llength $cells] == 0} {
+    i3c_miss $desc $pattern
+  }
+  return $cells
+}
+
+# Apply set_case_analysis to a pin if it exists, reporting a miss otherwise.
+# Returns 1 if applied. Some attribute bits are legitimately absent because the
+# technology's WARL mask removes them, so callers that expect that pass
+# `optional`.
+proc i3c_case_if_present {value pattern {optional 0}} {
+  set pins [get_pins -quiet $pattern]
+  if {[llength $pins] == 0} {
+    if {!$optional} {
+      i3c_miss "set_case_analysis ${value}" $pattern
+    }
     return 0
   }
   set_case_analysis $value $pins
+  incr ::i3c_applied
   return 1
 }
 
-# Apply set_case_analysis to a pin that must exist, so that a typo is caught
-# rather than silently dropping a constraint.
-proc i3c_case {value pattern} {
-  if {![i3c_case_if_present $value $pattern]} {
-    error "i3c_constraints: no such pin: $pattern"
-  }
-}
-
-# Drive a `width`-bit register to `value`, one bit at a time.
 proc i3c_case_reg {base width value} {
   for {set bit 0} {$bit < $width} {incr bit} {
-    set pin "${base}/[format $::i3c_cfg(reg_q_pin) $bit]"
-    i3c_case [expr {($value >> $bit) & 1}] $pin
+    i3c_case_if_present [expr {($value >> $bit) & 1}] \
+        "${base}/[format $::i3c_cfg(reg_q_pin) $bit]"
   }
 }
 
 # True if the running tool provides `cmd`, used to keep this file portable
-# between Vivado and the Synopsys tools.
+# between Vivado and the ASIC tools.
 proc i3c_has_command {cmd} {
   return [expr {[llength [info commands $cmd]] > 0}]
 }
 
-# Collect leaf pins of the given direction. A pattern that matched a
-# hierarchical pin would not be a valid timing start- or endpoint.
-proc i3c_pins {pattern direction} {
-  return [get_pins -quiet -hierarchical -filter \
-      "full_name =~ ${pattern} && DIRECTION == ${direction}"]
-}
-
-# Apply a best-effort constraint, warning rather than aborting when the netlist
-# does not have the expected structure. Used only for the internal budgets; the
-# clocks, the case analysis and the I/O delays must all apply, so a mistake
-# there still stops the run.
+# Apply a constraint, reporting rather than aborting when the netlist does not
+# have the expected structure.
 proc i3c_try {desc script} {
   if {[catch {uplevel 1 $script} err]} {
-    puts "i3c_constraints: WARNING: skipped ${desc}: ${err}"
+    lappend ::i3c_misses "${desc}  (error: ${err})"
+  }
+}
+
+# Report what was applied and what was not. Call once after the i3c_constrain
+# calls. A miss is not fatal on its own - some are expected - but it is never
+# silent, which can make sdc debugging very hard.
+proc i3c_summary {} {
+  puts "i3c_constraints: applied ${::i3c_applied} case-analysis constraints"
+  if {[llength $::i3c_misses] == 0} {
+    puts "i3c_constraints: all lookups matched"
+    return
+  }
+  puts "i3c_constraints: WARNING: [llength $::i3c_misses] lookup(s) matched nothing:"
+  foreach m $::i3c_misses {
+    puts "i3c_constraints:   ${m}"
   }
 }
 
@@ -187,11 +270,13 @@ proc i3c_try {desc script} {
 # This is independent of where the I3C instances sit in the hierarchy.
 #
 #   pinmux       path to the pinmux instance
-#   assignments  list of {periph_in_idx periph_out_idx pad_idx}
+#   assignments  list of {periph_in_idx periph_out_idx pad_idx}, where
+#                periph_out_idx may be `-` for an input-only peripheral such as
+#                the reset detector's SCL/SDA observation inputs.
 #
 # Mux encodings (pinmux.sv):
-#   mio_mux        = {mio_in, 1'b1, 1'b0}            -> insel  = pad_idx + 2
-#   periph_data_mux = {periph_to_mio_i, 0, 1, 0}     -> outsel = periph_out + 3
+#   mio_mux         = {mio_in, 1'b1, 1'b0}        -> insel  = pad_idx + 2
+#   periph_data_mux = {periph_to_mio_i, 0, 1, 0}  -> outsel = periph_out + 3
 proc i3c_pinmux_case_analysis {pinmux assignments} {
   set pads {}
   foreach entry $assignments {
@@ -200,8 +285,10 @@ proc i3c_pinmux_case_analysis {pinmux assignments} {
 
     # Input: the peripheral input reads this pad.
     i3c_case_reg "${pinmux}/u_reg/u_mio_periph_insel_${periph_in}" 6 [expr {$pad + 2}]
-    # Output: this pad is driven by the peripheral output.
-    i3c_case_reg "${pinmux}/u_reg/u_mio_outsel_${pad}" 7 [expr {$periph_out + 3}]
+    # Output: this pad is driven by the peripheral output, where there is one.
+    if {$periph_out ne "-"} {
+      i3c_case_reg "${pinmux}/u_reg/u_mio_outsel_${pad}" 7 [expr {$periph_out + 3}]
+    }
   }
 
   foreach pad [lsort -unique -integer $pads] {
@@ -209,24 +296,27 @@ proc i3c_pinmux_case_analysis {pinmux assignments} {
     # output select (pinmux.sv).
     set sleep_reg [expr {$pad < 32 ? "u_mio_pad_sleep_status_0_en_${pad}"
                                    : "u_mio_pad_sleep_status_1_en_${pad}"}]
-    i3c_case_if_present 0 "${pinmux}/u_reg/${sleep_reg}/[format $::i3c_cfg(reg_q_pin) 0]"
+    i3c_case_if_present 0 \
+        "${pinmux}/u_reg/${sleep_reg}/[format $::i3c_cfg(reg_q_pin) 0]"
 
     # Pad attributes that would otherwise make the pad non-unate or cut the
     # signal (prim_pad_wrapper.sv):
     #   invert        XORs both the input and the output
     #   virt_od_en    makes the output enable depend on the output data
     #   input_disable turns the input buffer off
-    # Which of these exist depends on the technology's WARL mask, so they are
-    # applied only where present.
+    # Which of these exist depends on the technology's WARL mask, so a missing
+    # one is reported but not treated as an error.
     set applied {}
     foreach attr {invert virt_od_en input_disable} {
       if {[i3c_case_if_present 0 \
-               "${pinmux}/[format $::i3c_cfg(pad_attr_pin) $pad $attr]"]} {
+               "${pinmux}/[format $::i3c_cfg(pad_attr_pin) $pad $attr]" 1]} {
         lappend applied $attr
       }
     }
-    # Report what was pinned: a silently empty list usually means the attribute
-    # naming does not match this tool's netlist, rather than a WARL-masked bit.
+    if {[llength $applied] == 0} {
+      i3c_miss "MIO pad ${pad} attributes" \
+          "${pinmux}/[format $::i3c_cfg(pad_attr_pin) $pad invert]"
+    }
     puts "i3c_constraints: MIO pad ${pad} attributes pinned: [join $applied { }]"
   }
 }
@@ -237,17 +327,32 @@ proc i3c_pinmux_case_analysis {pinmux assignments} {
 
 # Create the bus clocks for one I3C instance.
 #
-#   inst       path to the i3c instance
+#   inst       path to the i3c primary partition instance
 #   scl_port   chip port carrying SCL
 #   sda_port   chip port carrying SDA
 #   prefix     clock name prefix, e.g. I3C0
 #   clk_pin    pin carrying the IP's clk_i, used as the generated clock source
 #   clk_name   name of the clock on clk_pin, used as the master clock
 proc i3c_create_clocks {inst scl_port sda_port prefix clk_pin clk_name} {
+  set inbufs ${inst}/u_core/u_targ_inbufs
+
   # An external Active Controller drives SCL; we are a Target. 12.9 MHz is the
   # Table 50 maximum, including the short bursts caused by jitter and skew.
   create_clock -name ${prefix}_SCL_EXT -period $::i3c_cfg(scl_ext_period) \
       [get_ports $scl_port] -add
+
+  # SDA clocks the Target's START/STOP detectors (i3c_target_trx.sv). It is
+  # declared on the input of its clock buffer rather than on the pad, because
+  # SDA is only a clock inside the Target, and because a port that carries a
+  # clock cannot also take the input delays that SDA needs as data.
+  set sda_clk_pin [i3c_get_pins "${prefix} SDA clock buffer input" \
+      ${inbufs}/u_sda0_clk/u_buf/*/$::i3c_cfg(buf_in_pin)]
+  if {[llength $sda_clk_pin]} {
+    create_clock -name ${prefix}_SDA -period $::i3c_cfg(scl_ext_period) \
+        $sda_clk_pin -add
+    set_clock_groups -name ${prefix}_SDA_ASYNC -asynchronous \
+        -group [get_clocks ${prefix}_SDA]
+  }
 
   # Our own Controller drives SCL, derived from clk_i. Only one of the two can
   # be driving the pad, so they are physically exclusive. This clock exists to
@@ -262,33 +367,34 @@ proc i3c_create_clocks {inst scl_port sda_port prefix clk_pin clk_name} {
         -group [get_clocks ${prefix}_SCL_EXT] \
         -group [get_clocks ${prefix}_SCL_INT]
 
-    # Stop the generated SCL at the pad. It is defined on a bidirectional port,
-    # so it would otherwise propagate back in through the pad and clock the
-    # Target, which is electrically real on a shared bus but makes the Target
-    # a clk_i-related domain reached via a full pad-board-pad round trip. The
-    # resulting skew is tens of nanoseconds and breaks both setup and hold.
-    # The Target is timed against the externally driven SCL instead.
-    i3c_try "stop ${prefix}_SCL_INT at the pad" {
-      set tree_in [get_pins -quiet \
-          ${inst}/u_core/u_targ_inbufs/u_scl_buf/u_buf/*/I]
-      if {[llength $tree_in] && [i3c_has_command set_clock_sense]} {
-        set_clock_sense -stop_propagation -clocks [get_clocks ${prefix}_SCL_INT] \
-            $tree_in
-      } elseif {[llength $tree_in] && [i3c_has_command set_sense]} {
-        set_sense -stop_propagation -clocks [get_clocks ${prefix}_SCL_INT] $tree_in
+    # Our own SCL leaves and re-enters the chip through the pad, so whenever
+    # the Controller drives the bus, the Target is clocked by a copy of clk_i
+    # that has made a full pad-board-pad round trip. STA relates the two and
+    # charges the round trip as skew, which breaks setup and hold at the same
+    # time. Stopping the clock at the Target buffer inputs does not prevent
+    # this: `set_sense -stop_propagation` is accepted but the paths remain.
+    # Instead, cut these paths here by setting false paths between all bus
+    # clocked flops and clk_i of the Controller.
+    #
+    # Only the bus-clocked logic is cut. The Controller's own paths to and from
+    # the pads end there rather than at these flops, so they stay timed.
+    i3c_try "cut the ${prefix} SCL loopback" {
+      set bus_flops {}
+      foreach blk {u_targ_trx u_patt_det} {
+        set cells [get_cells -quiet ${inst}/u_core/${blk}/*_reg*]
+        if {[llength $cells]} {
+          lappend bus_flops $cells
+        }
+      }
+      foreach cells $bus_flops {
+        set_false_path -from [get_clocks $clk_name] -to $cells
+        set_false_path -from $cells -to [get_clocks $clk_name]
       }
     }
   }
 
-  # SDA clocks the Target's START/STOP detectors (i3c_target_trx.sv).
-  # It transitions at most once per SCL half period, so the SCL period bounds
-  # it as well.
-  create_clock -name ${prefix}_SDA -period $::i3c_cfg(scl_ext_period) \
-      [get_ports $sda_port] -add
-
   # A bus driven from outside has no relationship to anything else in the
-  # design. A single-clock group is asynchronous to every other clock, which is
-  # what we want for both of these.
+  # design. A single-clock group is asynchronous to every other clock.
   #
   # SCL_INT is deliberately NOT grouped here: it is generated from clk_i and
   # must stay related to it, otherwise the Controller's own output and input
@@ -296,13 +402,15 @@ proc i3c_create_clocks {inst scl_port sda_port prefix clk_pin clk_name} {
   # (see i3c_scl_int_clock).
   set_clock_groups -name ${prefix}_SCL_EXT_ASYNC -asynchronous \
       -group [get_clocks ${prefix}_SCL_EXT]
-  set_clock_groups -name ${prefix}_SDA_ASYNC -asynchronous \
-      -group [get_clocks ${prefix}_SDA]
 }
 
 # Name of the generated clock that has to join the clk_i clock group at top
-# level, because it is derived from clk_i rather than from the bus.
+# level, or an empty string when the bus I/O timing is not modelled and the
+# clock was therefore never created.
 proc i3c_scl_int_clock {prefix} {
+  if {!$::i3c_cfg(bus_io_delays)} {
+    return ""
+  }
   return ${prefix}_SCL_INT
 }
 
@@ -326,33 +434,31 @@ proc i3c_set_io_delays {inst scl_port sda_port prefix clk_name} {
   set in_max  [expr {$::i3c_cfg(board_dly_max) + $::i3c_cfg(pad_in_dly_max)}]
   set in_min  [expr {$::i3c_cfg(board_dly_min) + $::i3c_cfg(pad_in_dly_min)}]
 
-  # Target role: the bus is driven by an external Active Controller, so the
-  # timing is relative to SCL_EXT. When our own Controller drives the bus
-  # instead, the interface timing is the Controller case below; SCL_INT still
-  # reaches the Target clock trees by propagation, so that logic stays timed
-  # either way.
+  ## Target role: the bus is driven by an external Active Controller, so the
+  ## timing is relative to SCL_EXT.
   set scl_clk ${prefix}_SCL_EXT
   set half [expr {$::i3c_cfg(scl_ext_period) / 2.0}]
 
-  ## SDA is launched and sampled by SCL itself.
-  #
   # Output. Our tSCO obligation is measured from the SCL edge at the pad, so
   # the required time has to land tSCO after that edge. With the capture edge
   # half a period away, that is an output delay of (half period - tSCO).
   # The board delay is added on top, which tightens our own budget by that
   # amount rather than leaving it to the far end: deliberately conservative,
   # and it costs nothing when board_dly_max is set to the real number.
-  # Hold: SDA must not move before tHD_PP, which is 0 for a Target.
   set tgt_out_max [expr {$half - $::i3c_cfg(tsco_max) + $out_max}]
-  set tgt_out_min [expr {-1.0 * ($::i3c_cfg(thd_pp_tgt) + $out_min)}]
+  # Hold. The far end must still see SDA tHD_PP after its capture edge, so the
+  # earliest our output may change is tHD_PP after that edge, less whatever the
+  # board already delays it by. tHD_PP is 0 for a Target, so this is normally
+  # just the (negative) board minimum.
+  set tgt_out_min [expr {$::i3c_cfg(thd_pp_tgt) - $out_min}]
   # Input. A remote Controller presents SDA tSU_PP before the edge that
   # samples it and holds it tHD_PP = tCF/tCR + 3 ns afterwards.
   set tgt_in_max [expr {$half - $::i3c_cfg(tsu_pp) + $in_max}]
   set tgt_in_min_f [expr {$::i3c_cfg(tcf) + 3.0 + $in_min}]
   set tgt_in_min_r [expr {$::i3c_cfg(tcr) + 3.0 + $in_min}]
 
-  # SDR launches on the falling edge and samples on the rising edge; HDR-DDR
-  # uses both, so each constraint is applied against both edges.
+  # Both Target shift registers sample SDA on every edge and the output enable
+  # select toggles on both edges, so both references are needed even in SDR.
   set_output_delay -max $tgt_out_max -clock $scl_clk $sda -add_delay
   set_output_delay -min $tgt_out_min -clock $scl_clk $sda -add_delay
   set_output_delay -max $tgt_out_max -clock $scl_clk -clock_fall $sda -add_delay
@@ -366,52 +472,115 @@ proc i3c_set_io_delays {inst scl_port sda_port prefix clk_name} {
   ## Controller role. SDA is launched and captured by clk_i, but the bus timing
   ## is relative to the SCL we generate, so SCL_INT is the reference.
   set scl_clk ${prefix}_SCL_INT
-  set half [expr {$::i3c_cfg(scl_ext_period) / 2.0}]
 
-  # Output: the remote Target needs tSU_PP of setup and tHD_PP of hold.
+  # Output: the remote Target needs tSU_PP of setup before the capturing edge
+  # and tHD_PP of hold after it, so the hold number is positive for the same
+  # reason as on the Target side above.
   set ctrl_out_max [expr {$::i3c_cfg(tsu_pp) + $out_max}]
-  set ctrl_out_min_f [expr {-1.0 * ($::i3c_cfg(tcf) + 3.0 + $out_min)}]
-  set ctrl_out_min_r [expr {-1.0 * ($::i3c_cfg(tcr) + 3.0 + $out_min)}]
+  set ctrl_out_min_f [expr {$::i3c_cfg(tcf) + 3.0 - $out_min}]
+  set ctrl_out_min_r [expr {$::i3c_cfg(tcr) + 3.0 - $out_min}]
   set_output_delay -max $ctrl_out_max -clock $scl_clk $sda -add_delay
   set_output_delay -min $ctrl_out_min_r -clock $scl_clk $sda -add_delay
   set_output_delay -max $ctrl_out_max -clock $scl_clk -clock_fall $sda -add_delay
   set_output_delay -min $ctrl_out_min_f -clock $scl_clk -clock_fall $sda -add_delay
 
-  # Input: a remote Target answers at most tSCO after the SCL edge.
+  # The RTL moves SDA a whole tcls ahead of the edge the far end samples on,
+  # whereas STA would launch from the last clk_i edge before that edge.
+  set tx $::i3c_cfg(ctrl_tx_cycles)
+  set_multicycle_path -setup $tx -start -from [get_clocks $clk_name] \
+      -to [get_clocks $scl_clk] -through $sda
+  set_multicycle_path -hold [expr {$tx - 1}] -start -from [get_clocks $clk_name] \
+      -to [get_clocks $scl_clk] -through $sda
+
+  # Input: a remote Target answers at most tSCO after the SCL edge. Both edges
+  # launch data: the falling edge for SDR and the odd HDR-DDR bits, the rising
+  # edge for the even HDR-DDR bits.
   set ctrl_in_max [expr {$::i3c_cfg(tsco_ext_max) + $in_max}]
   set ctrl_in_min [expr {$::i3c_cfg(thd_pp_tgt) + $in_min}]
   set_input_delay -max $ctrl_in_max -clock $scl_clk -clock_fall $sda -add_delay
   set_input_delay -min $ctrl_in_min -clock $scl_clk -clock_fall $sda -add_delay
+  set_input_delay -max $ctrl_in_max -clock $scl_clk $sda -add_delay
+  set_input_delay -min $ctrl_in_min -clock $scl_clk $sda -add_delay
 
-  # The Controller samples with clk_i, not with SCL, and deliberately waits
-  # until the middle of the SCL low phase (i3c_timing_pkg.sv). Without
-  # a multicycle the tool would check against the first clk_i edge after the
-  # SCL edge, which no amount of logic could meet.
-  set mcp $::i3c_cfg(ctrl_rx_cycles)
-  set_multicycle_path -setup $mcp -end -from [get_clocks $scl_clk] \
+  # The Controller samples with clk_i, not with SCL, and `rx_advance`
+  # (i3c_controller_trx.sv) captures SDA in four different states. Each sits a
+  # different number of clk_i cycles after the SCL edge that launched the data,
+  # so one blanket multicycle would only be correct for the read data and too
+  # loose for the rest.
+  #
+  # Two of the four are covered by edge: everything launched by the falling
+  # edge, and everything launched by the rising edge. The remaining two are
+  # captured earlier than their edge-mate, so they get an exception of their
+  # own, aimed at the endpoint; a `-to <cell>` exception is more specific than
+  # a `-to <clock>` one and takes precedence.
+  #
+  #   state                launch       capture   cycles
+  #   State_ClkLoAwaitD    fall 3.5T    8T        ctrl_rx_cycles
+  #   State_ClkHiAwaitD    rise 0       3T        ctrl_rx_ddr_cycles
+  #   State_ClkLoSampleD   fall 3.5T    6T        ctrl_tbit_cycles
+  #   State_ArbClkHiHoldD  rise 0       2T        ctrl_arb_cycles
+  #
+  # The capture instants come from the state durations: `cnt` is loaded from
+  # phase_cycles(state_q) on leaving a state, so each state lasts the *previous*
+  # state's parameter.
+  set rx $::i3c_cfg(ctrl_rx_cycles)
+  set_multicycle_path -setup $rx -end -fall_from [get_clocks $scl_clk] \
       -to [get_clocks $clk_name] -through $sda
-  set_multicycle_path -hold [expr {$mcp - 1}] -end -from [get_clocks $scl_clk] \
+  set_multicycle_path -hold [expr {$rx - 1}] -end -fall_from [get_clocks $scl_clk] \
       -to [get_clocks $clk_name] -through $sda
+
+  # HDR-DDR even bits, captured at the end of State_ClkHiAwaitD, i.e. while SCL
+  # is still high, which is only 3.5 cycles long.
+  set ddr $::i3c_cfg(ctrl_rx_ddr_cycles)
+  set_multicycle_path -setup $ddr -end -rise_from [get_clocks $scl_clk] \
+      -to [get_clocks $clk_name] -through $sda
+  set_multicycle_path -hold [expr {$ddr - 1}] -end -rise_from [get_clocks $scl_clk] \
+      -to [get_clocks $clk_name] -through $sda
+
+  # The SDR read T-bit is captured earlier than the read data, at the end of
+  # State_ClkLoSampleD, so the blanket read-data multicycle would let it arrive
+  # two cycles late.
+  set tbit [i3c_get_cells "${prefix} SDR T-bit sample" \
+      ${inst}/u_core/u_ctrl_trx/sdr_tbit_targ_q_reg*]
+  if {[llength $tbit]} {
+    set tb $::i3c_cfg(ctrl_tbit_cycles)
+    set_multicycle_path -setup $tb -end -fall_from [get_clocks $scl_clk] \
+        -to $tbit
+    set_multicycle_path -hold [expr {$tb - 1}] -end -fall_from [get_clocks $scl_clk] \
+        -to $tbit
+  }
+
+  # Arbitration and IBI are captured at the end of State_ArbClkHiHoldD, a cycle
+  # before the HDR-DDR data, so the rising-edge multicycle above would let them
+  # arrive a cycle late.
+  set arb [i3c_get_cells "${prefix} arbitration sample" \
+      ${inst}/u_core/u_ctrl_trx/arb_q_reg*]
+  if {[llength $arb]} {
+    set ab $::i3c_cfg(ctrl_arb_cycles)
+    set_multicycle_path -setup $ab -end -rise_from [get_clocks $scl_clk] \
+        -to $arb
+    set_multicycle_path -hold [expr {$ab - 1}] -end -rise_from [get_clocks $scl_clk] \
+        -to $arb
+  }
 }
 
 #############################
 # Internal paths            #
 #############################
 
-# Constraints inside one I3C instance: clock-tree structure, bus-to-core
-# crossings and the two skew budgets the design relies on.
+# Structural constraints inside one I3C instance. These belong in the synthesis
+# SDC; the domain-crossing bounds do not, see i3c_set_cdc_bounds.
 proc i3c_set_internal_paths {inst clk_name clk_period} {
   set inbufs ${inst}/u_core/u_targ_inbufs
-  set cdc_max [expr {$clk_period * $::i3c_cfg(cdc_fraction)}]
 
-  # The Target input buffers gate the bus clocks with a plain AND/OR
-  # (i3c_clock_buf_en.sv) rather than an integrated clock gate, and select
-  # the scan clock through a mux. The enable only changes while the bus is
-  # idle (i3c_target_rst.sv), so the gating check is not meaningful.
   foreach buf {u_scl_buf u_scl_inv u_sda0_clk u_sda0_clk_n} {
+    # The Target input buffers gate the bus clocks with a plain AND/OR
+    # (i3c_clock_buf_en.sv) rather than an integrated clock gate. The enable
+    # only changes while the bus is idle (i3c_target_rst.sv), so the gating
+    # check is not meaningful.
     if {[i3c_has_command set_disable_clock_gating_check]} {
       i3c_try "clock gating check on ${buf}" {
-        set cells [get_cells -quiet ${inbufs}/${buf}/*]
+        set cells [get_cells -quiet ${inbufs}/${buf}/u_mux/*]
         if {[llength $cells]} {
           set_disable_clock_gating_check $cells
         }
@@ -419,15 +588,28 @@ proc i3c_set_internal_paths {inst clk_name clk_period} {
     }
     # Never take the scan branch of the clock mux in functional analysis, so
     # the scan clock does not appear on the bus clock trees.
-    i3c_case_if_present 0 ${inbufs}/${buf}/u_mux/sel_i
+    i3c_case_if_present 0 ${inbufs}/${buf}/u_mux/sel_i 1
   }
+
   # Keep the quasi-static buffer enable out of timing.
   i3c_try "target buffer enable" {
-    set en_q [i3c_pins ${inst}/u_core/u_targ_rst/*buf_en_q*/Q OUT]
+    set en_q [i3c_get_cells "${inst} buffer enable" \
+        ${inst}/u_core/u_targ_rst/buf_en_q_reg*]
     if {[llength $en_q]} {
       set_false_path -from $en_q
     }
   }
+
+#############################
+# Domain crossings          #
+#############################
+
+# Bounds for the crossings between the bus clocks and clk_i. Call this from the
+# check-only flow, which times the routed design with the groups removed. The
+# set_clock_groups -async on SCL_EXT and SDA would otherwise take precedence and
+# make the set_max_delay below useless.
+proc i3c_set_cdc_bounds {inst clk_period} {
+  set cdc_max [expr {$clk_period * $::i3c_cfg(cdc_fraction)}]
 
   # Bus clocks to and from clk_i. Every crossing uses either prim_flop_2sync or
   # the toggle handshake in i3c_sync_data, so bounding the data path is enough.
@@ -443,16 +625,19 @@ proc i3c_set_internal_paths {inst clk_name clk_period} {
     u_core/u_target/gen_targ_txd_sync[*].u_targ_txd_sync
   } {
     i3c_try "CDC bound on ${sync}" {
-      set endpoints [i3c_pins ${inst}/${sync}/*u_sync_1*/D IN]
+      set endpoints [i3c_get_cells "${inst}/${sync} synchronizer" \
+          ${inst}/${sync}/$::i3c_cfg(sync_flop)]
       if {[llength $endpoints]} {
         set_max_delay $cdc_max -to $endpoints
       }
     }
   }
+
   # i3c_sync_data carries its payload combinationally alongside the toggle, so
   # the data has to be bounded too (i3c_sync_data.sv).
   i3c_try "CDC bound on i3c_sync_data payloads" {
-    set sync_data [i3c_pins ${inst}/u_core/u_target/*sync*/dst_data_q_reg*/D IN]
+    set sync_data [get_cells -quiet \
+        ${inst}/u_core/u_target/*sync*/dst_data_q_reg*]
     if {[llength $sync_data]} {
       set_max_delay $cdc_max -to $sync_data
     }
@@ -461,18 +646,19 @@ proc i3c_set_internal_paths {inst clk_name clk_period} {
   # The Target transceiver's reset is released by a clk_i flop into the
   # SCL/SDA domains (i3c_core.sv).
   i3c_try "transceiver reset bound" {
-    set rst_src [i3c_pins ${inst}/u_core/u_targ_rst_src/*/Q OUT]
+    set rst_src [i3c_get_cells "${inst} transceiver reset source" \
+        ${inst}/u_core/u_targ_rst_src/*reg*]
     if {[llength $rst_src]} {
       set_max_delay $cdc_max -from $rst_src
     }
   }
 
   # Quasi-static device address and group address configuration, written while
-  # the Target is disabled (i3c_target_trx.sv, TODO #31065).
+  # the Target is disabled (i3c_target_trx.sv, TODO #31065). These are
+  # hierarchical pins on the transceiver boundary, which are not valid
+  # endpoints, so bound whatever passes through them instead.
   foreach cfg_pin {targ_dev_i grp_addr_i addr_blocked_i mask_blocked_i} {
     i3c_try "quasi-static ${cfg_pin}" {
-      # These are hierarchical pins on the transceiver boundary, which are not
-      # valid endpoints, so bound whatever passes through them instead.
       set pins [get_pins -quiet ${inst}/u_core/u_targ_trx/${cfg_pin}*]
       if {[llength $pins]} {
         set_max_delay $cdc_max -through $pins
@@ -480,35 +666,15 @@ proc i3c_set_internal_paths {inst clk_name clk_period} {
     }
   }
 
-  # SDA is buffered as data while SCL is buffered as a clock; the two have to
-  # stay close enough for the Target to sample SDA correctly
-  # (i3c_input_buffers.sv, TODO #31335).
-  i3c_try "SCL/SDA skew" {
-    set sda_data [i3c_pins ${inbufs}/u_sda_buf/*/out_o* OUT]
-    if {[llength $sda_data]} {
-      set_max_delay $::i3c_cfg(sda_skew_max) -from $sda_data
-    }
-  }
-
-  # SCL leaves the Controller as the OR of a posedge and a negedge flop. The
-  # bus is unusable if that OR glitches, so keep the two contributions close
-  # (integration_notes.md:51).
-  i3c_try "SCL output skew" {
-    set scl_flops [i3c_pins ${inst}/u_core/u_ctrl_trx/*scl_n*/Q OUT]
-    set scl_out [get_pins -quiet ${inst}/cio_scl_o]
-    if {[llength $scl_flops] && [llength $scl_out]} {
-      set_max_delay $::i3c_cfg(scl_out_skew_max) -from $scl_flops -to $scl_out
-    }
-  }
-
   # The START/STOP detectors are clocked by SDA and take SCL as their data
-  # (i3c_target_trx.sv). SDA and SCL are separate asynchronous clocks,
-  # so this clock-as-data path has to be bounded explicitly. The specification
-  # allows tCAS after a START before the first SCL edge, and tCBP before a
-  # STOP, which is the window the detectors have to resolve in.
+  # (i3c_target_trx.sv). SDA and SCL are separate asynchronous clocks, so this
+  # clock-as-data path has to be bounded explicitly. The specification allows
+  # tCAS after a START before the first SCL edge, and tCBP before a STOP, which
+  # is the window the detectors have to resolve in.
   foreach det {stop_det start_det rep_start_det rep_start_pre} {
     i3c_try "START/STOP detector ${det}" {
-      set det_d [i3c_pins ${inst}/u_core/u_targ_trx/*${det}*/D IN]
+      set det_d [i3c_get_cells "${inst} ${det}" \
+          ${inst}/u_core/u_targ_trx/${det}_reg*]
       if {[llength $det_d]} {
         set_max_delay $::i3c_cfg(start_stop_max) -to $det_d
       }
@@ -520,8 +686,14 @@ proc i3c_set_internal_paths {inst clk_name clk_period} {
 # Entry point               #
 #############################
 
-# Constrain one I3C instance end to end.
+# Remembers the SCL port per instance, so that the internal constraints can
+# reference the chip port rather than a hierarchical pin, which is not a valid
+# timing endpoint.
+array set ::i3c_scl_port {}
+
+# Constrain one I3C primary partition end to end.
 proc i3c_constrain {inst scl_port sda_port prefix clk_pin clk_name clk_period} {
+  set ::i3c_scl_port($inst) $scl_port
   i3c_create_clocks $inst $scl_port $sda_port $prefix $clk_pin $clk_name
   i3c_set_io_delays $inst $scl_port $sda_port $prefix $clk_name
   i3c_set_internal_paths $inst $clk_name $clk_period

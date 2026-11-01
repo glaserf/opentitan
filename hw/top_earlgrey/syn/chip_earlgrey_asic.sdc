@@ -1675,17 +1675,32 @@ set SPI_TPM_CLKS "SPI_TPM_CLK SPI_TPM_IN_CLK SPI_TPM_OUT_CLK"
 #
 # The Target half of each instance is clocked by the bus itself, and the
 # Controller half generates SCL out of clk_i onto the same pad. Each pad
-# therefore carries two mutually exclusive SCL sources, and the Target clock
-# trees are timed against both.
+# therefore carries two mutually exclusive SCL sources. The Target is timed
+# against the external one; the generated SCL is stopped before the Target
+# clock trees, see the header of i3c_constraints.tcl.
 #
 # Pads, used in both directions, may need to be changed:
 #   I3C0: SCL = IOB10 (MIO pad 19), SDA = IOB9  (MIO pad 18)
 #   I3C1: SCL = IOB11 (MIO pad 20), SDA = IOB12 (MIO pad 21)
-set I3C_CONSTRAINTS [file join [file dirname [info script]] .. .. \
-                               ip i3c syn i3c_constraints.tcl]
-if {![file exists ${I3C_CONSTRAINTS}]} {
-  error "cannot find the I3C constraint procedures at ${I3C_CONSTRAINTS}"
+#
+# Look for the procedures next to this file first, so a flow that copies the
+# SDC into a build directory stays reproducible, then in the IP. `info script`
+# is not usable here because `read_sdc` (called on this file) does not set it.
+set I3C_CONSTRAINTS ""
+foreach I3C_CANDIDATE [list \
+    [file join [pwd] sdc i3c_constraints.tcl] \
+    [file join [pwd] .. .. ip i3c syn i3c_constraints.tcl]] {
+  if {[file exists ${I3C_CANDIDATE}]} {
+    set I3C_CONSTRAINTS [file normalize ${I3C_CANDIDATE}]
+    break
+  }
 }
+if {${I3C_CONSTRAINTS} eq ""} {
+  # read_sdc swallows a bare `error`, so report it where it will be seen.
+  puts "ERROR: cannot find the I3C constraint procedures (i3c_constraints.tcl)"
+  error "cannot find the I3C constraint procedures"
+}
+puts "INFO: sourcing the I3C constraint procedures from ${I3C_CONSTRAINTS}"
 
 # Set these to the real numbers for the package and board this is taped out on.
 # The defaults assume the pad cells are timed by the library.
@@ -1694,22 +1709,30 @@ set ::i3c_cfg(board_dly_min) 0.1
 
 source ${I3C_CONSTRAINTS}
 
-# Entries are {peripheral_input peripheral_output mio_pad}.
+# Entries are {peripheral_input peripheral_output mio_pad}. The reset detectors
+# observe the same pads through their own peripheral inputs (50-53) and have no
+# peripheral output of their own.
 i3c_pinmux_case_analysis top_earlgrey/earlgrey_pd_aon/u_pinmux {
     {38 38 19}
     {39 39 18}
     {40 40 20}
     {41 41 21}
+    {50  - 19}
+    {51  - 18}
+    {52  - 20}
+    {53  - 21}
 }
 
 # Call the constrain entry points for both instances.
 # The IP runs on clk_io_peri, a gated copy of IO_CLK, so IO_CLK is both the
 # source of the generated SCL and the clock that captures the Controller's
 # received data.
-i3c_constrain top_earlgrey/earlgrey_pd_main/u_i3c0 IOB10 IOB9 \
+i3c_constrain top_earlgrey/earlgrey_pd_main/u_i3c0_part_primary IOB10 IOB9 \
     I3C0 ${IO_CLK_PIN} IO_CLK ${IO_TCK_PERIOD}
-i3c_constrain top_earlgrey/earlgrey_pd_main/u_i3c1 IOB11 IOB12 \
+i3c_constrain top_earlgrey/earlgrey_pd_main/u_i3c1_part_primary IOB11 IOB12 \
     I3C1 ${IO_CLK_PIN} IO_CLK ${IO_TCK_PERIOD}
+
+i3c_summary
 
 
 # This may need some refinement (and max delay / skew needs to be constrained)
