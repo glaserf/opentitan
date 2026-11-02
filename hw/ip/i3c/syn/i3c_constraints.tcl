@@ -683,6 +683,105 @@ proc i3c_set_cdc_bounds {inst clk_period} {
 }
 
 #############################
+# Reset detector            #
+#############################
+
+# Constrain the secondary partition, which holds the Target Reset Detector.
+# It observes the same pads as the primary partition through its own pinmux
+# inputs, has its own SCL/SDA clock trees, and crosses into the AON clock
+# rather than clk_i.
+#
+#   inst       path to the i3c_part_secondary instance
+#   prefix     clock name prefix of the instance it belongs to, e.g. I3C0
+#   clk_name   name of the main clock of the primary partition (`clk_i`)
+#   aon_clk    name of the AON clock
+#   aon_period period of the AON clock, for the crossing bounds
+#
+# Note that for i3c0 the two partitions sit in different power domains and use
+# different AON resets, so the request and response between are across both a
+# reset domain as well as a clock domain crossing.
+proc i3c_constrain_rstdet {inst prefix clk_name aon_clk aon_period} {
+  set det ${inst}/u_reset_detector
+  set inbufs ${det}/u_targ_inbufs
+
+  # The detector has its own SDA clock buffer, separate from the primary
+  # partition's, so the clock declared there does not reach it. SCL needs no
+  # equivalent because it is declared on the pad and so reaches both.
+  set sda_clk_pin [i3c_get_pins "${prefix} rstdet SDA clock buffer input" \
+      ${inbufs}/u_sda0_clk/u_buf/*/$::i3c_cfg(buf_in_pin)]
+  if {[llength $sda_clk_pin]} {
+    create_clock -name ${prefix}_RSTDET_SDA -period $::i3c_cfg(scl_ext_period) \
+        $sda_clk_pin -add
+    set_clock_groups -name ${prefix}_RSTDET_SDA_ASYNC -asynchronous \
+        -group [get_clocks ${prefix}_RSTDET_SDA]
+  }
+
+  # The generated SCL reaches the detector through the pad as well, so it needs
+  # the same loopback cut as the Target; see i3c_create_clocks.
+  if {$::i3c_cfg(bus_io_delays)} {
+    i3c_try "cut the ${prefix} rstdet SCL loopback" {
+      set cells [get_cells -quiet ${det}/*_reg*]
+      if {[llength $cells]} {
+        set_false_path -from [get_clocks $clk_name] -to $cells
+        set_false_path -from $cells -to [get_clocks $clk_name]
+      }
+    }
+  }
+
+  # Only three of the buffers are used: the detector leaves the inverted SCL
+  # and the buffered SDA data outputs open, so those are trimmed.
+  foreach buf {u_scl_buf u_sda0_clk u_sda0_clk_n} {
+    if {[i3c_has_command set_disable_clock_gating_check]} {
+      i3c_try "${prefix} rstdet gating check on ${buf}" {
+        set cells [get_cells -quiet ${inbufs}/${buf}/u_mux/*]
+        if {[llength $cells]} {
+          set_disable_clock_gating_check $cells
+        }
+      }
+    }
+    # The secondary partition ties scanmode off, so the mux may already be
+    # trimmed; pin it where it survives.
+    i3c_case_if_present 0 ${inbufs}/${buf}/u_mux/sel_i 1
+  }
+
+  # The detector samples SCL with SDA-clocked flops and SDA with an SCL-clocked
+  # flop, and derives its resets from both. Those are clock-as-data paths
+  # between two asynchronous bus clocks, so they get the same explicit window as
+  # the Target's START/STOP detectors.
+  foreach node {rst_cnt cnt_met poss_reset_pend poss_reset_start reset_detected
+                wake_up_q target_reset_q chip_reset_q} {
+    i3c_try "${prefix} rstdet ${node}" {
+      set cells [get_cells -quiet ${det}/${node}_reg*]
+      if {[llength $cells]} {
+        set_max_delay $::i3c_cfg(start_stop_max) -to $cells
+      }
+    }
+  }
+
+  # Crossings to and from the AON clock: the configuration in, the detection
+  # result out. The reference is the AON period, not clk_i.
+  set cdc_max [expr {$aon_period * $::i3c_cfg(cdc_fraction)}]
+  foreach sync {u_cfg_sync u_out_sync} {
+    i3c_try "${prefix} rstdet ${sync}" {
+      set endpoints [i3c_get_cells "${prefix} rstdet ${sync}" \
+          ${det}/${sync}/$::i3c_cfg(sync_flop)]
+      if {[llength $endpoints]} {
+        set_max_delay $cdc_max -to $endpoints
+      }
+    }
+  }
+
+  # The enable is quasi-static and comes from the primary partition, which for
+  # i3c0 is in a different power domain.
+  i3c_try "${prefix} rstdet enable" {
+    set en [get_pins -quiet ${det}/enable_i]
+    if {[llength $en]} {
+      set_max_delay $cdc_max -through $en
+    }
+  }
+}
+
+#############################
 # Entry point               #
 #############################
 
