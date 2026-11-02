@@ -140,11 +140,22 @@ i3c_cfg_default ctrl_tx_cycles 2
 # period. Only applied by i3c_set_cdc_bounds, which belongs in the check-only
 # flow: in the synthesis SDC the asynchronous clock groups would override it.
 i3c_cfg_default cdc_fraction 0.9
-# Allowed skew between the SCL clock tree and the buffered SDA data it samples
-# (i3c_input_buffers.sv, TODO #31335), and between the two flops forming the
-# Controller's SCL output (integration_notes.md:51).
-i3c_cfg_default sda_skew_max 1.0
+# Skew budgets, both disabled by default.
+#
+# These express physical-implementation requirements that set_max_delay cannot
+# state on its own. SCL leaves the Controller as an OR of a posedge and a
+# negedge flop and must not glitch, and SDA must arrive at the Target in step
+# with the SCL clock insertion (i3c_input_buffers.sv, TODO #31335). What
+# matters in both cases is the *difference* between two delays, so bounding
+# either one absolutely is meaningless.
+#
+# Set these to the real flop-to-pad delay of the implementation to turn the
+# budgets on. Each arm is then held inside a window of the given width, which
+# does bound the skew between them. Leave empty to skip them.
+i3c_cfg_default scl_out_delay {}
 i3c_cfg_default scl_out_skew_max 1.0
+i3c_cfg_default sda_skew_delay {}
+i3c_cfg_default sda_skew_max 1.0
 # Window the START/STOP detectors have to resolve a bus condition in. SDA and
 # SCL are asynchronous to each other, so these clock-as-data paths get an
 # explicit bound rather than a clock relationship. Table 49: tCAS min 38.4 ns,
@@ -599,6 +610,50 @@ proc i3c_set_internal_paths {inst clk_name clk_period} {
       set_false_path -from $en_q
     }
   }
+
+  # SDA is buffered as data while SCL is buffered as a clock; the two have to
+  # stay close enough for the Target to sample SDA correctly
+  # (i3c_input_buffers.sv, TODO #31335). Only applied when the integrator has
+  # given the delay these two paths should match, since the requirement is on
+  # the difference between them rather than on either one.
+  if {$::i3c_cfg(sda_skew_delay) ne ""} {
+    i3c_try "SCL/SDA skew" {
+      set sda_data [i3c_get_pins "${inst} SDA data buffer output" \
+          ${inbufs}/u_sda_buf/u_buf/*/$::i3c_cfg(buf_out_pin)]
+      set sda_sampled [get_cells -quiet ${inst}/u_core/u_targ_trx/sda_?q_reg*]
+      if {[llength $sda_data] && [llength $sda_sampled]} {
+        set half [expr {$::i3c_cfg(sda_skew_max) / 2.0}]
+        set_max_delay [expr {$::i3c_cfg(sda_skew_delay) + $half}] \
+            -from $sda_data -to $sda_sampled
+        set_min_delay [expr {$::i3c_cfg(sda_skew_delay) - $half}] \
+            -from $sda_data -to $sda_sampled
+      }
+    }
+  }
+
+  # SCL leaves the Controller as the OR of a posedge flop and a negedge flop.
+  # The bus is unusable if that OR glitches, so both arms are held inside the
+  # same window; bounding one arm alone says nothing about the skew between
+  # them, and bounding either one absolutely only works if the window is
+  # centred on the delay the implementation actually has.
+  if {$::i3c_cfg(scl_out_delay) ne ""} {
+    i3c_try "SCL output skew" {
+      set scl_flops [i3c_get_cells "${inst} SCL negedge flop" \
+          ${inst}/u_core/u_ctrl_trx/*scl_n_reg*]
+      set scl_state [i3c_get_cells "${inst} SCL state flop" \
+          "${inst}/u_core/u_ctrl_trx/state_q_reg\[0\]"]
+      set scl_arms [concat $scl_flops $scl_state]
+      if {[llength $scl_arms]} {
+        set half [expr {$::i3c_cfg(scl_out_skew_max) / 2.0}]
+        set port [get_ports $::i3c_scl_port($inst)]
+        set_max_delay [expr {$::i3c_cfg(scl_out_delay) + $half}] \
+            -from $scl_arms -to $port
+        set_min_delay [expr {$::i3c_cfg(scl_out_delay) - $half}] \
+            -from $scl_arms -to $port
+      }
+    }
+  }
+}
 
 #############################
 # Domain crossings          #
